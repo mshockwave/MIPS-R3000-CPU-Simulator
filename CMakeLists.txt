@@ -9,7 +9,6 @@ set(SOURCE_FILES
         Instruction.cpp Instruction.h
         Types.h
         tests/TestCase.h tests/TestInstruction.h
-        misc/Log.cpp misc/Log.h
         ExecutionEngine.cpp ExecutionEngine.h
         Task.cpp Task.h
         Utils.h)

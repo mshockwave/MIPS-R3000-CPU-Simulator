@@ -4,6 +4,37 @@
 
 #include "Types.h"
 
+#include <iostream>
+
+class Log {
+private:
+    static std::ostream* sOstream;
+
+public:
+    static void setStream(std::ostream& ostr){
+        sOstream = &ostr;
+    }
+
+    static void E(std::string tag, std::string msg);
+    static void W(std::string tag, std::string msg);
+    static void V(std::string tag, std::string msg);
+    static void D(std::string tag, std::string msg);
+};
+std::ostream* Log::sOstream = &(std::cout);
+
+void Log::E(std::string tag, std::string msg){
+    *(sOstream) << "[Error] " << tag << ": " << msg << std::endl;
+}
+void Log::W(std::string tag, std::string msg){
+    *(sOstream) << "[Warning] " << tag << ": " << msg << std::endl;
+}
+void Log::V(std::string tag, std::string msg){
+    *(sOstream) << "[Verbose] " << tag << ": " << msg << std::endl;
+}
+void Log::D(std::string tag, std::string msg) {
+    *(sOstream) << "[Debug] " << tag << ": " << msg << std::endl;
+}
+
 inline uint32_t createBitMask(uint8_t width){
     return (1 << width) - U32_1;
 }
