@@ -11,7 +11,8 @@ set(SOURCE_FILES
         tests/TestCase.h tests/TestInstruction.h
         misc/Log.cpp misc/Log.h
         ExecutionEngine.cpp ExecutionEngine.h
-        Task.cpp Task.h)
+        Task.cpp Task.h
+        Utils.h)
 include_directories(./include)
 
 add_executable(ArchiHW1 ${SOURCE_FILES})

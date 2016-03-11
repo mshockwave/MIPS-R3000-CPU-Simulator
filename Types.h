@@ -38,4 +38,7 @@ public:
 
 typedef uint32_t task_id_t;
 
+const uint8_t U8_1 = (uint8_t)1;
+const uint32_t U32_1 = (uint32_t)1;
+
 #endif //ARCHIHW1_TYPES_H
