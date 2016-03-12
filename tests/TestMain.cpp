@@ -1,11 +1,12 @@
 #include "TestInstruction.h"
+#include "TestUtils.h"
 
 int main(){
 
     //Add test cases
     std::vector<TestCase*> testCases;
     testCases.push_back(new TestInstructionTransform());
-
+    testCases.push_back(new TestUtils());
 
     std::vector<TestCase*>::iterator it = testCases.begin();
     for(; it != testCases.end(); ++it){

@@ -74,9 +74,9 @@ namespace task {
     //Use typedef for future extension. e.g. Replace it with sparse_vector
     typedef std::unordered_map<uint8_t, task_id_t > instr_task_map_t;
     //First level
-    instr_task_map_t FirstInstrMap;
+    instr_task_map_t FirstInstrOpMap;
     //R type's second level
-    instr_task_map_t RtypeInstrMap;
+    instr_task_map_t RtypeInstrFuncMap;
     void  InitInstructionMap();
 } //namespace task
 
