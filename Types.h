@@ -8,16 +8,16 @@
 typedef uint8_t byte_t;
 
 const uint8_t REGISTER_COUNT = 32;
-typedef uint32_t register_t;
+typedef uint32_t reg_t;
 
 const uint32_t MEMORY_WIDTH = (1 << 10);
 
 class Context {
 public:
     //Registers
-    register_t Registers[REGISTER_COUNT];
+    reg_t Registers[REGISTER_COUNT];
     //Special registers
-    register_t *PC, *SP;
+    reg_t *PC, *SP;
 
     //Memory
     byte_t Memory[MEMORY_WIDTH];

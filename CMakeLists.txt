@@ -4,14 +4,13 @@ project(ArchiHW1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
-        main.cpp
-        RawBinary.cpp RawBinary.h
-        Instruction.cpp Instruction.h
-        Types.h
-        tests/TestCase.h tests/TestInstruction.h
-        ExecutionEngine.cpp ExecutionEngine.h
-        Task.cpp Task.h
-        Utils.h)
+        RawBinary.cpp
+        Instruction.cpp
+        ExecutionEngine.cpp
+        Task.cpp
+        Utils.cpp)
 include_directories(./include)
 
-add_executable(ArchiHW1 ${SOURCE_FILES})
+add_executable(ArchiHW1 ${SOURCE_FILES} main.cpp)
+
+add_executable(ArchiHW1Tests ${SOURCE_FILES} tests/TestMain.cpp )

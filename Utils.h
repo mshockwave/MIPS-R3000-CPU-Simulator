@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+const std::string EMPTY_STRING("");
+
 class Log {
 private:
     static std::ostream* sOstream;
@@ -15,25 +17,22 @@ public:
         sOstream = &ostr;
     }
 
-    static void E(std::string tag, std::string msg);
-    static void W(std::string tag, std::string msg);
-    static void V(std::string tag, std::string msg);
-    static void D(std::string tag, std::string msg);
-};
-std::ostream* Log::sOstream = &(std::cout);
+    static std::ostream& E(const std::string &tag) {
+        return (*sOstream) << "[Error] " << tag << ": ";
+    }
 
-void Log::E(std::string tag, std::string msg){
-    *(sOstream) << "[Error] " << tag << ": " << msg << std::endl;
-}
-void Log::W(std::string tag, std::string msg){
-    *(sOstream) << "[Warning] " << tag << ": " << msg << std::endl;
-}
-void Log::V(std::string tag, std::string msg){
-    *(sOstream) << "[Verbose] " << tag << ": " << msg << std::endl;
-}
-void Log::D(std::string tag, std::string msg) {
-    *(sOstream) << "[Debug] " << tag << ": " << msg << std::endl;
-}
+    static std::ostream& W(const std::string &tag) {
+        return (*sOstream) << "[Warning] " << tag << ": ";
+    }
+
+    static std::ostream& V(const std::string &tag) {
+        return (*sOstream) << "[Verbose] " << tag << ": ";
+    }
+
+    static std::ostream& D(const std::string &tag) {
+        return (*sOstream) << "[Debug] " << tag << ": ";
+    }
+};
 
 inline uint32_t createBitMask(uint8_t width){
     return (1 << width) - U32_1;

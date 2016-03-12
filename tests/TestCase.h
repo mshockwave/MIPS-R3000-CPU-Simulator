@@ -3,9 +3,24 @@
 #define ARCHIHW1_TESTCASE_H
 
 #include <string>
+#include <vector>
+
+#include "../Utils.h"
 
 class TestCase {
+
+protected:
+    std::string mName;
+
 public:
+
+    TestCase(std::string name) :
+            mName(name) {}
+    TestCase(const char* name) :
+            TestCase(std::string(name)) {}
+
+    std::string& getName() { return mName;}
+
     void init(){}
 
     bool test();
@@ -14,7 +29,10 @@ public:
 
     //Utils
     static void assert(bool v, std::string msg){
-
+        if(!v){
+            auto prefix = std::string("Assert failed: ");
+            throw (prefix + msg);
+        }
     }
 
 protected:
@@ -23,11 +41,8 @@ protected:
 bool TestCase::test() {
     try{
         return doTest();
-    }catch(const char*){
-        
-        return false;
-    }catch(char *){
-
+    }catch(std::string msg){
+        Log::E(mName) << msg;
         return false;
     }
 }
