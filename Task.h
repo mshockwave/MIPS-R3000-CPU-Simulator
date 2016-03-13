@@ -15,7 +15,7 @@ namespace task {
 #define DEF_TASK(name, id) \
     const task_id_t name = (id);
 
-    const uint32_t TASK_COUNT = 40;
+    const uint32_t TASK_COUNT = 38;
 
     task_t TasksTable[TASK_COUNT];
 
@@ -24,7 +24,8 @@ namespace task {
     [](Context* context, Instruction* instruction) -> task_id_t
 
     /*Task ids*/
-    DEF_TASK(TASK_END, 0)   //Reserve
+    //Reserve 0
+    DEF_TASK(TASK_END, 37)
     DEF_TASK(TASK_ROOT_DECODER, 1)
     DEF_TASK(TASK_R_TYPE_DECODER, 2)
 
