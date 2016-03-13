@@ -17,7 +17,7 @@ namespace task {
 
     const uint32_t TASK_COUNT = 38;
 
-    task_t TasksTable[TASK_COUNT];
+    extern task_t TasksTable[TASK_COUNT];
 
     void InitTasks();
 #define TASK_HANDLER() \
@@ -75,9 +75,9 @@ namespace task {
     //Use typedef for future extension. e.g. Replace it with sparse_vector
     typedef std::unordered_map<uint8_t, task_id_t > instr_task_map_t;
     //First level
-    instr_task_map_t FirstInstrOpMap;
+    extern instr_task_map_t FirstInstrOpMap;
     //R type's second level
-    instr_task_map_t RtypeInstrFuncMap;
+    extern instr_task_map_t RtypeInstrFuncMap;
     void  InitInstructionMap();
 } //namespace task
 
