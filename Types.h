@@ -17,21 +17,27 @@ public:
     //Registers
     reg_t Registers[REGISTER_COUNT];
     //Special registers
-    reg_t *PC, *SP;
+    reg_t PC;
+    reg_t &ZERO, &AT, &SP, &FP, &RA;
 
     //Memory
     byte_t Memory[MEMORY_WIDTH];
 
-    Context() :
-            PC(&Registers[0]), SP(&Registers[1]) /*TODO: Verify*/{
+    Context(reg_t pc) :
+            PC(pc),
+            ZERO(Registers[0]),
+            AT(Registers[1]),
+            SP(Registers[29]),
+            FP(Registers[30]),
+            RA(Registers[31]){
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
-            Registers[i] = 0;
+            Registers[i] = (byte_t)0;
         }
 
-        //Zero register
+        //Zero memory
         for(int i = 0; i < MEMORY_WIDTH; i++){
-            Memory[i] = 0;
+            Memory[i] = (byte_t)0;
         }
     }
 };

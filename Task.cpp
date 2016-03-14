@@ -63,6 +63,7 @@ namespace task{
             //Extract [5,0] bits
             uint8_t func = static_cast<uint8_t >(extractInstrBits(instruction->getBitsInstruction(),
                                                                   5, 0));
+            //TODO: Error handling: op code not found
             return RtypeInstrFuncMap[func];
         };
 
