@@ -69,11 +69,114 @@ namespace task{
 
         /*R type instructions*/
         TasksTable[OP_ADD] = TASK_HANDLER() {
+            R_INSTR_DEF_REGS()
+
+            //TODO: Overflow detection
+            rd = rs + rt;
 
             return TASK_END;
         };
 
         TasksTable[OP_ADDU] = TASK_HANDLER() {
+            R_INSTR_DEF_REGS()
+
+            //TODO: Unsigned check
+            rd = rs + rt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SUB] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            //TODO: Overflow detection
+            rd = rs - rt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_AND] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            rd = rs & rt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_OR] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            rd = rs | rt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_XOR] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            rd = rs ^ rt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_NOR] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            rd = ~(rs | rt);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_NAND] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            rd = ~(rs & rt);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SLT] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            rd = (rs < rt)? U32_1 : U32_0;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SLL] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
+            rd = rs << shamt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SRA] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
+            rd = rs >> shamt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SRL] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
+            rd = rs >> shamt;
+            uint32_t mask = createBitMask( ((uint8_t)32) - shamt );
+            rd &= mask;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_JR] = TASK_HANDLER(){
+            R_INSTR_DEF_REGS()
+
+            //TODO: Check for misalignment error
+            context->PC = rs;
 
             return TASK_END;
         };

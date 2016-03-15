@@ -9,6 +9,7 @@ set(SOURCE_FILES
         ExecutionEngine.cpp
         Task.cpp
         Types.h
+        Types.cpp
         Utils.cpp)
 include_directories(./include)
 

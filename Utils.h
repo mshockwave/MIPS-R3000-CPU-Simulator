@@ -49,4 +49,8 @@ inline uint32_t extractInstrBits(uint32_t value, uint8_t msb, uint8_t lsb){
     return (result & createBitMask(bitsCount));
 }
 
+inline bool isSigned(uint32_t value){
+    return ((1 << 31) & value) != 0 ;
+}
+
 #endif //ARCHIHW1_UTILS_H

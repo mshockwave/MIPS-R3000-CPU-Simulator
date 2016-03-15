@@ -80,6 +80,11 @@ namespace task {
     extern instr_task_map_t RtypeInstrFuncMap;
     void  InitInstructionMap();
 
+#define R_INSTR_DEF_REGS() \
+    reg_t& rs = context->Registers[RInstr::GetRs(instruction->getBitsInstruction())]; \
+    reg_t& rt = context->Registers[RInstr::GetRt(instruction->getBitsInstruction())]; \
+    reg_t& rd = context->Registers[RInstr::GetRd(instruction->getBitsInstruction())];
+
     namespace RInstr{
         /*Routines for R type instructions*/
 
