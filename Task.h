@@ -79,6 +79,35 @@ namespace task {
     //R type's second level
     extern instr_task_map_t RtypeInstrFuncMap;
     void  InitInstructionMap();
+
+    namespace RInstr{
+        /*Routines for R type instructions*/
+
+        inline uint8_t GetRs(uint32_t instruction);
+
+        inline uint8_t GetRt(uint32_t instruction);
+
+        inline uint8_t GetRd(uint32_t instruction);
+
+        inline uint8_t GetShAmt(uint32_t instruction);
+    }//namespace RInstr
+
+    namespace IInstr{
+        /*Routines for I type instructions*/
+
+        inline uint8_t GetRs(uint32_t instruction);
+
+        inline uint8_t GetRt(uint32_t instruction);
+
+        inline uint16_t GetImm(uint32_t instruction);
+    }//namespace IInstr
+
+    namespace JInstr{
+        /*Routines for J type instructions*/
+
+        inline uint32_t GetAddr(uint32_t instruction);
+    }//namespace JInstr
+
 } //namespace task
 
 #endif //ARCHIHW1_TASK_H
