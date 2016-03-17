@@ -53,4 +53,15 @@ inline bool isSigned(uint32_t value){
     return ((1 << 31) & value) != 0 ;
 }
 
+inline uint32_t signExtend16(uint16_t v){
+    int32_t ex = static_cast<int32_t>(v);
+    ex <<= 16;
+    return static_cast<uint32_t>(ex >> 16);
+}
+inline uint32_t signExtend8(uint8_t v){
+    int32_t ex = static_cast<int32_t>(v);
+    ex <<= 24;
+    return static_cast<uint32_t>(ex >> 24);
+}
+
 #endif //ARCHIHW1_UTILS_H

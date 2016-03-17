@@ -85,6 +85,11 @@ namespace task {
     reg_t& rt = context->Registers[RInstr::GetRt(instruction->getBitsInstruction())]; \
     reg_t& rd = context->Registers[RInstr::GetRd(instruction->getBitsInstruction())];
 
+#define I_INSTR_DEF_ARGS() \
+    reg_t& rs = context->Registers[IInstr::GetRs(instruction->getBitsInstruction())]; \
+    reg_t& rt = context->Registers[IInstr::GetRt(instruction->getBitsInstruction())]; \
+    uint16_t imm = IInstr::GetImm(instruction->getBitsInstruction());
+
     namespace RInstr{
         /*Routines for R type instructions*/
 

@@ -180,6 +180,144 @@ namespace task{
 
             return TASK_END;
         };
+
+        /*I type instructions*/
+        TasksTable[OP_ADDI] = TASK_HANDLER(){
+            I_INSTR_DEF_ARGS()
+
+            //TODO: Check overflow
+            rt = rs + signExtend16(imm);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_ADDIU] = TASK_HANDLER(){
+            I_INSTR_DEF_ARGS()
+
+            //TODO: Check unsigned
+            rt = rs + static_cast<reg_t>(imm);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_LW] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            //TODO: Check memory overflow
+            //TODO: Check alignment
+            rt = *((reg_t*)( (context->Memory) + rs + imm ));
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_LH] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            //TODO: Check memory overflow
+            //TODO: Check alignment
+            rt = signExtend16(*((half_w_t*)( (context->Memory) + rs + imm )));
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_LHU] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            //TODO: Check memory overflow
+            //TODO: Check alignment
+            //TODO: Check unsigned
+            rt = static_cast<reg_t>(*((half_w_t*)( (context->Memory) + rs + imm )));
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_LB] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = signExtend8(*((byte_t*)( (context->Memory) + rs + imm )));
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_LBU] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = static_cast<reg_t>(*((byte_t*)( (context->Memory) + rs + imm )));
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SW] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            *((reg_t*)( (context->Memory) + rs + imm )) = rt;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SH] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            *((half_w_t*)( (context->Memory) + rs + imm )) = static_cast<half_w_t>(rt & 0x0000FFFF);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SB] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            *((byte_t*)( (context->Memory) + rs + imm )) = static_cast<byte_t>(rt & 0x000000FF);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_LUI] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = static_cast<reg_t>(imm << 16);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_ANDI] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = rs & static_cast<reg_t>(imm);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_ORI] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = rs | static_cast<reg_t>(imm);
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_NORI] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = ~(rs | static_cast<reg_t>(imm));
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_SLTI] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            rt = (static_cast<int32_t>(rs) < static_cast<int32_t>(signExtend16(imm)))? U32_1 : U32_0;
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_BEQ] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+
+
+            return TASK_END;
+        };
     }
 
     namespace RInstr{

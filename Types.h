@@ -10,6 +10,7 @@ typedef uint8_t byte_t;
 
 const uint8_t REGISTER_COUNT = 32;
 typedef uint32_t reg_t;
+typedef uint16_t half_w_t;
 
 const uint32_t MEMORY_WIDTH = (1 << 10);
 
