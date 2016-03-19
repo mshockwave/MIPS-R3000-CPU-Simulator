@@ -53,6 +53,11 @@ inline bool isSigned(uint32_t value){
     return ((1 << 31) & value) != 0 ;
 }
 
+inline bool isSumOverflow(uint32_t a, uint32_t b, uint32_t result){
+    return (isSigned(a) && isSigned(b) && !isSigned(result)) ||
+            (!isSigned(a) && !isSigned(b) && isSigned(result));
+}
+
 inline uint32_t signExtend16(uint16_t v){
     int32_t ex = static_cast<int32_t>(v);
     ex <<= 16;

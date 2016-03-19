@@ -11,11 +11,13 @@ typedef uint8_t byte_t;
 
 const uint8_t REGISTER_COUNT = 32;
 typedef uint32_t reg_t;
+typedef uint32_t word_t;
 typedef uint16_t half_w_t;
+
 typedef uint32_t addr_t;
 
 const uint32_t WORD_WIDTH = 4;
-const uint32_t MEMORY_WIDTH = (1 << 10);
+const uint32_t MEMORY_LENGTH = (1 << 10);
 
 class Error {
 private:
@@ -65,6 +67,12 @@ private:
     uint32_t mInstrCount;
     addr_t mInstrEndAddr;
 
+    //Program counter
+    reg_t PC;
+
+    //mMemory
+    byte_t mMemory[MEMORY_LENGTH];
+
     CounterType mCycleCounter;
 
     //Output streams
@@ -78,11 +86,7 @@ public:
     //Registers
     reg_t Registers[REGISTER_COUNT];
     //Special registers
-    reg_t PC;
     reg_t &ZERO, &AT, &SP, &FP, &RA;
-
-    //Memory
-    byte_t Memory[MEMORY_WIDTH];
 
     Context(reg_t pc, OutputStream& snapshotStream, OutputStream& errorStream) :
             /*Registers*/
@@ -103,8 +107,8 @@ public:
         }
 
         //Zero memory
-        for(int i = 0; i < MEMORY_WIDTH; i++){
-            Memory[i] = (byte_t)0;
+        for(int i = 0; i < MEMORY_LENGTH; i++){
+            mMemory[i] = (byte_t)0;
         }
     }
 
@@ -115,6 +119,8 @@ public:
         mInstrEndAddr = INSTR_START_ADDR + (mInstrCount - 1) * WORD_WIDTH;
     }
 
+    //PC operations
+    const reg_t& getPC(){ return PC; }
     Error& setPC(reg_t pc){
 
         if(pc % WORD_WIDTH != 0) return Error::DATA_MISALIGNED;
@@ -123,6 +129,37 @@ public:
         PC = pc;
 
         return Error::NONE;
+    }
+    inline void advancePC(){
+        //TODO: Check bound
+        PC += WORD_WIDTH;
+    }
+
+    //mMemory operations
+    //const byte_t* getMemoryR() { return const_cast<const byte_t*>(mMemory); }
+    word_t& getMemoryWord(addr_t offset){
+        //Check alignment
+        if(offset % WORD_WIDTH != 0) throw Error::DATA_MISALIGNED;
+        //Check boundary
+        if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
+
+        return *((word_t*)(mMemory + offset));
+    }
+    half_w_t& getMemoryHalfWord(addr_t offset){
+        //Check alignment
+        if(offset % WORD_WIDTH != 0) throw Error::DATA_MISALIGNED;
+        //Check boundary
+        if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
+
+        return *((half_w_t*)(mMemory + offset));
+    }
+    byte_t& getMemoryByte(addr_t offset){
+        //Check alignment
+        if(offset % WORD_WIDTH != 0) throw Error::DATA_MISALIGNED;
+        //Check boundary
+        if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
+
+        return *((byte_t*)(mMemory + offset));
     }
 
     CounterType incCycleCounter(){ return ++mCycleCounter; }

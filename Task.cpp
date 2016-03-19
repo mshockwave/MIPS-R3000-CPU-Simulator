@@ -71,8 +71,10 @@ namespace task{
         TasksTable[OP_ADD] = TASK_HANDLER() {
             R_INSTR_DEF_REGS()
 
-            //TODO: Overflow detection
             rd = rs + rt;
+            if(isSumOverflow(rs, rt, rd)){
+                context->putError(Error::NUMBER_OVERFLOW);
+            }
 
             return TASK_END;
         };
@@ -80,7 +82,6 @@ namespace task{
         TasksTable[OP_ADDU] = TASK_HANDLER() {
             R_INSTR_DEF_REGS()
 
-            //TODO: Unsigned check
             rd = rs + rt;
 
             return TASK_END;
@@ -89,8 +90,10 @@ namespace task{
         TasksTable[OP_SUB] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
-            //TODO: Overflow detection
             rd = rs - rt;
+            if(isSumOverflow(rs, -rt, rd)){
+                context->putError(Error::NUMBER_OVERFLOW);
+            }
 
             return TASK_END;
         };
@@ -175,18 +178,23 @@ namespace task{
         TasksTable[OP_JR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
-            //TODO: Check for misalignment error
-            context->PC = rs;
+            Error& e = context->setPC(rs);
+            if(e == Error::NONE){
+                return TASK_END;
+            }
 
-            return TASK_END;
+            context->putError(e);
+            return OP_HALT;
         };
 
         /*I type instructions*/
         TasksTable[OP_ADDI] = TASK_HANDLER(){
             I_INSTR_DEF_ARGS()
 
-            //TODO: Check overflow
             rt = rs + signExtend16(imm);
+            if(isSumOverflow(rs, signExtend16(imm), rt)){
+                context->putError(Error::NUMBER_OVERFLOW);
+            }
 
             return TASK_END;
         };
@@ -194,7 +202,6 @@ namespace task{
         TasksTable[OP_ADDIU] = TASK_HANDLER(){
             I_INSTR_DEF_ARGS()
 
-            //TODO: Check unsigned
             rt = rs + static_cast<reg_t>(imm);
 
             return TASK_END;
@@ -203,72 +210,105 @@ namespace task{
         TasksTable[OP_LW] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            //TODO: Check memory overflow
-            //TODO: Check alignment
-            rt = *((reg_t*)( (context->Memory) + rs + imm ));
-
-            return TASK_END;
+            try{
+                word_t v = context->getMemoryWord(rs + imm);
+                rt = static_cast<reg_t>(v);
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_LH] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            //TODO: Check memory overflow
-            //TODO: Check alignment
-            rt = signExtend16(*((half_w_t*)( (context->Memory) + rs + imm )));
-
-            return TASK_END;
+            try{
+                half_w_t v = context->getMemoryHalfWord(rs + imm);
+                rt = static_cast<reg_t>(signExtend16(v));
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_LHU] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            //TODO: Check memory overflow
-            //TODO: Check alignment
-            //TODO: Check unsigned
-            rt = static_cast<reg_t>(*((half_w_t*)( (context->Memory) + rs + imm )));
-
-            return TASK_END;
+            try{
+                half_w_t v = context->getMemoryHalfWord(rs + imm);
+                rt = static_cast<reg_t>(v);
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_LB] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            rt = signExtend8(*((byte_t*)( (context->Memory) + rs + imm )));
-
-            return TASK_END;
+            try{
+                byte_t v = context->getMemoryByte(rs + imm);
+                rt = static_cast<reg_t>(signExtend8(v));
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_LBU] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            rt = static_cast<reg_t>(*((byte_t*)( (context->Memory) + rs + imm )));
-
-            return TASK_END;
+            try{
+                byte_t v = context->getMemoryByte(rs + imm);
+                rt = static_cast<reg_t>(v);
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_SW] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            *((reg_t*)( (context->Memory) + rs + imm )) = rt;
-
-            return TASK_END;
+            try{
+                word_t& var = context->getMemoryWord(rs + imm);
+                var = rt;
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_SH] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            *((half_w_t*)( (context->Memory) + rs + imm )) = static_cast<half_w_t>(rt & 0x0000FFFF);
-
-            return TASK_END;
+            try{
+                half_w_t& var = context->getMemoryHalfWord(rs + imm);
+                var = static_cast<half_w_t>(rt & 0x0000FFFF);
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_SB] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-            *((byte_t*)( (context->Memory) + rs + imm )) = static_cast<byte_t>(rt & 0x000000FF);
-
-            return TASK_END;
+            try{
+                byte_t& var = context->getMemoryByte(rs + imm);
+                var = static_cast<byte_t>(rt & 0x000000FF);
+                return TASK_END;
+            }catch(Error& e){
+                context->putError(e);
+                return OP_HALT;
+            }
         };
 
         TasksTable[OP_LUI] = TASK_HANDLER() {
@@ -315,7 +355,13 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             if(rs == rt){
-                context->PC += (4 + (signExtend16(imm) << 2));
+                reg_t offset = static_cast<reg_t>(4 + (signExtend16(imm) << 2));
+                Error& e = context->setPC(context->getPC() + offset);
+                if(e == Error::NONE){
+                    return TASK_END;
+                }
+                context->putError(e);
+                return OP_HALT;
             }
 
             return TASK_END;
@@ -325,7 +371,13 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             if(rs != rt){
-                context->PC += (4 + (signExtend16(imm) << 2));
+                reg_t offset = static_cast<reg_t>(4 + (signExtend16(imm) << 2));
+                Error& e = context->setPC(context->getPC() + offset);
+                if(e == Error::NONE){
+                    return TASK_END;
+                }
+                context->putError(e);
+                return OP_HALT;
             }
 
             return TASK_END;
@@ -335,7 +387,13 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             if(static_cast<uint32_t>(rs) > 0){
-                context->PC += (4 + (signExtend16(imm) << 2));
+                reg_t offset = static_cast<reg_t>(4 + (signExtend16(imm) << 2));
+                Error& e = context->setPC(context->getPC() + offset);
+                if(e == Error::NONE){
+                    return TASK_END;
+                }
+                context->putError(e);
+                return OP_HALT;
             }
 
             return TASK_END;
