@@ -90,6 +90,9 @@ namespace task {
     reg_t& rt = context->Registers[IInstr::GetRt(instruction->getBitsInstruction())]; \
     uint16_t imm = IInstr::GetImm(instruction->getBitsInstruction());
 
+#define J_INSTR_DEF_ADDR() \
+    uint32_t addr = JInstr::GetAddr(instruction->getBitsInstruction());
+
     namespace RInstr{
         /*Routines for R type instructions*/
 

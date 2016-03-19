@@ -5,6 +5,10 @@
 #define INSTRUCTION_BYTE_WIDTH 4
 
 #include "Types.h"
+#include "RawBinary.h"
+#include "Utils.h"
+
+#include <vector>
 
 class Instruction {
 private:
@@ -27,5 +31,19 @@ public:
     Error& getError(){ return mError; }
 };
 
+struct Instructions{
+private:
+    std::vector<Instruction> mInstructions;
+
+public:
+    Instructions(RawBinary& binary);
+
+    typedef std::vector<Instruction>::iterator iterator;
+
+    uint32_t length(){ return static_cast<uint32_t>(mInstructions.size()); }
+
+    iterator begin(){ return mInstructions.begin(); }
+    iterator end(){ return mInstructions.end(); }
+};
 
 #endif //ARCHIHW1_INSTRUCTION_H

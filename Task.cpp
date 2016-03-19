@@ -314,10 +314,34 @@ namespace task{
         TasksTable[OP_BEQ] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
-
+            if(rs == rt){
+                context->PC += (4 + (signExtend16(imm) << 2));
+            }
 
             return TASK_END;
         };
+
+        TasksTable[OP_BNE] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            if(rs != rt){
+                context->PC += (4 + (signExtend16(imm) << 2));
+            }
+
+            return TASK_END;
+        };
+
+        TasksTable[OP_BGTZ] = TASK_HANDLER() {
+            I_INSTR_DEF_ARGS()
+
+            if(static_cast<uint32_t>(rs) > 0){
+                context->PC += (4 + (signExtend16(imm) << 2));
+            }
+
+            return TASK_END;
+        };
+
+        /*J type instruction*/
     }
 
     namespace RInstr{

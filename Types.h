@@ -5,44 +5,17 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <ostream>
 
 typedef uint8_t byte_t;
 
 const uint8_t REGISTER_COUNT = 32;
 typedef uint32_t reg_t;
 typedef uint16_t half_w_t;
+typedef uint32_t addr_t;
 
+const uint32_t WORD_WIDTH = 4;
 const uint32_t MEMORY_WIDTH = (1 << 10);
-
-class Context {
-public:
-    //Registers
-    reg_t Registers[REGISTER_COUNT];
-    //Special registers
-    reg_t PC;
-    reg_t &ZERO, &AT, &SP, &FP, &RA;
-
-    //Memory
-    byte_t Memory[MEMORY_WIDTH];
-
-    Context(reg_t pc) :
-            PC(pc),
-            ZERO(Registers[0]),
-            AT(Registers[1]),
-            SP(Registers[29]),
-            FP(Registers[30]),
-            RA(Registers[31]){
-        //Zero registers
-        for(int i = 0; i < REGISTER_COUNT; i++){
-            Registers[i] = (byte_t)0;
-        }
-
-        //Zero memory
-        for(int i = 0; i < MEMORY_WIDTH; i++){
-            Memory[i] = (byte_t)0;
-        }
-    }
-};
 
 class Error {
 private:
@@ -74,6 +47,97 @@ public:
     bool operator==(const Error& rhs){
         return this->mErrorId == rhs.mErrorId;
     }
+    bool operator==(Error& rhs){
+        return this->mErrorId == rhs.mErrorId;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Error& error);
+};
+
+class Context {
+
+public:
+    typedef unsigned long CounterType;
+    typedef std::ostream OutputStream;
+
+private:
+
+    uint32_t mInstrCount;
+    addr_t mInstrEndAddr;
+
+    CounterType mCycleCounter;
+
+    //Output streams
+    OutputStream &mSnapShotStream, &mErrorStream;
+
+public:
+
+    static const addr_t INSTR_START_ADDR;
+    addr_t getInstrEndAddr(){ return mInstrEndAddr; }
+
+    //Registers
+    reg_t Registers[REGISTER_COUNT];
+    //Special registers
+    reg_t PC;
+    reg_t &ZERO, &AT, &SP, &FP, &RA;
+
+    //Memory
+    byte_t Memory[MEMORY_WIDTH];
+
+    Context(reg_t pc, OutputStream& snapshotStream, OutputStream& errorStream) :
+            /*Registers*/
+            PC(pc),
+            ZERO(Registers[0]),
+            AT(Registers[1]),
+            SP(Registers[29]),
+            FP(Registers[30]),
+            RA(Registers[31]),
+            /*Cycle counter*/
+            mCycleCounter(0),
+            /*Streams*/
+            mSnapShotStream(snapshotStream), mErrorStream(errorStream),
+            mInstrCount(0), mInstrEndAddr(0){
+        //Zero registers
+        for(int i = 0; i < REGISTER_COUNT; i++){
+            Registers[i] = (byte_t)0;
+        }
+
+        //Zero memory
+        for(int i = 0; i < MEMORY_WIDTH; i++){
+            Memory[i] = (byte_t)0;
+        }
+    }
+
+    void setInstructionCount(uint32_t num){
+        mInstrCount = num;
+
+        //Evaluate end instruction address
+        mInstrEndAddr = INSTR_START_ADDR + (mInstrCount - 1) * WORD_WIDTH;
+    }
+
+    Error& setPC(reg_t pc){
+
+        if(pc % WORD_WIDTH != 0) return Error::DATA_MISALIGNED;
+        if(pc > getInstrEndAddr()) return Error::MEMORY_ADDR_OVERFLOW;
+
+        PC = pc;
+
+        return Error::NONE;
+    }
+
+    CounterType incCycleCounter(){ return ++mCycleCounter; }
+    CounterType getCycleCounter(){ return mCycleCounter; }
+
+    /*
+     * Append current cycle's snapshot
+     * */
+    void dumpSnapshot();
+
+    /*
+     * Append error
+     * */
+    void putError(Error& error);
+
 };
 
 typedef uint32_t task_id_t;
