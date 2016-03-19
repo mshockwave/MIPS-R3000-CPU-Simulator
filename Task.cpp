@@ -76,6 +76,8 @@ namespace task{
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -83,6 +85,8 @@ namespace task{
             R_INSTR_DEF_REGS()
 
             rd = rs + rt;
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -95,6 +99,8 @@ namespace task{
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -102,6 +108,8 @@ namespace task{
             R_INSTR_DEF_REGS()
 
             rd = rs & rt;
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -111,6 +119,8 @@ namespace task{
 
             rd = rs | rt;
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -118,6 +128,8 @@ namespace task{
             R_INSTR_DEF_REGS()
 
             rd = rs ^ rt;
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -127,6 +139,8 @@ namespace task{
 
             rd = ~(rs | rt);
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -135,6 +149,8 @@ namespace task{
 
             rd = ~(rs & rt);
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -142,6 +158,8 @@ namespace task{
             R_INSTR_DEF_REGS()
 
             rd = (rs < rt)? U32_1 : U32_0;
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -152,6 +170,8 @@ namespace task{
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
             rd = rs << shamt;
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -160,6 +180,8 @@ namespace task{
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
             rd = rs >> shamt;
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -171,6 +193,8 @@ namespace task{
             rd = rs >> shamt;
             uint32_t mask = createBitMask( ((uint8_t)32) - shamt );
             rd &= mask;
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -196,6 +220,8 @@ namespace task{
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -203,6 +229,8 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             rt = rs + static_cast<reg_t>(imm);
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -213,6 +241,9 @@ namespace task{
             try{
                 word_t v = context->getMemoryWord(rs + imm);
                 rt = static_cast<reg_t>(v);
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -226,6 +257,9 @@ namespace task{
             try{
                 half_w_t v = context->getMemoryHalfWord(rs + imm);
                 rt = static_cast<reg_t>(signExtend16(v));
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -239,6 +273,9 @@ namespace task{
             try{
                 half_w_t v = context->getMemoryHalfWord(rs + imm);
                 rt = static_cast<reg_t>(v);
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -252,6 +289,9 @@ namespace task{
             try{
                 byte_t v = context->getMemoryByte(rs + imm);
                 rt = static_cast<reg_t>(signExtend8(v));
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -265,6 +305,9 @@ namespace task{
             try{
                 byte_t v = context->getMemoryByte(rs + imm);
                 rt = static_cast<reg_t>(v);
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -278,6 +321,9 @@ namespace task{
             try{
                 word_t& var = context->getMemoryWord(rs + imm);
                 var = rt;
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -291,6 +337,9 @@ namespace task{
             try{
                 half_w_t& var = context->getMemoryHalfWord(rs + imm);
                 var = static_cast<half_w_t>(rt & 0x0000FFFF);
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -304,6 +353,9 @@ namespace task{
             try{
                 byte_t& var = context->getMemoryByte(rs + imm);
                 var = static_cast<byte_t>(rt & 0x000000FF);
+
+                context->advancePC();
+
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
@@ -316,6 +368,8 @@ namespace task{
 
             rt = static_cast<reg_t>(imm << 16);
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -323,6 +377,8 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             rt = rs & static_cast<reg_t>(imm);
+
+            context->advancePC();
 
             return TASK_END;
         };
@@ -332,6 +388,8 @@ namespace task{
 
             rt = rs | static_cast<reg_t>(imm);
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -340,6 +398,8 @@ namespace task{
 
             rt = ~(rs | static_cast<reg_t>(imm));
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -347,6 +407,8 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             rt = (static_cast<int32_t>(rs) < static_cast<int32_t>(signExtend16(imm)))? U32_1 : U32_0;
+
+            context->advancePC();
 
             return TASK_END;
         };
