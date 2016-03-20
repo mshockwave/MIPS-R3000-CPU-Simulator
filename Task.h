@@ -15,7 +15,7 @@ namespace task {
 #define DEF_TASK(name, id) \
     const task_id_t name = (id);
 
-    const uint32_t TASK_COUNT = 38;
+    const uint32_t TASK_COUNT = 39;
 
     extern task_t TasksTable[TASK_COUNT];
 
@@ -25,7 +25,9 @@ namespace task {
 
     /*Task ids*/
     //Reserve 0
-    DEF_TASK(TASK_END, 37)
+    DEF_TASK(TASK_END, 36)
+    DEF_TASK(TASK_BAIL, 38) //Exit with error
+
     DEF_TASK(TASK_ROOT_DECODER, 1)
     DEF_TASK(TASK_R_TYPE_DECODER, 2)
 
@@ -68,7 +70,7 @@ namespace task {
     DEF_TASK(OP_J, 34)
     DEF_TASK(OP_JAL, 35)
 
-    DEF_TASK(OP_HALT, 36)
+    DEF_TASK(OP_HALT, 37)
 
     /*Instruction map*/
     /*Map instruction op code -> task_id_t*/

@@ -15,7 +15,7 @@ private:
         task::InitTasks();
     }
 
-    void dispatchTask(Instruction *instruction);
+    void nextTask();
 
     void dispatchTask(Instruction *instruction, task_id_t taskId);
 
