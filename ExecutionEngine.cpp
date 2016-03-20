@@ -28,8 +28,11 @@ void ExecutionEngine::dispatchTask(Instruction *instruction, task_id_t taskId){
 
     task_id_t nextId = (task::TasksTable[taskId])(mContext, instruction);
 
-    //Do not dump snapshot
-    if(nextId == task::OP_HALT || nextId == task::TASK_BAIL) return;
+    if(nextId == task::OP_HALT || nextId == task::TASK_BAIL){
+        //Do not dump snapshot for TASK_BAIL
+        if(nextId == task::OP_HALT) mContext->dumpSnapshot();
+        return;
+    }
 
     /*
      * Compiler's tail call optimization would eliminate this

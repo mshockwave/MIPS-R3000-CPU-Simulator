@@ -208,7 +208,7 @@ namespace task{
             }
 
             context->putError(e);
-            return OP_HALT;
+            return TASK_BAIL;
         };
 
         /*I type instructions*/
@@ -247,7 +247,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -263,7 +263,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -279,7 +279,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -295,7 +295,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -311,7 +311,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -327,7 +327,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -343,7 +343,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -359,7 +359,7 @@ namespace task{
                 return TASK_END;
             }catch(Error& e){
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
         };
 
@@ -417,13 +417,13 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             if(rs == rt){
-                reg_t offset = static_cast<reg_t>(4 + (signExtend16(imm) << 2));
+                reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error& e = context->setPC(context->getPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
 
             return TASK_END;
@@ -433,13 +433,13 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             if(rs != rt){
-                reg_t offset = static_cast<reg_t>(4 + (signExtend16(imm) << 2));
+                reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error& e = context->setPC(context->getPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
 
             return TASK_END;
@@ -449,19 +449,59 @@ namespace task{
             I_INSTR_DEF_ARGS()
 
             if(static_cast<uint32_t>(rs) > 0){
-                reg_t offset = static_cast<reg_t>(4 + (signExtend16(imm) << 2));
+                reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error& e = context->setPC(context->getPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
                 context->putError(e);
-                return OP_HALT;
+                return TASK_BAIL;
             }
 
             return TASK_END;
         };
 
         /*J type instruction*/
+        TasksTable[OP_J] = TASK_HANDLER() {
+            J_INSTR_DEF_ADDR()
+
+            reg_t pc = context->getPC();
+            pc += WORD_WIDTH;
+            uint32_t partPC = extractInstrBits(pc, 31, 28);
+            pc = (partPC << 28);
+
+            Error& e = context->setPC( pc | (addr << 2) );
+            if(e == Error::NONE){
+                return TASK_END;
+            }else{
+                context->putError(e);
+                return TASK_BAIL;
+            }
+        };
+
+        TasksTable[OP_JAL] = TASK_HANDLER() {
+            J_INSTR_DEF_ADDR()
+
+            reg_t pc = context->getPC();
+            pc += WORD_WIDTH;
+            context->RA = pc;
+
+            uint32_t partPC = extractInstrBits(pc, 31, 28);
+            pc = (partPC << 28);
+
+            Error& e = context->setPC( pc | (addr << 2) );
+            if(e == Error::NONE){
+                return TASK_END;
+            }else{
+                context->putError(e);
+                return TASK_BAIL;
+            }
+        };
+
+        TasksTable[OP_HALT] = TASK_HANDLER() {
+            //Unlikely to reach here
+            return OP_HALT;
+        };
     }
 
     namespace RInstr{
