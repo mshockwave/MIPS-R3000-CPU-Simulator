@@ -12,6 +12,12 @@ typedef std::function<task_id_t(Context *, Instruction*)> task_t;
 
 namespace task {
 
+#define ASSERT_DEST_REG_NOT_ZERO(dest) \
+    if((dest) == context->ZERO){ \
+        context->putError(Error::WRITE_REG_ZERO); \
+        return TASK_END; \
+    }
+
 #define DEF_TASK(name, id) \
     const task_id_t name = (id);
 

@@ -71,6 +71,8 @@ namespace task{
         TasksTable[OP_ADD] = TASK_HANDLER() {
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             rd = rs + rt;
             if(isSumOverflow(rs, rt, rd)){
                 context->putError(Error::NUMBER_OVERFLOW);
@@ -84,6 +86,8 @@ namespace task{
         TasksTable[OP_ADDU] = TASK_HANDLER() {
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             rd = rs + rt;
 
             context->advancePC();
@@ -93,6 +97,8 @@ namespace task{
 
         TasksTable[OP_SUB] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = rs - rt;
             if(isSumOverflow(rs, -rt, rd)){
@@ -107,6 +113,8 @@ namespace task{
         TasksTable[OP_AND] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             rd = rs & rt;
 
             context->advancePC();
@@ -116,6 +124,8 @@ namespace task{
 
         TasksTable[OP_OR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = rs | rt;
 
@@ -127,6 +137,8 @@ namespace task{
         TasksTable[OP_XOR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             rd = rs ^ rt;
 
             context->advancePC();
@@ -136,6 +148,8 @@ namespace task{
 
         TasksTable[OP_NOR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = ~(rs | rt);
 
@@ -147,6 +161,8 @@ namespace task{
         TasksTable[OP_NAND] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             rd = ~(rs & rt);
 
             context->advancePC();
@@ -157,6 +173,8 @@ namespace task{
         TasksTable[OP_SLT] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             rd = (rs < rt)? U32_1 : U32_0;
 
             context->advancePC();
@@ -166,6 +184,8 @@ namespace task{
 
         TasksTable[OP_SLL] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rd)
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
             rd = rs << shamt;
@@ -178,6 +198,8 @@ namespace task{
         TasksTable[OP_SRA] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rd)
+
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
             rd = rs >> shamt;
 
@@ -188,6 +210,8 @@ namespace task{
 
         TasksTable[OP_SRL] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rd)
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
             rd = rs >> shamt;
@@ -215,6 +239,8 @@ namespace task{
         TasksTable[OP_ADDI] = TASK_HANDLER(){
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             rt = rs + signExtend16(imm);
             if(isSumOverflow(rs, signExtend16(imm), rt)){
                 context->putError(Error::NUMBER_OVERFLOW);
@@ -228,6 +254,8 @@ namespace task{
         TasksTable[OP_ADDIU] = TASK_HANDLER(){
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             rt = rs + static_cast<reg_t>(imm);
 
             context->advancePC();
@@ -237,6 +265,8 @@ namespace task{
 
         TasksTable[OP_LW] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
                 word_t v = context->getMemoryWord(rs + imm);
@@ -254,6 +284,8 @@ namespace task{
         TasksTable[OP_LH] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             try{
                 half_w_t v = context->getMemoryHalfWord(rs + imm);
                 rt = static_cast<reg_t>(signExtend16(v));
@@ -269,6 +301,8 @@ namespace task{
 
         TasksTable[OP_LHU] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
                 half_w_t v = context->getMemoryHalfWord(rs + imm);
@@ -286,6 +320,8 @@ namespace task{
         TasksTable[OP_LB] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             try{
                 byte_t v = context->getMemoryByte(rs + imm);
                 rt = static_cast<reg_t>(signExtend8(v));
@@ -301,6 +337,8 @@ namespace task{
 
         TasksTable[OP_LBU] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
                 byte_t v = context->getMemoryByte(rs + imm);
@@ -366,6 +404,8 @@ namespace task{
         TasksTable[OP_LUI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             rt = static_cast<reg_t>(imm << 16);
 
             context->advancePC();
@@ -375,6 +415,8 @@ namespace task{
 
         TasksTable[OP_ANDI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rt)
 
             rt = rs & static_cast<reg_t>(imm);
 
@@ -386,6 +428,8 @@ namespace task{
         TasksTable[OP_ORI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             rt = rs | static_cast<reg_t>(imm);
 
             context->advancePC();
@@ -396,6 +440,8 @@ namespace task{
         TasksTable[OP_NORI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            ASSERT_DEST_REG_NOT_ZERO(rt)
+
             rt = ~(rs | static_cast<reg_t>(imm));
 
             context->advancePC();
@@ -405,6 +451,8 @@ namespace task{
 
         TasksTable[OP_SLTI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            ASSERT_DEST_REG_NOT_ZERO(rt)
 
             rt = (static_cast<int32_t>(rs) < static_cast<int32_t>(signExtend16(imm)))? U32_1 : U32_0;
 
