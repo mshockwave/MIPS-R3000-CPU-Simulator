@@ -11,8 +11,8 @@ void ExecutionEngine::nextTask() {
 
     //Extract op code
     uint32_t op = extractInstrBits(instruction.getBitsInstruction(), 31, 26);
-    task::instr_task_map_t::iterator itOpMap;
-    if((itOpMap = task::FirstInstrOpMap.find(static_cast<uint8_t>(op))) == task::FirstInstrOpMap.end()){
+    task::instr_task_map_t::iterator itOpMap = task::FirstInstrOpMap.find(static_cast<uint8_t>(op));
+    if(UNLIKELY(itOpMap == task::FirstInstrOpMap.end())){
         //Not found
         //Halt
         return;
@@ -24,8 +24,7 @@ void ExecutionEngine::nextTask() {
 
 void ExecutionEngine::dispatchTask(Instruction *instruction, task_id_t taskId){
     //Last catch
-    //Unlikely reach
-    if(taskId == task::OP_HALT || taskId == task::TASK_BAIL) return;
+    if(UNLIKELY(taskId == task::OP_HALT || taskId == task::TASK_BAIL)) return;
 
     task_id_t nextId = (task::TasksTable[taskId])(mContext, instruction);
 
@@ -47,7 +46,9 @@ void ExecutionEngine::dispatchTask(Instruction *instruction, task_id_t taskId){
 }
 
 void ExecutionEngine::start() {
+    //Dump cycle zero state
     mContext->dumpSnapshot();
     mContext->incCycleCounter();
+
     nextTask();
 }

@@ -8,6 +8,15 @@
 
 const std::string EMPTY_STRING("");
 
+#if defined(__clang__) || defined(__GUNC__)
+    #define UNLIKELY(condition) (__builtin_expect(!!(condition), 0))
+    #define LIKELY(condition) (__builtin_expect(!!(condition), 1))
+#else
+    /*Fallbacks*/
+    #define UNLIKELY(condition) (condition)
+    #define LIKELY(condition) (condition)
+#endif
+
 class Log {
 private:
     static std::ostream* sOstream;
