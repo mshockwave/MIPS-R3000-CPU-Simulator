@@ -3,7 +3,7 @@
 void ExecutionEngine::nextTask() {
     const reg_t& pc = mContext->getPC();
 
-    addr_t offset = pc - static_cast<addr_t>(0);
+    addr_t offset = pc - Context::INSTR_START_ADDR;
     uint32_t index = offset / WORD_WIDTH;
 
     Instructions::iterator itInstr = mInstructions.begin();

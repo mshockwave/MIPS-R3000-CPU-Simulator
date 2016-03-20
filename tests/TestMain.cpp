@@ -1,5 +1,8 @@
+
 #include "TestInstruction.h"
 #include "TestUtils.h"
+#include "TestError.h"
+#include "TestExecutionEngine.h"
 
 int main(){
 
@@ -7,6 +10,8 @@ int main(){
     std::vector<TestCase*> testCases;
     testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestUtils());
+    testCases.push_back(new TestErrorVerbose());
+    testCases.push_back(new TestExecutionEngine());
 
     std::vector<TestCase*>::iterator it = testCases.begin();
     for(; it != testCases.end(); ++it){
