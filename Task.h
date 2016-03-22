@@ -13,8 +13,9 @@ typedef std::function<task_id_t(Context *, Instruction*)> task_t;
 namespace task {
 
 #define ASSERT_DEST_REG_NOT_ZERO(dest) \
-    if((dest) == context->ZERO){ \
+    if( &(dest) == &(context->ZERO) ){ \
         context->putError(Error::WRITE_REG_ZERO); \
+        context->advancePC(); \
         return TASK_END; \
     }
 

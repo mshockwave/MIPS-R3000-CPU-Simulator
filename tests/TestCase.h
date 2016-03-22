@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "../Utils.h"
 
@@ -42,7 +43,10 @@ bool TestCase::test() {
     try{
         return doTest();
     }catch(std::string msg){
-        Log::E(mName) << msg;
+        Log::E(mName) << msg << std::endl;
+        return false;
+    }catch(const char* msg){
+        Log::E(mName) << msg << std::endl;
         return false;
     }
 }

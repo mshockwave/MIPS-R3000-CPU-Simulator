@@ -6,6 +6,7 @@
 #include <cstdio>
 #include "../Types.h"
 #include "../Instruction.h"
+#include "../RawBinary.h"
 
 class TestInstructionTransform : public TestCase {
 public:
@@ -32,5 +33,23 @@ bool TestInstructionTransform::doTest() {
 
     return true;
 }
+
+class TestInstructionList : public TestCase {
+public:
+    TestInstructionList() :
+            TestCase("InstructionList"){}
+
+private:
+    bool doTest(){
+
+        RawBinary data("test_dataset/func/iimage.bin", "test_dataset/func/dimage.bin");
+
+        Instructions instructions(data);
+
+        Log::D(mName) << "Instructions length: " << instructions.length() << std::endl;
+
+        return true;
+    }
+};
 
 #endif //ARCHIHW1_TESTINSTRUCTION_H

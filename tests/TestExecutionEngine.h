@@ -2,19 +2,33 @@
 #ifndef ARCHIHW1_TESTEXECUTIONENGINE_H
 #define ARCHIHW1_TESTEXECUTIONENGINE_H
 
+#include <iostream>
+
 #include "TestCase.h"
+#include "../Types.h"
+#include "../ExecutionEngine.h"
 
 class TestExecutionEngine : public TestCase {
 public:
     TestExecutionEngine() :
-            TestCase("TestExecutionEngine"){}
+            TestCase("ExecutionEngine"){}
 
 private:
     bool doTest(){
 
-        //TODO
+        RawBinary data("test_dataset/func/iimage.bin", "test_dataset/func/dimage.bin");
 
-        return false;
+        Instructions instructions(data);
+
+        //TODO: Initialize data section
+        Context context(U32_0, std::cout, Log::E(mName));
+        Log::D("") << std::endl;
+
+        ExecutionEngine engine(context, instructions);
+
+        engine.start();
+
+        return true;
     }
 };
 

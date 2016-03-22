@@ -5,13 +5,11 @@
 #include "TestCase.h"
 #include "../Utils.h"
 
-#include <sstream>
-
 class TestUtils : public TestCase {
 
 public:
     TestUtils() :
-            TestCase("TestUtils"){}
+            TestCase("Utils"){}
 
 private:
     bool doTest();
