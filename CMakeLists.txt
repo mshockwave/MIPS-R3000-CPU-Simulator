@@ -9,6 +9,7 @@ set(SOURCE_FILES
         RawBinary.cpp
         Instruction.cpp
         ExecutionEngine.cpp
+        Context.cpp Context.h
         Task.cpp
         Types.h
         Types.cpp

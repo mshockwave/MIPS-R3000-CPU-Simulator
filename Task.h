@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "Types.h"
+#include "Context.h"
 #include "Instruction.h"
 #include "Utils.h"
 

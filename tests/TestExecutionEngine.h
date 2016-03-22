@@ -7,6 +7,7 @@
 #include "TestCase.h"
 #include "../Types.h"
 #include "../ExecutionEngine.h"
+#include "../Context.h"
 
 class TestExecutionEngine : public TestCase {
 public:
@@ -21,7 +22,7 @@ private:
         Instructions instructions(data);
 
         //TODO: Initialize data section
-        Context context(U32_0, std::cout, Log::E(mName));
+        Context context(data, std::cout, Log::E(mName));
         Log::D("") << std::endl;
 
         ExecutionEngine engine(context, instructions);

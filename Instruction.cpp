@@ -31,9 +31,9 @@ Instructions::Instructions(RawBinary &binary) {
 
     const byte_t* bytesArray = bytes.data();
 
-    for(int i = 0; i < instructionLength; i++){
-        Instruction instruction(bytesArray);
+    /*The first four bytes are PC address, skip*/
+    for(int i = 4; i < instructionLength; i += INSTRUCTION_BYTE_WIDTH){
+        Instruction instruction(bytesArray + i);
         mInstructions.push_back(instruction);
-        bytesArray += INSTRUCTION_BYTE_WIDTH;
     }
 }

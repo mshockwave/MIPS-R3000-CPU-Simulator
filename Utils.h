@@ -5,6 +5,7 @@
 #include "Types.h"
 
 #include <iostream>
+#include <vector>
 
 const std::string EMPTY_STRING("");
 
@@ -42,6 +43,19 @@ public:
         return (*sOstream) << "[Debug] " << tag << ": ";
     }
 };
+
+template<
+        std::size_t start_index = 0,
+        std::size_t W = 4,
+        bool bigEndian = true
+>
+inline void load2Register(std::vector<byte_t> &data, reg_t &outputReg){
+    if(data.size() < W) return;
+    for(std::size_t i = start_index; i < W; i++){
+        reg_t b = static_cast<reg_t>((bigEndian)? data[(W - 1) - i] : data[i]);
+        outputReg |= (b << ((W - 1 - i) << 3));
+    }
+}
 
 inline uint32_t createBitMask(uint8_t width){
     return (1 << width) - U32_1;
