@@ -18,6 +18,7 @@ private:
 };
 bool TestInstructionTransform::doTest() {
 
+    Log::V(mName) << "Testing instructions transforming..." << std::endl;
     const byte_t rawInstruction[4] = { 0x00, 0x12, 0x34, 0x56 };
     Instruction instruction(rawInstruction);
 
@@ -41,6 +42,8 @@ public:
 
 private:
     bool doTest(){
+
+        Log::V(mName) << "Testing instructions list..." << std::endl;
 
         RawBinary data("test_dataset/func/iimage.bin", "test_dataset/func/dimage.bin");
 

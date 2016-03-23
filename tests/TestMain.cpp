@@ -7,10 +7,10 @@ int main(){
 
     //Add test cases
     std::vector<TestCase*> testCases;
-    testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestUtils());
+    testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestInstructionList());
-    testCases.push_back(new TestExecutionEngine());
+    //testCases.push_back(new TestExecutionEngine());
 
     std::vector<TestCase*>::iterator it = testCases.begin();
     for(; it != testCases.end(); ++it){
