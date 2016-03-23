@@ -16,9 +16,7 @@ private:
         task::InitTasks();
     }
 
-    void nextTask();
-
-    void dispatchTask(Instruction *instruction, task_id_t taskId);
+    task_id_t dispatchTask(Instruction *instruction, task_id_t taskId);
 
 public:
 
@@ -30,7 +28,7 @@ public:
     ExecutionEngine(Context& ctx, Instructions& instructions) :
             mContext(&ctx),
             mInstructions(instructions) {
-        ctx.setInstructionCount(mInstructions.length());
+        ctx.setInstructionCount(static_cast<uint32_t>(mInstructions.length()));
         init();
     }
 
