@@ -9,7 +9,7 @@ inline void Instruction::convert() {
 
     //Convert to 32-bits uint for bits operations
     for(int i = 0; i < INSTRUCTION_BYTE_WIDTH; i++){
-        uint32_t b = static_cast<uint32_t>(this->mInstruction[i]);
+        uint32_t b = static_cast<uint32_t>(this->mRawInstruction[i]);
         this->mBitsInstruction |= (b << ((INSTRUCTION_BYTE_WIDTH - 1 - i) << 3));
     }
 }
