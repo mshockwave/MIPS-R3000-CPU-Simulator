@@ -109,15 +109,13 @@ public:
     }
     half_w_t& getMemoryHalfWord(addr_t offset){
         //Check alignment
-        if(offset % WORD_WIDTH != 0) throw Error::DATA_MISALIGNED;
+        if(offset % (WORD_WIDTH >> 1) != 0) throw Error::DATA_MISALIGNED;
         //Check boundary
         if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
 
         return *((half_w_t*)(mMemory + offset));
     }
     byte_t& getMemoryByte(addr_t offset){
-        //Check alignment
-        if(offset % WORD_WIDTH != 0) throw Error::DATA_MISALIGNED;
         //Check boundary
         if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
 

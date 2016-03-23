@@ -71,6 +71,20 @@ inline uint32_t extractInstrBits(uint32_t value, uint8_t msb, uint8_t lsb){
     uint32_t result = (value >> lsb);
     return (result & createBitMask(bitsCount));
 }
+inline uint32_t reverse32ByteOrder(uint32_t val){
+    uint32_t base = U32_0;
+    base |= (extractInstrBits(val, 7, 0) << 24);
+    base |= (extractInstrBits(val, 15, 8) << 16);
+    base |= (extractInstrBits(val, 23, 16) << 8);
+    base |= extractInstrBits(val, 31, 24);
+    return base;
+}
+inline uint16_t reverse16ByteOrder(uint16_t val){
+    uint16_t base = static_cast<uint16_t>(0);
+    base |= (extractInstrBits(val, 7, 0) << 8);
+    base |= extractInstrBits(val, 15, 8);
+    return base;
+}
 
 inline bool isSigned(uint32_t value){
     return ((1 << 31) & value) != 0 ;

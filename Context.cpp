@@ -13,9 +13,9 @@ void Context::loadMemory(RawBinary& rawBinary) {
     load2Register<4>(dataImg, dataSize);
 
     int i, j, k;
-    for(i = 0, k = 8; i < dataSize; i ++, k += WORD_WIDTH){
+    for(i = 0, k = 8; i < dataSize; i++, k += WORD_WIDTH){
         for(j = 0; j < WORD_WIDTH; j++){
-            mMemory[k - 8 + j] = dataImg[k + (WORD_WIDTH - 1) - j];
+            mMemory[k - 8 + j] = dataImg[k + j];
         }
     }
 }

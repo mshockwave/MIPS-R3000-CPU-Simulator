@@ -39,6 +39,21 @@ bool TestUtils::doTest() {
     assert(reg1 == static_cast<reg_t>(0x12345678), ss.str());
     ss.clear();
 
+    //Test byte order reverse
+    Log::V(mName) << "Testing byte order reversing..." << std::endl;
+    uint32_t u32Val = static_cast<uint32_t>(0x12345678);
+    uint16_t u16Val = static_cast<uint16_t>(0x1234);
+    //Log::D(mName) << "0x" << std::hex << reverse32ByteOrder(u32Val) << std::endl;
+    //Log::D(mName) << "0x" << std::hex << reverse16ByteOrder(u16Val) << std::endl;
+    u32Val = reverse32ByteOrder(u32Val);
+    u16Val = reverse16ByteOrder(u16Val);
+    ss = std::stringstream();
+    ss << "Expect 0x78563412, " << "get 0x" << std::hex << u32Val << std::endl;
+    assert(u32Val == 0x78563412, ss.str());
+    ss = std::stringstream();
+    ss << "Expect 0x78563412, " << "get 0x" << std::hex << u16Val << std::endl;
+    assert(u16Val == 0x3412, ss.str());
+
     return true;
 }
 

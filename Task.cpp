@@ -269,7 +269,7 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                word_t v = context->getMemoryWord(rs + imm);
+                word_t v = reverse32ByteOrder(context->getMemoryWord(rs + imm));
                 rt = static_cast<reg_t>(v);
 
                 context->advancePC();
@@ -287,7 +287,7 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                half_w_t v = context->getMemoryHalfWord(rs + imm);
+                half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(rs + imm));
                 rt = static_cast<reg_t>(signExtend16(v));
 
                 context->advancePC();
@@ -305,7 +305,7 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                half_w_t v = context->getMemoryHalfWord(rs + imm);
+                half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(rs + imm));
                 rt = static_cast<reg_t>(v);
 
                 context->advancePC();
@@ -358,7 +358,7 @@ namespace task{
 
             try{
                 word_t& var = context->getMemoryWord(rs + imm);
-                var = rt;
+                var = reverse32ByteOrder(rt);
 
                 context->advancePC();
 
@@ -374,7 +374,7 @@ namespace task{
 
             try{
                 half_w_t& var = context->getMemoryHalfWord(rs + imm);
-                var = static_cast<half_w_t>(rt & 0x0000FFFF);
+                var = reverse16ByteOrder(static_cast<half_w_t>(rt & 0x0000FFFF));
 
                 context->advancePC();
 
