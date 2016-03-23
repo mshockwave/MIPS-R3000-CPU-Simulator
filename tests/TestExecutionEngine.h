@@ -21,7 +21,6 @@ private:
 
         Instructions instructions(data);
 
-        //TODO: Initialize data section
         Context context(data, std::cout, Log::E(mName));
         Log::D("") << std::endl;
 
