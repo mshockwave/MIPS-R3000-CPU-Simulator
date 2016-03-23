@@ -21,13 +21,13 @@ void Context::loadMemory(RawBinary& rawBinary) {
 }
 
 void Context::dumpSnapshot() {
-    mSnapShotStream << "cycle " << mCycleCounter << std::endl;
+    mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
 
     for(int i = 0; i < REGISTER_COUNT; i++){
-        mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << i;
-        mSnapShotStream << ": 0x" << std::setfill('0') << std::setw(8) << std::hex << Registers[i] << std::endl;
+        mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << std::dec << i;
+        mSnapShotStream << ": 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << Registers[i] << std::endl;
     }
-    mSnapShotStream << "PC: 0x" << std::setfill('0') << std::setw(8) << std::hex << PC << std::endl;
+    mSnapShotStream << "PC: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << PC << std::endl;
 
     //Epilogue
     mSnapShotStream << std::endl << std::endl;

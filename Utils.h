@@ -92,4 +92,7 @@ inline uint32_t signExtend8(uint8_t v){
     return static_cast<uint32_t>(ex >> 24);
 }
 
+//Do not insert new line
+#define OSTREAM_HEX_OUTPUT_FMT(width) std::setfill('0') << std::setw((width)) << std::hex << std::uppercase
+
 #endif //ARCHIHW1_UTILS_H
