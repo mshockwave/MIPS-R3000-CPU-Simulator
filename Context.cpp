@@ -5,13 +5,17 @@
 void Context::loadMemory(RawBinary& rawBinary) {
     std::vector<byte_t>& dataImg = rawBinary.getDataImg();
 
-    /*The first four bytes are SP, skip*/
+    /*The first eight bytes are SP and data size, skip*/
     SP = U32_0;
     load2Register(dataImg, SP);
 
-    for(int i = 4; i < dataImg.size(); i += WORD_WIDTH){
-        for(int j = 0; j < WORD_WIDTH; j++){
-            mMemory[i + j] = dataImg[i + (WORD_WIDTH - 1) - j];
+    uint32_t dataSize = 0;
+    load2Register<4>(dataImg, dataSize);
+
+    int i, j, k;
+    for(i = 0, k = 8; i < dataSize; i ++, k += WORD_WIDTH){
+        for(j = 0; j < WORD_WIDTH; j++){
+            mMemory[k - 8 + j] = dataImg[k + (WORD_WIDTH - 1) - j];
         }
     }
 }
