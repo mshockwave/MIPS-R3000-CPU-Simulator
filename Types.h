@@ -19,6 +19,13 @@ typedef uint32_t addr_t;
 const uint32_t WORD_WIDTH = 4;
 const uint32_t MEMORY_LENGTH = (1 << 10);
 
+#if defined(_WIN32) || defined(WIN32) || defined(__CYGWIN__)
+#define FILE_PATH_SEP "\\"
+#else
+#define FILE_PATH_SEP "/"
+#endif
+
+
 class Error {
 private:
     uint8_t mErrorId;
