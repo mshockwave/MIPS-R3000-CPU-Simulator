@@ -50,9 +50,9 @@ template<
         bool bigEndian = true
 >
 inline void load2Register(std::vector<byte_t> &data, reg_t &outputReg){
-    if(data.size() < W) return;
-    for(std::size_t i = start_index; i < W; i++){
-        reg_t b = static_cast<reg_t>((bigEndian)? data[(W - 1) - i] : data[i]);
+    if(UNLIKELY(data.size() < W || (data.begin() + start_index >= data.end()))) return;
+    for(std::size_t i = start_index; i < (start_index + W); i++){
+        reg_t b = static_cast<reg_t>((bigEndian)? data[i] : data[(W - 1) - i]);
         outputReg |= (b << ((W - 1 - i) << 3));
     }
 }

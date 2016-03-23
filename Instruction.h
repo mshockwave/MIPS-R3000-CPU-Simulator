@@ -40,7 +40,7 @@ public:
 
     typedef std::vector<Instruction>::iterator iterator;
 
-    uint32_t length(){ return static_cast<uint32_t>(mInstructions.size()); }
+    unsigned long length(){ return mInstructions.size(); }
 
     iterator begin(){ return mInstructions.begin(); }
     iterator end(){ return mInstructions.end(); }

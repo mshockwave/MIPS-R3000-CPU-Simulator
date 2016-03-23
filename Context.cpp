@@ -2,12 +2,11 @@
 #include "Context.h"
 
 /*Context*/
-const addr_t Context::INSTR_START_ADDR = U32_0;
-
 void Context::loadMemory(RawBinary& rawBinary) {
     std::vector<byte_t>& dataImg = rawBinary.getDataImg();
 
     /*The first four bytes are SP, skip*/
+    SP = U32_0;
     load2Register(dataImg, SP);
 
     for(int i = 4; i < dataImg.size(); i += WORD_WIDTH){

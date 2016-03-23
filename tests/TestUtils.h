@@ -35,8 +35,8 @@ bool TestUtils::doTest() {
     reg_t reg1 = U32_0;
     load2Register(dataVector, reg1);
     //Log::D(mName) << "Register value: 0x" << std::hex << reg1 << std::endl;
-    ss << "Expect 0x78563412, " << "get 0x" << std::hex << reg1 << std::endl;
-    assert(reg1 == static_cast<reg_t>(0x78563412), ss.str());
+    ss << "Expect 0x12345678, " << "get 0x" << std::hex << reg1 << std::endl;
+    assert(reg1 == static_cast<reg_t>(0x12345678), ss.str());
     ss.clear();
 
     return true;

@@ -17,6 +17,7 @@ public:
 private:
 
     uint32_t mInstrCount;
+    addr_t mInstrStartAddr;
     addr_t mInstrEndAddr;
 
     //Program counter
@@ -34,7 +35,6 @@ private:
 
 public:
 
-    static const addr_t INSTR_START_ADDR;
     addr_t getInstrEndAddr(){ return mInstrEndAddr; }
 
     //Registers
@@ -45,6 +45,7 @@ public:
     Context(RawBinary& rawBinary,
             OutputStream& snapshotStream, OutputStream& errorStream) :
             /*Registers*/
+            PC(0),
             ZERO(Registers[0]),
             AT(Registers[1]),
             SP(Registers[29]),
@@ -62,6 +63,7 @@ public:
 
         //Load PC from rawBinary
         load2Register(rawBinary.getInstructions(), PC);
+        mInstrStartAddr = static_cast<addr_t>(PC);
 
         //Zero memory
         for(int i = 0; i < MEMORY_LENGTH; i++){
@@ -70,11 +72,13 @@ public:
         loadMemory(rawBinary);
     }
 
+    addr_t getInstrStartAddress() const{ return mInstrStartAddr; }
+
     void setInstructionCount(uint32_t num){
         mInstrCount = num;
 
         //Evaluate end instruction address
-        mInstrEndAddr = INSTR_START_ADDR + (mInstrCount - 1) * WORD_WIDTH;
+        mInstrEndAddr = mInstrStartAddr + (mInstrCount - 1) * WORD_WIDTH;
     }
 
     //PC operations

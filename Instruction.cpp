@@ -27,13 +27,16 @@ Instructions::Instructions(RawBinary &binary) {
     std::vector<byte_t>& bytes = binary.getInstructions();
 
     //TODO: assert binary.size() % 4 == 0
-    unsigned long instructionLength = bytes.size() >> 2;
+    //Load instruction length
+    uint32_t instructionLength = U32_0;
+    load2Register<4>(bytes, instructionLength);
 
     const byte_t* bytesArray = bytes.data();
 
-    /*The first four bytes are PC address, skip*/
-    for(int i = 4; i < instructionLength; i += INSTRUCTION_BYTE_WIDTH){
-        Instruction instruction(bytesArray + i);
+    /*The first eight bytes are PC address and instruction size, skip*/
+    uint32_t i, j;
+    for(i = 0, j = 8; i < instructionLength; i++, j += INSTRUCTION_BYTE_WIDTH){
+        Instruction instruction(bytesArray + j);
         mInstructions.push_back(instruction);
     }
 }
