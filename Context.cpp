@@ -34,6 +34,6 @@ void Context::dumpSnapshot() {
 }
 
 void Context::putError(Error &error) {
-    mErrorStream << "In cycle " << mCycleCounter << ": ";
+    mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
     mErrorStream << error << std::endl;
 }
