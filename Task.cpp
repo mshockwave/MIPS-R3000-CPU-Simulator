@@ -474,6 +474,8 @@ namespace task{
                 return TASK_BAIL;
             }
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -490,6 +492,8 @@ namespace task{
                 return TASK_BAIL;
             }
 
+            context->advancePC();
+
             return TASK_END;
         };
 
@@ -505,6 +509,8 @@ namespace task{
                 context->putError(e);
                 return TASK_BAIL;
             }
+
+            context->advancePC();
 
             return TASK_END;
         };
