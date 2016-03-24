@@ -53,12 +53,7 @@ namespace task{
     }
 
     void InitTasks(){
-        TasksTable[TASK_ROOT_DECODER] = TASK_HANDLER() {
-            //Extract [31,26] bits
-            uint8_t op = static_cast<uint8_t >(extractInstrBits(instruction->getBitsInstruction(),
-                                                                31, 26));
-            return FirstInstrOpMap[op];
-        };
+
         TasksTable[TASK_R_TYPE_DECODER] = TASK_HANDLER() {
             //Extract [5,0] bits
             uint8_t func = static_cast<uint8_t >(extractInstrBits(instruction->getBitsInstruction(),

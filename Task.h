@@ -36,7 +36,7 @@ namespace task {
     DEF_TASK(TASK_END, 36)
     DEF_TASK(TASK_BAIL, 38) //Exit with error
 
-    DEF_TASK(TASK_ROOT_DECODER, 1)
+    //DEF_TASK(TASK_ROOT_DECODER, 1) //Legacy Root Level Decoder
     DEF_TASK(TASK_R_TYPE_DECODER, 2)
 
     //Type R Instructions
