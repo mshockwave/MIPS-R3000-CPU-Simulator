@@ -21,7 +21,8 @@ int main(){
         }
 
         if((*it) != nullptr){
-            delete *it;
+            TestCase* ptr = *it;
+            delete ptr;
         }
         if(fail) break;
     }
