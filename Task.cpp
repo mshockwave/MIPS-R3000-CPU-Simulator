@@ -251,7 +251,7 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
-            rt = rs + static_cast<reg_t>(imm);
+            rt = rs + static_cast<reg_t>(signExtend16(imm));
 
             context->advancePC();
 
