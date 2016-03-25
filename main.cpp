@@ -16,13 +16,14 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-    if(argc < 2){
-        Log::E("") << "Usage: " << argv[0] << " <test case folder name>" << std::endl;
-        return 1;
-    }
+    char testCasePath[100] = { '\0' };
 
-    char testCasePath[100];
-    strncpy(testCasePath, argv[1], sizeof(char) * 100);
+    if(argc < 2){
+        //Log::E("") << "Usage: " << argv[0] << " <test case folder name>" << std::endl;
+        testCasePath[0] = '.';
+    }else{
+        strncpy(testCasePath, argv[1], sizeof(char) * 100);
+    }
 
     try{
         std::stringstream ssInstrImage;
