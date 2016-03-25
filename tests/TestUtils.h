@@ -54,7 +54,6 @@ bool TestUtils::doTest() {
         std::stringstream ss;
         ss << "Expect 0x78563412, " << "get 0x" << std::hex << u32Val << std::endl;
         assert(u32Val == 0x78563412, ss.str());
-        ss = std::stringstream();
         ss << "Expect 0x78563412, " << "get 0x" << std::hex << u16Val << std::endl;
         assert(u16Val == 0x3412, ss.str());
     }
