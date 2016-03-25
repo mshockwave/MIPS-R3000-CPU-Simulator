@@ -1,6 +1,8 @@
 
 #include "Instruction.h"
 
+#include <cstring>
+
 inline void Instruction::convert() {
     //To Little endian
     for(int i = 0; i < INSTRUCTION_BYTE_WIDTH; i++){
