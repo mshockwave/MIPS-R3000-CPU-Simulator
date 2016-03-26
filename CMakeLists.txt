@@ -17,9 +17,13 @@ set(SOURCE_FILES
         Utils.cpp)
 include_directories(./include)
 
-add_executable(ArchiHW1 ${SOURCE_FILES} main.cpp)
+if(NOT DEFINED OUT_EXE_NAME)
+    set(OUT_EXE_NAME ArchiHW1)
+endif(NOT DEFINED OUT_EXE_NAME)
 
-add_executable(ArchiHW1Tests ${SOURCE_FILES} tests/TestMain.cpp )
+add_executable(${OUT_EXE_NAME} ${SOURCE_FILES} main.cpp)
+
+add_executable(${OUT_EXE_NAME}Tests ${SOURCE_FILES} tests/TestMain.cpp )
 
 add_custom_target(install-test-data ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tests/test_dataset ${CMAKE_BINARY_DIR}/test_dataset
