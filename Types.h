@@ -28,7 +28,7 @@ const uint32_t MEMORY_LENGTH = (1 << 10);
 
 class Error {
 private:
-    uint8_t mErrorId;
+    uint8_t mErrorId; //Bit masks
     std::string mDescription;
 
     //0 for the default level, would continue
@@ -53,11 +53,27 @@ public:
     static Error MEMORY_ADDR_OVERFLOW;
     static Error DATA_MISALIGNED;
 
+    inline bool contains(const Error& e){
+        return (mErrorId & e.mErrorId) != 0;
+    }
+
     bool operator==(const Error& rhs){
         return this->mErrorId == rhs.mErrorId;
     }
     bool operator==(Error& rhs){
         return this->mErrorId == rhs.mErrorId;
+    }
+
+    //Error mix
+    Error operator+(Error& rhs){
+        return Error(rhs.mErrorId | this->mErrorId,
+                     rhs.mErrorLevel | this->mErrorLevel,
+                     "Mix Error");
+    }
+    const Error operator+(const Error& rhs){
+        return Error(rhs.mErrorId | this->mErrorId,
+                     rhs.mErrorLevel | this->mErrorLevel,
+                     "Mix Error");
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Error& error);

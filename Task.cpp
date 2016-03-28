@@ -276,7 +276,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -294,7 +294,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -312,7 +312,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -330,7 +330,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -348,7 +348,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -364,7 +364,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -380,7 +380,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }
@@ -396,7 +396,7 @@ namespace task{
                 context->advancePC();
 
                 return TASK_END;
-            }catch(Error& e){
+            }catch(Error e){
                 context->putError(e);
                 return TASK_BAIL;
             }

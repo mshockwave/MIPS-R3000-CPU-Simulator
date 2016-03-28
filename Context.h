@@ -23,7 +23,8 @@ private:
     //Program counter
     reg_t PC;
 
-    //mMemory
+    //Memory
+    addr_t mDataSize;
     byte_t mMemory[MEMORY_LENGTH];
 
     CounterType mCycleCounter;
@@ -51,6 +52,8 @@ public:
             SP(Registers[29]),
             FP(Registers[30]),
             RA(Registers[31]),
+            /*Memory*/
+            mDataSize(0),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -100,24 +103,32 @@ public:
     //mMemory operations
     //const byte_t* getMemoryR() { return const_cast<const byte_t*>(mMemory); }
     word_t& getMemoryWord(addr_t offset){
+        Error e = Error::NONE;
+
         //Check alignment
-        if(offset % WORD_WIDTH != 0) throw Error::DATA_MISALIGNED;
+        if(offset % WORD_WIDTH != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
+        if(offset > mDataSize && offset < SP) e = e + Error::MEMORY_ADDR_OVERFLOW;
+
+        if(!(e == Error::NONE)) throw e;
 
         return *((word_t*)(mMemory + offset));
     }
     half_w_t& getMemoryHalfWord(addr_t offset){
+        Error e = Error::NONE;
+
         //Check alignment
-        if(offset % (WORD_WIDTH >> 1) != 0) throw Error::DATA_MISALIGNED;
+        if(offset % (WORD_WIDTH >> 1) != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
+        if(offset > mDataSize && offset < SP) e = e + Error::MEMORY_ADDR_OVERFLOW;
+
+        if(!(e == Error::NONE)) throw e;
 
         return *((half_w_t*)(mMemory + offset));
     }
     byte_t& getMemoryByte(addr_t offset){
         //Check boundary
-        if(offset > MEMORY_LENGTH) throw Error::MEMORY_ADDR_OVERFLOW;
+        if(offset > mDataSize && offset < SP) throw Error::MEMORY_ADDR_OVERFLOW;
 
         return *((byte_t*)(mMemory + offset));
     }

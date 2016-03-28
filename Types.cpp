@@ -9,8 +9,8 @@ const uint8_t Error::LEVEL_HALT = 1;
 Error Error::NONE(0, "");
 Error Error::WRITE_REG_ZERO(1, "Write $0 Error");
 Error Error::NUMBER_OVERFLOW(2, "Number Overflow");
-Error Error::MEMORY_ADDR_OVERFLOW(3, LEVEL_HALT, "Address Overflow");
-Error Error::DATA_MISALIGNED(4, LEVEL_HALT, "Misalignment Error");
+Error Error::MEMORY_ADDR_OVERFLOW(4, LEVEL_HALT, "Address Overflow");
+Error Error::DATA_MISALIGNED(8, LEVEL_HALT, "Misalignment Error");
 
 std::ostream& operator<<(std::ostream& os, const Error& error){
     os << error.mDescription;
