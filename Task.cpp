@@ -210,7 +210,7 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
-            rd = (rs < rt)? U32_1 : U32_0;
+            rd = (static_cast<int32_t>(rs) < static_cast<int32_t>(rt))? U32_1 : U32_0;
 
             context->advancePC();
 
@@ -227,7 +227,7 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
-            rd = rs << shamt;
+            rd = rt << shamt;
 
             context->advancePC();
 
@@ -244,7 +244,9 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
-            rd = rs >> shamt;
+            int32_t signRt = rt;
+            int32_t signRd = signRt >> shamt;
+            rd = (reg_t)signRd;
 
             context->advancePC();
 
@@ -261,7 +263,7 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
-            rd = rs >> shamt;
+            rd = rt >> shamt;
             uint32_t mask = createBitMask( ((uint8_t)32) - shamt );
             rd &= mask;
 
