@@ -10,6 +10,9 @@
 
 class Context {
 
+#define CHECK_MEMORY_BOUND(offset) \
+    if((offset) > mDataSize && (offset) < SP)
+
 public:
     typedef unsigned long CounterType;
     typedef std::ostream OutputStream;
@@ -108,7 +111,7 @@ public:
         //Check alignment
         if(offset % WORD_WIDTH != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        if(offset > mDataSize && offset < SP) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if(!(e == Error::NONE)) throw e;
 
@@ -120,7 +123,7 @@ public:
         //Check alignment
         if(offset % (WORD_WIDTH >> 1) != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        if(offset > mDataSize && offset < SP) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if(!(e == Error::NONE)) throw e;
 
@@ -128,7 +131,7 @@ public:
     }
     byte_t& getMemoryByte(addr_t offset){
         //Check boundary
-        if(offset > mDataSize && offset < SP) throw Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset) throw Error::MEMORY_ADDR_OVERFLOW;
 
         return *((byte_t*)(mMemory + offset));
     }
