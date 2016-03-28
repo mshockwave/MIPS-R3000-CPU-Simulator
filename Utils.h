@@ -89,6 +89,9 @@ inline uint16_t reverse16ByteOrder(uint16_t val){
 inline bool isSigned(uint32_t value){
     return ((1 << 31) & value) != 0 ;
 }
+inline uint32_t twoComplement(uint32_t val){
+    return (~val) + U32_1;
+}
 
 inline bool isSumOverflow(uint32_t a, uint32_t b, uint32_t result){
     return (isSigned(a) && isSigned(b) && !isSigned(result)) ||

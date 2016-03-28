@@ -68,8 +68,10 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
+            reg_t pend_rs = rs, pend_rt = rt;
+
             rd = rs + rt;
-            if(isSumOverflow(rs, rt, rd)){
+            if(isSumOverflow(pend_rs, pend_rt, rd)){
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
@@ -95,8 +97,10 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
+            reg_t pend_rs = rs, pend_rt = twoComplement(rt); //-rt
+
             rd = rs - rt;
-            if(isSumOverflow(rs, -rt, rd)){
+            if(isSumOverflow(pend_rs, pend_rt, rd)){
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
@@ -236,8 +240,10 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
+            reg_t pend_rs = rs;
+
             rt = rs + signExtend16(imm);
-            if(isSumOverflow(rs, signExtend16(imm), rt)){
+            if(isSumOverflow(pend_rs, signExtend16(imm), rt)){
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
