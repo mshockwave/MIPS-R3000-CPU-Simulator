@@ -18,6 +18,14 @@ const std::string EMPTY_STRING("");
     #define LIKELY(condition) (condition)
 #endif
 
+#ifdef DEBUG
+    #define DEBUG_BLOCK \
+        if(1)
+#else
+    #define DEBUG_BLOCK \
+        if(0)
+#endif
+
 class Log {
 private:
     static std::ostream* sOstream;

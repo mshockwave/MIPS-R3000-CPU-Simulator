@@ -66,6 +66,10 @@ namespace task{
         TasksTable[OP_ADD] = TASK_HANDLER() {
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("add")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             reg_t pend_rs = rs, pend_rt = rt;
@@ -83,6 +87,10 @@ namespace task{
         TasksTable[OP_ADDU] = TASK_HANDLER() {
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("addu")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = rs + rt;
@@ -94,6 +102,10 @@ namespace task{
 
         TasksTable[OP_SUB] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("sub")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
@@ -112,6 +124,10 @@ namespace task{
         TasksTable[OP_AND] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("and")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = rs & rt;
@@ -123,6 +139,10 @@ namespace task{
 
         TasksTable[OP_OR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("or")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
@@ -136,6 +156,10 @@ namespace task{
         TasksTable[OP_XOR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("xor")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = rs ^ rt;
@@ -147,6 +171,10 @@ namespace task{
 
         TasksTable[OP_NOR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("nor")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
@@ -160,6 +188,10 @@ namespace task{
         TasksTable[OP_NAND] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("nand")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = ~(rs & rt);
@@ -172,6 +204,10 @@ namespace task{
         TasksTable[OP_SLT] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("slt")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             rd = (rs < rt)? U32_1 : U32_0;
@@ -183,6 +219,10 @@ namespace task{
 
         TasksTable[OP_SLL] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("sll")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
@@ -197,6 +237,10 @@ namespace task{
         TasksTable[OP_SRA] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("sra")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
             uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
@@ -209,6 +253,10 @@ namespace task{
 
         TasksTable[OP_SRL] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
+
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("srl")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
@@ -225,6 +273,10 @@ namespace task{
         TasksTable[OP_JR] = TASK_HANDLER(){
             R_INSTR_DEF_REGS()
 
+            DEBUG_BLOCK {
+                PRINT_R_INSTR_DEBUG("jr")
+            }
+
             Error& e = context->setPC(rs);
             if(e == Error::NONE){
                 return TASK_END;
@@ -237,6 +289,10 @@ namespace task{
         /*I type instructions*/
         TasksTable[OP_ADDI] = TASK_HANDLER(){
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("addi")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
@@ -255,6 +311,10 @@ namespace task{
         TasksTable[OP_ADDIU] = TASK_HANDLER(){
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("addiu")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             rt = rs + static_cast<reg_t>(signExtend16(imm));
@@ -266,6 +326,10 @@ namespace task{
 
         TasksTable[OP_LW] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("lw")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
@@ -285,6 +349,10 @@ namespace task{
         TasksTable[OP_LH] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("lh")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
@@ -302,6 +370,10 @@ namespace task{
 
         TasksTable[OP_LHU] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("lhu")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
@@ -321,6 +393,10 @@ namespace task{
         TasksTable[OP_LB] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("lb")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
@@ -338,6 +414,10 @@ namespace task{
 
         TasksTable[OP_LBU] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("lbu")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
@@ -357,6 +437,10 @@ namespace task{
         TasksTable[OP_SW] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("sw")
+            }
+
             try{
                 word_t& var = context->getMemoryWord(rs + imm);
                 var = reverse32ByteOrder(rt);
@@ -372,6 +456,10 @@ namespace task{
 
         TasksTable[OP_SH] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("sh")
+            }
 
             try{
                 half_w_t& var = context->getMemoryHalfWord(rs + imm);
@@ -389,6 +477,10 @@ namespace task{
         TasksTable[OP_SB] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("sb")
+            }
+
             try{
                 byte_t& var = context->getMemoryByte(rs + imm);
                 var = static_cast<byte_t>(rt & 0x000000FF);
@@ -405,6 +497,10 @@ namespace task{
         TasksTable[OP_LUI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("lui")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             rt = static_cast<reg_t>(imm << 16);
@@ -416,6 +512,10 @@ namespace task{
 
         TasksTable[OP_ANDI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("andi")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
@@ -429,6 +529,10 @@ namespace task{
         TasksTable[OP_ORI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("ori")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             rt = rs | static_cast<reg_t>(imm);
@@ -440,6 +544,10 @@ namespace task{
 
         TasksTable[OP_NORI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("nori")
+            }
 
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
@@ -453,6 +561,10 @@ namespace task{
         TasksTable[OP_SLTI] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("slti")
+            }
+
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             rt = (static_cast<int32_t>(rs) < static_cast<int32_t>(signExtend16(imm)))? U32_1 : U32_0;
@@ -464,6 +576,10 @@ namespace task{
 
         TasksTable[OP_BEQ] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("beq")
+            }
 
             if(rs == rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
@@ -483,6 +599,10 @@ namespace task{
         TasksTable[OP_BNE] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
 
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("bne")
+            }
+
             if(rs != rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error& e = context->setPC(context->getPC() + offset);
@@ -500,6 +620,10 @@ namespace task{
 
         TasksTable[OP_BGTZ] = TASK_HANDLER() {
             I_INSTR_DEF_ARGS()
+
+            DEBUG_BLOCK {
+                PRINT_I_INSTR_DEBUG("bgtz")
+            }
 
             if(static_cast<uint32_t>(rs) > 0){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
@@ -520,6 +644,10 @@ namespace task{
         TasksTable[OP_J] = TASK_HANDLER() {
             J_INSTR_DEF_ADDR()
 
+            DEBUG_BLOCK {
+                PRINT_J_INSTR_DEBUG("j")
+            }
+
             reg_t pc = context->getPC();
             pc += WORD_WIDTH;
             uint32_t partPC = extractInstrBits(pc, 31, 28);
@@ -536,6 +664,10 @@ namespace task{
 
         TasksTable[OP_JAL] = TASK_HANDLER() {
             J_INSTR_DEF_ADDR()
+
+            DEBUG_BLOCK {
+                PRINT_J_INSTR_DEBUG("jal")
+            }
 
             reg_t pc = context->getPC();
             pc += WORD_WIDTH;

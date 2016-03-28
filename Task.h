@@ -95,13 +95,47 @@ namespace task {
     reg_t& rt = context->Registers[RInstr::GetRt(instruction->getBitsInstruction())]; \
     reg_t& rd = context->Registers[RInstr::GetRd(instruction->getBitsInstruction())];
 
+#define PRINT_R_INSTR_DEBUG(op_name) \
+    Log::D("Task R Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
+    Log::D("Task R Type") << "Op Name: " << (op_name) << std::endl; \
+    Log::D("Task R Type") << "Rs: " << \
+                            static_cast<unsigned int>(RInstr::GetRs(instruction->getBitsInstruction())) << \
+                            ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rs << std::endl;\
+    Log::D("Task R Type") << "Rt: " << \
+                            static_cast<unsigned int>(RInstr::GetRt(instruction->getBitsInstruction())) << \
+                            ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rt << std::endl;\
+    Log::D("Task R Type") << "Rd: " << \
+                            static_cast<unsigned int>(RInstr::GetRd(instruction->getBitsInstruction())) << \
+                            ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rd << std::endl; \
+    Log::D("Task R Type") << "------------------------------------" << std::endl;
+
 #define I_INSTR_DEF_ARGS() \
     reg_t& rs = context->Registers[IInstr::GetRs(instruction->getBitsInstruction())]; \
     reg_t& rt = context->Registers[IInstr::GetRt(instruction->getBitsInstruction())]; \
     uint16_t imm = IInstr::GetImm(instruction->getBitsInstruction());
 
+#define PRINT_I_INSTR_DEBUG(op_name) \
+    Log::D("Task I Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
+    Log::D("Task I Type") << "Op Name: " << (op_name) << std::endl; \
+    Log::D("Task I Type") << "Rs: " << \
+                            static_cast<unsigned int>(RInstr::GetRs(instruction->getBitsInstruction())) << \
+                            ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rs << std::endl;\
+    Log::D("Task I Type") << "Rt: " << \
+                            static_cast<unsigned int>(RInstr::GetRt(instruction->getBitsInstruction())) << \
+                            ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rt << std::endl;\
+    Log::D("Task I Type") << "Imm: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << \
+                            static_cast<unsigned int>(IInstr::GetImm(instruction->getBitsInstruction())) << std::endl; \
+    Log::D("Task I Type") << "------------------------------------" << std::endl;
+
 #define J_INSTR_DEF_ADDR() \
     uint32_t addr = JInstr::GetAddr(instruction->getBitsInstruction());
+
+#define PRINT_J_INSTR_DEBUG(op_name) \
+    Log::D("Task J Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
+    Log::D("Task J Type") << "Op Name: " << (op_name) << std::endl; \
+    Log::D("Task J Type") << "Addr: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << \
+                            static_cast<unsigned int>(JInstr::GetAddr(instruction->getBitsInstruction())) << std::endl; \
+    Log::D("Task J Type") << "------------------------------------" << std::endl;
 
     namespace RInstr{
         /*Routines for R type instructions*/
