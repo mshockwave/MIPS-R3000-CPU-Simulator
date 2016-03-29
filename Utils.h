@@ -18,12 +18,12 @@ const std::string EMPTY_STRING("");
     #define LIKELY(condition) (condition)
 #endif
 
-#ifdef DEBUG
-    #define DEBUG_BLOCK \
-        if(1)
-#else
+#if defined(NDEBUG)
     #define DEBUG_BLOCK \
         if(0)
+#else
+    #define DEBUG_BLOCK \
+        if(1)
 #endif
 
 class Log {
