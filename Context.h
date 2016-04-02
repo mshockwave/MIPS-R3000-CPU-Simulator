@@ -95,7 +95,7 @@ public:
         if(pc % WORD_WIDTH != 0)
             e = e + Error::DATA_MISALIGNED;
 
-        if(pc > getInstrEndAddr() || pc < getInstrStartAddress())
+        if(pc > getInstrEndAddr())
             e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if( !(e == Error::NONE) ) return e;

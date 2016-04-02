@@ -31,6 +31,14 @@ void ExecutionEngine::start() {
     while(true){
         const reg_t& pc = mContext->getPC();
 
+        if(pc < mContext->getInstrStartAddress()){
+            //Execute NOP until
+            mContext->dumpSnapshot();
+            mContext->incCycleCounter();
+            mContext->advancePC();
+            continue;
+        }
+
         addr_t offset = pc - (mContext->getInstrStartAddress());
         uint32_t index = offset / WORD_WIDTH;
 
