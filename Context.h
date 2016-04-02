@@ -89,10 +89,16 @@ public:
 
     //PC operations
     const reg_t& getPC(){ return PC; }
-    Error& setPC(reg_t pc){
+    Error setPC(reg_t pc){
+        Error e = Error::NONE;
 
-        if(pc % WORD_WIDTH != 0) return Error::DATA_MISALIGNED;
-        if(pc > getInstrEndAddr()) return Error::MEMORY_ADDR_OVERFLOW;
+        if(pc % WORD_WIDTH != 0)
+            e = e + Error::DATA_MISALIGNED;
+
+        if(pc > getInstrEndAddr() || pc < getInstrStartAddress())
+            e = e + Error::MEMORY_ADDR_OVERFLOW;
+
+        if( !(e == Error::NONE) ) return e;
 
         PC = pc;
 

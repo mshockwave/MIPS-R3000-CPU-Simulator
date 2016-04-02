@@ -279,7 +279,7 @@ namespace task{
                 PRINT_R_INSTR_DEBUG("jr")
             }
 
-            Error& e = context->setPC(rs);
+            Error e = context->setPC(rs);
             if(e == Error::NONE){
                 return TASK_END;
             }
@@ -585,7 +585,7 @@ namespace task{
 
             if(rs == rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
-                Error& e = context->setPC(context->getPC() + offset);
+                Error e = context->setPC(context->getPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
@@ -607,7 +607,7 @@ namespace task{
 
             if(rs != rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
-                Error& e = context->setPC(context->getPC() + offset);
+                Error e = context->setPC(context->getPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
@@ -629,7 +629,7 @@ namespace task{
 
             if(static_cast<uint32_t>(rs) > 0){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
-                Error& e = context->setPC(context->getPC() + offset);
+                Error e = context->setPC(context->getPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
@@ -655,7 +655,7 @@ namespace task{
             uint32_t partPC = extractInstrBits(pc, 31, 28);
             pc = (partPC << 28);
 
-            Error& e = context->setPC( pc | (addr << 2) );
+            Error e = context->setPC( pc | (addr << 2) );
             if(e == Error::NONE){
                 return TASK_END;
             }else{
@@ -678,7 +678,7 @@ namespace task{
             uint32_t partPC = extractInstrBits(pc, 31, 28);
             pc = (partPC << 28);
 
-            Error& e = context->setPC( pc | (addr << 2) );
+            Error e = context->setPC( pc | (addr << 2) );
             if(e == Error::NONE){
                 return TASK_END;
             }else{

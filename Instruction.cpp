@@ -17,8 +17,7 @@ inline void Instruction::convert() {
 }
 
 Instruction::Instruction(const byte_t *rawInstruction) :
-        mBitsInstruction(0),
-        mError(Error::NONE) {
+        mBitsInstruction(0){
     memcpy(this->mRawInstruction, rawInstruction, sizeof(byte_t) * INSTRUCTION_BYTE_WIDTH);
     convert();
 }

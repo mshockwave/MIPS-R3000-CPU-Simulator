@@ -16,8 +16,6 @@ private:
     byte_t mInstruction[INSTRUCTION_BYTE_WIDTH]; //little endian
     uint32_t mBitsInstruction;
 
-    Error &mError;
-
     inline void convert();
 
 public:
@@ -27,8 +25,6 @@ public:
     const byte_t* getInstruction(){ return const_cast<const byte_t*>(mInstruction); }
     const uint32_t getBitsInstruction(){ return mBitsInstruction; }
 
-    void setError(Error& error){ mError = error; }
-    Error& getError(){ return mError; }
 };
 
 struct Instructions{
