@@ -7,6 +7,10 @@
 #include <iostream>
 #include <vector>
 
+extern "C"{
+#include <sys/time.h>
+};
+
 const std::string EMPTY_STRING("");
 
 #if defined(__clang__) || defined(__GUNC__)
@@ -119,5 +123,16 @@ inline uint32_t signExtend8(uint8_t v){
 
 //Do not insert new line
 #define OSTREAM_HEX_OUTPUT_FMT(width) std::setfill('0') << std::setw((width)) << std::hex << std::uppercase
+
+inline long getCurrentTimeMs(){
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    double time_start = tv.tv_sec * 1000.0;
+    time_start += (tv.tv_usec / 1000.0);
+
+    long time_start_ms = static_cast<long>(time_start);
+
+    return time_start_ms % (3600L * 1000L);
+}
 
 #endif //ARCHIHW1_UTILS_H

@@ -3,6 +3,10 @@
 
 #include <cstring>
 
+extern "C"{
+#include <sys/time.h>
+}
+
 inline void Instruction::convert() {
     //To Little endian
     for(int i = 0; i < INSTRUCTION_BYTE_WIDTH; i++){
@@ -40,4 +44,8 @@ Instructions::Instructions(RawBinary &binary) {
         Instruction instruction(bytesArray + j);
         mInstructions.push_back(instruction);
     }
+
+    DEBUG_BLOCK {
+        Log::D("Instructions Read") << "End Time(ms): " << getCurrentTimeMs() << std::endl;
+    };
 }

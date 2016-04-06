@@ -1,7 +1,12 @@
 #include "RawBinary.h"
+#include "Utils.h"
 #include <fstream>
 
 RawBinary::RawBinary(std::string instFilePath, std::string dataFilePath) {
+    DEBUG_BLOCK {
+        Log::D("Instructions Read") << "Start Time(ms): " << getCurrentTimeMs() << std::endl;
+    };
+
     std::ifstream instFileStream(instFilePath, std::ios::binary);
     std::ifstream dataFileStream(dataFilePath, std::ios::binary);
     if(instFileStream.fail() || dataFileStream.fail()){

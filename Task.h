@@ -96,6 +96,7 @@ namespace task {
     reg_t& rd = context->Registers[RInstr::GetRd(instruction->getBitsInstruction())];
 
 #define PRINT_R_INSTR_DEBUG(op_name) \
+    Log::D("Task R Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
     Log::D("Task R Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
     Log::D("Task R Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task R Type") << "Rs: " << \
@@ -115,6 +116,7 @@ namespace task {
     uint16_t imm = IInstr::GetImm(instruction->getBitsInstruction());
 
 #define PRINT_I_INSTR_DEBUG(op_name) \
+    Log::D("Task I Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
     Log::D("Task I Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
     Log::D("Task I Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task I Type") << "Rs: " << \
@@ -131,6 +133,7 @@ namespace task {
     uint32_t addr = JInstr::GetAddr(instruction->getBitsInstruction());
 
 #define PRINT_J_INSTR_DEBUG(op_name) \
+    Log::D("Task J Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
     Log::D("Task J Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
     Log::D("Task J Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task J Type") << "Addr: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << \
