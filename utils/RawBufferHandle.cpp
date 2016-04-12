@@ -1,30 +1,31 @@
 
 #include "RawBufferHandle.h"
 
-template <class T, size_t N>
+template <class T>
 //Hint: Need 'typename' keyword here
-typename RawBufferHandle<T, N>::release_callback_t
-        RawBufferHandle<T,N>::EmptyCallback = [](RawBufferHandle<T,N>& self)->void {};
+typename RawBufferHandle<T>::release_callback_t
+        RawBufferHandle<T>::EmptyCallback = [](RawBufferHandle<T>& self)->void {};
 
 /*
-static RawBufferHandle<int,5>* dummy(){
+//TODO: Add to unit test
+static RawBufferHandle<int>* dummy(){
     int buffer[5] = {1, 2, 3, 4, 5};
-    auto bufferHandle = RawBufferHandle<int,5>::Wrap(buffer);
+    auto bufferHandle = RawBufferHandle<int>::Wrap(buffer, 5);
 
     //Hint: Can neither use anonymous lambda nor auto declaration
-    RawBufferHandle<int,5>::release_callback_t cb = [](RawBufferHandle<int,5>&)->void {
+    RawBufferHandle<int>::release_callback_t cb = [](RawBufferHandle<int>&)->void {
         puts("Destroy!!");
     };
     bufferHandle->SetReleaseCallback(cb);
 
-    RawBufferHandle<int,5>::iterator b = (bufferHandle->begin());
+    RawBufferHandle<int>::iterator b = (bufferHandle->begin());
     //RawBufferHandle<int,5>::iterator c;
 
     try{
         for(; b != bufferHandle->end(); b++){
             printf("%d ", *b);
         }
-    }catch (RawBufferHandle<int,5>::boundary_exception_t e){
+    }catch (RawBufferHandle<int>::boundary_exception_t e){
         puts("Exception:");
         puts(e);
     }

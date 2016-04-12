@@ -9,32 +9,34 @@
 #include "../Types.h"
 #include <utility>
 
-template <class value_t, size_t buffer_size>
+template <class value_t>
 class RawBufferHandle {
 
 public:
-    typedef std::function<void(RawBufferHandle<value_t,buffer_size>&)> release_callback_t;
+    typedef std::function<void(RawBufferHandle<value_t>&)> release_callback_t;
     typedef const char* boundary_exception_t;
 
     static release_callback_t EmptyCallback;
 
     static RawBufferHandle* Wrap(value_t* data,
+                                 size_t data_size,
                                  release_callback_t& cb = EmptyCallback){
-        auto handle = new RawBufferHandle<value_t, buffer_size>();
+        auto handle = new RawBufferHandle<value_t>();
         handle->SetReleaseCallback(cb);
         handle->data = data;
+        handle->buffer_size = data_size;
         return handle;
     };
 
     class iterator {
 
-        friend RawBufferHandle<value_t,buffer_size>;
+        friend RawBufferHandle<value_t>;
 
     private:
         size_t index;
-        RawBufferHandle<value_t,buffer_size>* buffer_handle;
+        RawBufferHandle<value_t>* buffer_handle;
 
-        iterator(RawBufferHandle<value_t,buffer_size>* buffer) :
+        iterator(RawBufferHandle<value_t>* buffer) :
                 index(0),
                 buffer_handle(buffer){}
 
@@ -57,7 +59,7 @@ public:
                 buffer_handle(that.buffer_handle){}
 
         bool IsAccessible(){
-            return !(index < 0 || index > buffer_size || buffer_handle == nullptr);
+            return !(index < 0  || buffer_handle == nullptr || index > buffer_handle->size());
         }
 
         //random access
@@ -114,6 +116,7 @@ public:
 private:
     release_callback_t& release_callback;
     value_t* data;
+    size_t buffer_size;
 
     //Base constructor
     RawBufferHandle() :
