@@ -29,7 +29,7 @@ Instruction::Instruction(const byte_t *rawInstruction) :
 /*struct Instructions*/
 Instructions::Instructions(RawBinary &binary) {
 
-    std::vector<byte_t>& bytes = binary.getInstructions();
+    auto bytes = binary.getInstructions();
 
     //TODO: assert binary.size() % 4 == 0
     //Load instruction length

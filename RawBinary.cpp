@@ -2,39 +2,30 @@
 #include "Utils.h"
 #include <fstream>
 
+extern "C" {
+#include <sys/mman.h>
+};
+
 RawBinary::RawBinary(std::string instFilePath, std::string dataFilePath) {
     DEBUG_BLOCK {
         Log::D("Instructions Read") << "Start Time(ms): " << getCurrentTimeMs() << std::endl;
     };
 
-    std::ifstream instFileStream(instFilePath, std::ios::binary);
-    std::ifstream dataFileStream(dataFilePath, std::ios::binary);
-    if(instFileStream.fail() || dataFileStream.fail()){
+    FILE* instFile = fopen(instFilePath.c_str(), "rb");
+    FILE* dataFile = fopen(dataFilePath.c_str(), "rb");
+    if(instFile == NULL || dataFile == NULL){
         throw "Error reading instruction or data file";
     }
 
-    instFileStream.unsetf(std::ios::skipws);
-    dataFileStream.unsetf(std::ios::skipws);
+    int instFd = fileno(instFile),
+        dataFd = fileno(dataFile);
 
     //Get file size in order to improve vector performance
-    std::streampos instFileSize, dataFileSize;
-
-    instFileStream.seekg(0, std::ios::end);
-    instFileSize = instFileStream.tellg();
-    instFileStream.seekg(0, std::ios::beg);
-
-    dataFileStream.seekg(0, std::ios::end);
-    dataFileSize = dataFileStream.tellg();
-    dataFileStream.seekg(0, std::ios::beg);
+    long instFileSize = get_file_size(instFd),
+            dataFileSize = get_file_size(dataFd);
 
     mRawInstructions.resize(static_cast<std::size_t>(instFileSize));
     mRawData.resize(static_cast<std::size_t>(dataFileSize));
 
-    instFileStream.read(reinterpret_cast<char*>(&mRawInstructions.front()),
-                        static_cast<std::size_t>(instFileSize));
-    dataFileStream.read(reinterpret_cast<char*>(&mRawData.front()),
-                        static_cast<std::size_t>(dataFileSize));
-
-    instFileStream.close();
-    dataFileStream.close();
+    //mRawInstructions.data() = (byte_t*)mmap(NULL, static_cast<size_t>(instFileSize), PROT_READ, MAP_PRIVATE, instFd, 0);
 }

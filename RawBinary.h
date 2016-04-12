@@ -4,13 +4,30 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+
+extern "C"{
+#include <sys/stat.h>
+};
 
 #include "Types.h"
 
 class RawBinary {
+
+public:
+    typedef std::vector<byte_t> raw_container_t;
+
 private:
-    std::vector<byte_t> mRawInstructions;
-    std::vector<byte_t> mRawData;
+    raw_container_t mRawInstructions;
+    raw_container_t mRawData;
+
+    inline off_t get_file_size(int fd){
+        struct stat fileStat;
+        fstat(fd, &fileStat);
+
+        return fileStat.st_size;
+    }
 
 public:
 
@@ -18,8 +35,8 @@ public:
     RawBinary(const char* instFilePath, const char* dataFilePath) :
             RawBinary(std::string(instFilePath), std::string(dataFilePath)){}
 
-    std::vector<byte_t>& getInstructions() { return mRawInstructions; }
-    std::vector<byte_t>& getDataImg() { return mRawData; }
+    raw_container_t& getInstructions() { return mRawInstructions; }
+    raw_container_t& getDataImg() { return mRawData; }
 };
 
 

@@ -3,6 +3,9 @@
 #define ARCHIHW1_UTILS_H
 
 #include "Types.h"
+#include "RawBinary.h"
+
+#include "utils/RawBufferHandle.h"
 
 #include <iostream>
 #include <vector>
@@ -61,7 +64,7 @@ template<
         std::size_t W = 4,
         bool bigEndian = true
 >
-inline void load2Register(std::vector<byte_t> &data, reg_t &outputReg){
+inline void load2Register(RawBinary::raw_container_t &data, reg_t &outputReg){
     if(UNLIKELY(data.size() < W || (data.begin() + start_index >= data.end()))) return;
     for(std::size_t i = start_index; i < (start_index + W); i++){
         reg_t b = static_cast<reg_t>((bigEndian)? data[i] : data[(W - 1) - i]);
