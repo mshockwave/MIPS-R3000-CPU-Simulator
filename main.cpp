@@ -5,7 +5,6 @@
 
 #include "Types.h"
 #include "Utils.h"
-#include "RawBinary.h"
 #include "Context.h"
 #include "ExecutionEngine.h"
 

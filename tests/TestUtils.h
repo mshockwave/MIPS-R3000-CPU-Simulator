@@ -32,10 +32,10 @@ bool TestUtils::doTest() {
     //Test loading data to register
     {
         Log::V(mName) << "Testing register value loader..." << std::endl;
-        const byte_t dataArray[] = {0x12, 0x34, 0x56, 0x78};
-        std::vector<byte_t> dataVector(dataArray, std::end(dataArray));
+        byte_t dataArray[] = {0x12, 0x34, 0x56, 0x78};
+        RawBinary::raw_container_t* handle = RawBinary::raw_container_t::Wrap(dataArray, 4);
         reg_t reg1 = U32_0;
-        load2Register(dataVector, reg1);
+        load2Register(*handle, reg1);
         //Log::D(mName) << "Register value: 0x" << std::hex << reg1 << std::endl;
         std::stringstream ss;
         ss << "Expect 0x12345678, " << "get 0x" << std::hex << reg1 << std::endl;

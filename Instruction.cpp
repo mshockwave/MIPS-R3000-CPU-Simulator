@@ -29,14 +29,16 @@ Instruction::Instruction(const byte_t *rawInstruction) :
 /*struct Instructions*/
 Instructions::Instructions(RawBinary &binary) {
 
-    auto bytes = binary.getInstructions();
+    //Hint: Do not use auto here
+    // For the sake of preventing unexpected memory release
+    RawBinary::raw_container_t& instr_bytes = binary.getInstructions();
 
     //TODO: assert binary.size() % 4 == 0
     //Load instruction length
     uint32_t instructionLength = U32_0;
-    load2Register<4>(bytes, instructionLength);
+    load2Register<4>(instr_bytes, instructionLength);
 
-    const byte_t* bytesArray = bytes.data();
+    const byte_t* bytesArray = instr_bytes.content();
 
     /*The first eight bytes are PC address and instruction size, skip*/
     uint32_t i, j;

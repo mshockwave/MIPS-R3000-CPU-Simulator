@@ -3,7 +3,7 @@
 
 /*Context*/
 void Context::loadMemory(RawBinary& rawBinary) {
-    std::vector<byte_t>& dataImg = rawBinary.getDataImg();
+    RawBinary::raw_container_t& dataImg = rawBinary.getDataImg();
 
     /*The first eight bytes are SP and data size, skip*/
     SP = U32_0;

@@ -16,13 +16,9 @@ public:
     typedef std::function<void(RawBufferHandle<value_t>&)> release_callback_t;
     typedef const char* boundary_exception_t;
 
-    static release_callback_t EmptyCallback;
-
     static RawBufferHandle* Wrap(value_t* data,
-                                 size_t data_size,
-                                 release_callback_t& cb = EmptyCallback){
+                                 size_t data_size){
         auto handle = new RawBufferHandle<value_t>();
-        handle->SetReleaseCallback(cb);
         handle->data = data;
         handle->buffer_size = data_size;
         return handle;
@@ -114,24 +110,22 @@ public:
     };
 
 private:
-    release_callback_t& release_callback;
+    release_callback_t release_callback;
     value_t* data;
     size_t buffer_size;
 
     //Base constructor
-    RawBufferHandle() :
-            release_callback(EmptyCallback),
-            data(nullptr) {}
+    RawBufferHandle() : data(nullptr) {}
 
 public:
 
     value_t& operator[](size_t index){
         if(index < 0 || index > buffer_size) throw "Index out of bound";
-        return *(data[index]);
+        return *(data + index);
     }
     const value_t& operator[](size_t index) const {
         if(index < 0 || index > buffer_size) throw "Index out of bound";
-        return const_cast<const value_t&>(*(data[index]));
+        return const_cast<const value_t&>(*(data + index));
     }
 
     //Iterator
@@ -146,12 +140,17 @@ public:
 
     size_t size(){ return buffer_size; }
 
-    void SetReleaseCallback(release_callback_t& callback){
+    value_t* content(){ return data; }
+    const value_t* content() const { return const_cast<const value_t*>(data); }
+
+    void SetReleaseCallback(release_callback_t/*By value*/ callback){
         release_callback = std::move(callback);
     }
 
     ~RawBufferHandle(){
-        release_callback(*this);
+        if(release_callback != nullptr){
+            release_callback(*this);
+        }
     }
 };
 

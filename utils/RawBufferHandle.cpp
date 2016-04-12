@@ -1,10 +1,6 @@
 
 #include "RawBufferHandle.h"
 
-template <class T>
-//Hint: Need 'typename' keyword here
-typename RawBufferHandle<T>::release_callback_t
-        RawBufferHandle<T>::EmptyCallback = [](RawBufferHandle<T>& self)->void {};
 
 /*
 //TODO: Add to unit test

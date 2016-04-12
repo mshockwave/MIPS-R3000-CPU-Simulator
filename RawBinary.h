@@ -13,14 +13,16 @@ extern "C"{
 
 #include "Types.h"
 
+#include "utils/RawBufferHandle.h"
+
 class RawBinary {
 
 public:
-    typedef std::vector<byte_t> raw_container_t;
+    typedef RawBufferHandle<byte_t> raw_container_t;
 
 private:
-    raw_container_t mRawInstructions;
-    raw_container_t mRawData;
+    raw_container_t* mRawInstructions;
+    raw_container_t* mRawData;
 
     inline off_t get_file_size(int fd){
         struct stat fileStat;
@@ -35,8 +37,13 @@ public:
     RawBinary(const char* instFilePath, const char* dataFilePath) :
             RawBinary(std::string(instFilePath), std::string(dataFilePath)){}
 
-    raw_container_t& getInstructions() { return mRawInstructions; }
-    raw_container_t& getDataImg() { return mRawData; }
+    raw_container_t& getInstructions() { return *mRawInstructions; }
+    raw_container_t& getDataImg() { return *mRawData; }
+
+    ~RawBinary(){
+        if(mRawData != nullptr) delete mRawData;
+        if(mRawInstructions != nullptr) delete mRawInstructions;
+    }
 };
 
 

@@ -6,16 +6,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}") #default: Debug
 #Do not use -O3!!
 set(CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os -std=c++11")
 
-set(UTILS_SOURCE_FILES
-        Utils.cpp
-        utils/RawBufferHandle.cpp)
-
 set(SOURCE_FILES
         RawBinary.cpp
         Instruction.cpp
         ExecutionEngine.cpp
         Context.cpp Context.h
-        ${UTILS_SOURCE_FILES}
+        Utils.cpp
+        utils/RawBufferHandle.cpp
         Task.cpp
         Types.h
         Types.cpp)
