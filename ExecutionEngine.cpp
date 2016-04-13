@@ -9,13 +9,13 @@ task_id_t ExecutionEngine::dispatchTask(Instruction *instruction, task_id_t task
 
     if(nextId == task::OP_HALT || nextId == task::TASK_BAIL){
         //Do not dump snapshot for TASK_BAIL
-        if(nextId == task::OP_HALT) mContext->dumpSnapshot();
+        if(nextId == task::OP_HALT) mContext->DumpSnapshot();
         return nextId;
     }
 
     if(nextId == task::TASK_END) {
-        mContext->dumpSnapshot();
-        mContext->incCycleCounter();
+        mContext->DumpSnapshot();
+        mContext->IncCycleCounter();
         return nextId;
     }else{
         //Instruction not finish, do not dump
@@ -23,30 +23,30 @@ task_id_t ExecutionEngine::dispatchTask(Instruction *instruction, task_id_t task
     }
 }
 
-void ExecutionEngine::start() {
+void ExecutionEngine::Start() {
     //Dump cycle zero state
-    mContext->dumpSnapshot();
-    mContext->incCycleCounter();
+    mContext->DumpSnapshot();
+    mContext->IncCycleCounter();
 
     while(true){
-        const reg_t& pc = mContext->getPC();
+        const reg_t& pc = mContext->GetPC();
 
-        if(pc < mContext->getInstrStartAddress()){
+        if(pc < mContext->GetInstrStartAddress()){
             //Execute NOP until
-            mContext->dumpSnapshot();
-            mContext->incCycleCounter();
-            mContext->advancePC();
+            mContext->DumpSnapshot();
+            mContext->IncCycleCounter();
+            mContext->AdvancePC();
             continue;
         }
 
-        addr_t offset = pc - (mContext->getInstrStartAddress());
+        addr_t offset = pc - (mContext->GetInstrStartAddress());
         uint32_t index = offset / WORD_WIDTH;
 
         Instructions::iterator itInstr = mInstructions.begin();
         Instruction& instruction = *(itInstr + index);
 
         //Extract op code
-        uint32_t op = extractInstrBits(instruction.getBitsInstruction(), 31, 26);
+        uint32_t op = extractInstrBits(instruction.GetBitsInstruction(), 31, 26);
         task::instr_task_map_t::iterator itOpMap = task::FirstInstrOpMap.find(static_cast<uint8_t>(op));
         if(UNLIKELY(itOpMap == task::FirstInstrOpMap.end())){
             //Not found

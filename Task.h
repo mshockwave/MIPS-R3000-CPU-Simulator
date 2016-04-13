@@ -16,7 +16,7 @@ namespace task {
 #define ASSERT_DEST_REG_NOT_ZERO(dest) \
     if( &(dest) == &(context->ZERO) ){ \
         context->putError(Error::WRITE_REG_ZERO); \
-        context->advancePC(); \
+        context->AdvancePC(); \
         return TASK_END; \
     }
 
@@ -91,53 +91,53 @@ namespace task {
     void  InitInstructionMap();
 
 #define R_INSTR_DEF_REGS() \
-    reg_t& rs = context->Registers[RInstr::GetRs(instruction->getBitsInstruction())]; \
-    reg_t& rt = context->Registers[RInstr::GetRt(instruction->getBitsInstruction())]; \
-    reg_t& rd = context->Registers[RInstr::GetRd(instruction->getBitsInstruction())];
+    reg_t& rs = context->Registers[RInstr::GetRs(instruction->GetBitsInstruction())]; \
+    reg_t& rt = context->Registers[RInstr::GetRt(instruction->GetBitsInstruction())]; \
+    reg_t& rd = context->Registers[RInstr::GetRd(instruction->GetBitsInstruction())];
 
 #define PRINT_R_INSTR_DEBUG(op_name) \
     Log::D("Task R Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
-    Log::D("Task R Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
+    Log::D("Task R Type") << "Cycle: " << context->GetCycleCounter() << std::endl; \
     Log::D("Task R Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task R Type") << "Rs: " << \
-                            static_cast<unsigned int>(RInstr::GetRs(instruction->getBitsInstruction())) << \
+                            static_cast<unsigned int>(RInstr::GetRs(instruction->GetBitsInstruction())) << \
                             ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rs << std::endl;\
     Log::D("Task R Type") << "Rt: " << \
-                            static_cast<unsigned int>(RInstr::GetRt(instruction->getBitsInstruction())) << \
+                            static_cast<unsigned int>(RInstr::GetRt(instruction->GetBitsInstruction())) << \
                             ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rt << std::endl;\
     Log::D("Task R Type") << "Rd: " << \
-                            static_cast<unsigned int>(RInstr::GetRd(instruction->getBitsInstruction())) << \
+                            static_cast<unsigned int>(RInstr::GetRd(instruction->GetBitsInstruction())) << \
                             ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rd << std::endl; \
     Log::D("Task R Type") << "------------------------------------" << std::endl;
 
 #define I_INSTR_DEF_ARGS() \
-    reg_t& rs = context->Registers[IInstr::GetRs(instruction->getBitsInstruction())]; \
-    reg_t& rt = context->Registers[IInstr::GetRt(instruction->getBitsInstruction())]; \
-    uint16_t imm = IInstr::GetImm(instruction->getBitsInstruction());
+    reg_t& rs = context->Registers[IInstr::GetRs(instruction->GetBitsInstruction())]; \
+    reg_t& rt = context->Registers[IInstr::GetRt(instruction->GetBitsInstruction())]; \
+    uint16_t imm = IInstr::GetImm(instruction->GetBitsInstruction());
 
 #define PRINT_I_INSTR_DEBUG(op_name) \
     Log::D("Task I Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
-    Log::D("Task I Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
+    Log::D("Task I Type") << "Cycle: " << context->GetCycleCounter() << std::endl; \
     Log::D("Task I Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task I Type") << "Rs: " << \
-                            static_cast<unsigned int>(RInstr::GetRs(instruction->getBitsInstruction())) << \
+                            static_cast<unsigned int>(RInstr::GetRs(instruction->GetBitsInstruction())) << \
                             ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rs << std::endl;\
     Log::D("Task I Type") << "Rt: " << \
-                            static_cast<unsigned int>(RInstr::GetRt(instruction->getBitsInstruction())) << \
+                            static_cast<unsigned int>(RInstr::GetRt(instruction->GetBitsInstruction())) << \
                             ". Value: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << rt << std::endl;\
     Log::D("Task I Type") << "Imm: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << \
-                            static_cast<unsigned int>(IInstr::GetImm(instruction->getBitsInstruction())) << std::endl; \
+                            static_cast<unsigned int>(IInstr::GetImm(instruction->GetBitsInstruction())) << std::endl; \
     Log::D("Task I Type") << "------------------------------------" << std::endl;
 
 #define J_INSTR_DEF_ADDR() \
-    uint32_t addr = JInstr::GetAddr(instruction->getBitsInstruction());
+    uint32_t addr = JInstr::GetAddr(instruction->GetBitsInstruction());
 
 #define PRINT_J_INSTR_DEBUG(op_name) \
     Log::D("Task J Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
-    Log::D("Task J Type") << "Cycle: " << context->getCycleCounter() << std::endl; \
+    Log::D("Task J Type") << "Cycle: " << context->GetCycleCounter() << std::endl; \
     Log::D("Task J Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task J Type") << "Addr: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << \
-                            static_cast<unsigned int>(JInstr::GetAddr(instruction->getBitsInstruction())) << std::endl; \
+                            static_cast<unsigned int>(JInstr::GetAddr(instruction->GetBitsInstruction())) << std::endl; \
     Log::D("Task J Type") << "------------------------------------" << std::endl;
 
     namespace RInstr{

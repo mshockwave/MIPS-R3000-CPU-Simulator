@@ -20,7 +20,7 @@ private:
 
 public:
 
-    Context* getContext(){
+    Context* GetContext(){
         //Wrapper for mutex in future
         return mContext;
     }
@@ -32,7 +32,7 @@ public:
         init();
     }
 
-    void start();
+    void Start();
 };
 
 #endif //ARCHIHW1_EXECUTIONENGINE_H

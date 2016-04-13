@@ -23,7 +23,7 @@ public:
     Instruction(const byte_t* rawInstruction);
 
     const byte_t* getInstruction(){ return const_cast<const byte_t*>(mInstruction); }
-    const uint32_t getBitsInstruction(){ return mBitsInstruction; }
+    const uint32_t GetBitsInstruction(){ return mBitsInstruction; }
 
 };
 

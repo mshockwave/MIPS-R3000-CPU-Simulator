@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 
         ExecutionEngine engine(context, instructions);
 
-        engine.start();
+        engine.Start();
 
         snapShotOut.close();
         errorOut.close();

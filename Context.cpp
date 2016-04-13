@@ -21,7 +21,7 @@ void Context::loadMemory(RawBinary& rawBinary) {
     }
 }
 
-void Context::dumpSnapshot() {
+void Context::DumpSnapshot() {
     mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
 
     for(int i = 0; i < REGISTER_COUNT; i++){

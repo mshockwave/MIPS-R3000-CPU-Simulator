@@ -78,7 +78,7 @@ public:
         loadMemory(rawBinary);
     }
 
-    addr_t getInstrStartAddress() const{ return mInstrStartAddr; }
+    addr_t GetInstrStartAddress() const{ return mInstrStartAddr; }
 
     void setInstructionCount(uint32_t num){
         mInstrCount = num;
@@ -88,7 +88,7 @@ public:
     }
 
     //PC operations
-    const reg_t& getPC(){ return PC; }
+    const reg_t& GetPC(){ return PC; }
     Error setPC(reg_t pc){
         Error e = Error::NONE;
 
@@ -104,7 +104,7 @@ public:
 
         return Error::NONE;
     }
-    inline void advancePC(){
+    inline void AdvancePC(){
         //TODO: Check bound
         PC += WORD_WIDTH;
     }
@@ -142,13 +142,13 @@ public:
         return *((byte_t*)(mMemory + offset));
     }
 
-    CounterType incCycleCounter(){ return ++mCycleCounter; }
-    CounterType getCycleCounter(){ return mCycleCounter; }
+    CounterType IncCycleCounter(){ return ++mCycleCounter; }
+    CounterType GetCycleCounter(){ return mCycleCounter; }
 
     /*
      * Append current cycle's snapshot
      * */
-    void dumpSnapshot();
+    void DumpSnapshot();
 
     /*
      * Append error

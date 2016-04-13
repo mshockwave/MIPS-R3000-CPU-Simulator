@@ -11,8 +11,8 @@ set(SOURCE_FILES
         Instruction.cpp
         ExecutionEngine.cpp
         Context.cpp Context.h
+        adts/RawBufferHandle.cpp
         Utils.cpp
-        utils/RawBufferHandle.cpp
         Task.cpp
         Types.h
         Types.cpp)

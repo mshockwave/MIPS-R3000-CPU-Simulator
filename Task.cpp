@@ -56,7 +56,7 @@ namespace task{
 
         TasksTable[TASK_R_TYPE_DECODER] = TASK_HANDLER() {
             //Extract [5,0] bits
-            uint8_t func = static_cast<uint8_t >(extractInstrBits(instruction->getBitsInstruction(),
+            uint8_t func = static_cast<uint8_t >(extractInstrBits(instruction->GetBitsInstruction(),
                                                                   5, 0));
             //TODO: Error handling: op code not found
             return RtypeInstrFuncMap[func];
@@ -79,7 +79,7 @@ namespace task{
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -95,7 +95,7 @@ namespace task{
 
             rd = rs + rt;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -116,7 +116,7 @@ namespace task{
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -132,7 +132,7 @@ namespace task{
 
             rd = rs & rt;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -148,7 +148,7 @@ namespace task{
 
             rd = rs | rt;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -164,7 +164,7 @@ namespace task{
 
             rd = rs ^ rt;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -180,7 +180,7 @@ namespace task{
 
             rd = ~(rs | rt);
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -196,7 +196,7 @@ namespace task{
 
             rd = ~(rs & rt);
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -212,7 +212,7 @@ namespace task{
 
             rd = (static_cast<int32_t>(rs) < static_cast<int32_t>(rt))? U32_1 : U32_0;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -226,10 +226,10 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
-            uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
+            uint8_t shamt = RInstr::GetShAmt(instruction->GetBitsInstruction());
             rd = rt << shamt;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -243,12 +243,12 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
-            uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
+            uint8_t shamt = RInstr::GetShAmt(instruction->GetBitsInstruction());
             int32_t signRt = rt;
             int32_t signRd = signRt >> shamt;
             rd = (reg_t)signRd;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -262,12 +262,12 @@ namespace task{
 
             ASSERT_DEST_REG_NOT_ZERO(rd)
 
-            uint8_t shamt = RInstr::GetShAmt(instruction->getBitsInstruction());
+            uint8_t shamt = RInstr::GetShAmt(instruction->GetBitsInstruction());
             rd = rt >> shamt;
             uint32_t mask = createBitMask( ((uint8_t)32) - shamt );
             rd &= mask;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -305,7 +305,7 @@ namespace task{
                 context->putError(Error::NUMBER_OVERFLOW);
             }
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -321,7 +321,7 @@ namespace task{
 
             rt = rs + static_cast<reg_t>(signExtend16(imm));
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -339,7 +339,7 @@ namespace task{
                 word_t v = reverse32ByteOrder(context->getMemoryWord(rs + imm));
                 rt = static_cast<reg_t>(v);
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -361,7 +361,7 @@ namespace task{
                 half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(rs + imm));
                 rt = static_cast<reg_t>(signExtend16(v));
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -383,7 +383,7 @@ namespace task{
                 half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(rs + imm));
                 rt = static_cast<reg_t>(v);
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -405,7 +405,7 @@ namespace task{
                 byte_t v = context->getMemoryByte(rs + imm);
                 rt = static_cast<reg_t>(signExtend8(v));
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -427,7 +427,7 @@ namespace task{
                 byte_t v = context->getMemoryByte(rs + imm);
                 rt = static_cast<reg_t>(v);
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -447,7 +447,7 @@ namespace task{
                 word_t& var = context->getMemoryWord(rs + imm);
                 var = reverse32ByteOrder(rt);
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -467,7 +467,7 @@ namespace task{
                 half_w_t& var = context->getMemoryHalfWord(rs + imm);
                 var = reverse16ByteOrder(static_cast<half_w_t>(rt & 0x0000FFFF));
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -487,7 +487,7 @@ namespace task{
                 byte_t& var = context->getMemoryByte(rs + imm);
                 var = static_cast<byte_t>(rt & 0x000000FF);
 
-                context->advancePC();
+                context->AdvancePC();
 
                 return TASK_END;
             }catch(Error e){
@@ -507,7 +507,7 @@ namespace task{
 
             rt = static_cast<reg_t>(imm << 16);
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -523,7 +523,7 @@ namespace task{
 
             rt = rs & static_cast<reg_t>(imm);
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -539,7 +539,7 @@ namespace task{
 
             rt = rs | static_cast<reg_t>(imm);
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -555,7 +555,7 @@ namespace task{
 
             rt = ~(rs | static_cast<reg_t>(imm));
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -571,7 +571,7 @@ namespace task{
 
             rt = (static_cast<int32_t>(rs) < static_cast<int32_t>(signExtend16(imm)))? U32_1 : U32_0;
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -585,7 +585,7 @@ namespace task{
 
             if(rs == rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
-                Error e = context->setPC(context->getPC() + offset);
+                Error e = context->setPC(context->GetPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
@@ -593,7 +593,7 @@ namespace task{
                 return TASK_BAIL;
             }
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -607,7 +607,7 @@ namespace task{
 
             if(rs != rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
-                Error e = context->setPC(context->getPC() + offset);
+                Error e = context->setPC(context->GetPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
@@ -615,7 +615,7 @@ namespace task{
                 return TASK_BAIL;
             }
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -629,7 +629,7 @@ namespace task{
 
             if(static_cast<uint32_t>(rs) > 0){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
-                Error e = context->setPC(context->getPC() + offset);
+                Error e = context->setPC(context->GetPC() + offset);
                 if(e == Error::NONE){
                     return TASK_END;
                 }
@@ -637,7 +637,7 @@ namespace task{
                 return TASK_BAIL;
             }
 
-            context->advancePC();
+            context->AdvancePC();
 
             return TASK_END;
         };
@@ -650,7 +650,7 @@ namespace task{
                 PRINT_J_INSTR_DEBUG("j")
             }
 
-            reg_t pc = context->getPC();
+            reg_t pc = context->GetPC();
             pc += WORD_WIDTH;
             uint32_t partPC = extractInstrBits(pc, 31, 28);
             pc = (partPC << 28);
@@ -671,7 +671,7 @@ namespace task{
                 PRINT_J_INSTR_DEBUG("jal")
             }
 
-            reg_t pc = context->getPC();
+            reg_t pc = context->GetPC();
             pc += WORD_WIDTH;
             context->RA = pc;
 

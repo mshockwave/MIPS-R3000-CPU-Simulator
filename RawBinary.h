@@ -13,7 +13,7 @@ extern "C"{
 
 #include "Types.h"
 
-#include "utils/RawBufferHandle.h"
+#include "adts/RawBufferHandle.h"
 
 class RawBinary {
 
