@@ -25,6 +25,8 @@ const uint32_t MEMORY_LENGTH = (1 << 10);
 #define FILE_PATH_SEP "/"
 #endif
 
+class Context;
+class Instruction;
 
 class Error {
 private:
@@ -80,6 +82,7 @@ public:
 };
 
 typedef uint32_t task_id_t;
+typedef std::function<task_id_t(Context *, Instruction*)> task_t;
 
 const uint8_t U8_1 = (uint8_t)1;
 const uint32_t U32_1 = (uint32_t)1;

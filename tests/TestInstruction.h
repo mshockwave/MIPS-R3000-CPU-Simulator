@@ -30,7 +30,7 @@ bool TestInstructionTransform::doTest() {
     Log::D(EMPTY_STRING) << std::endl;
 
     //printf("0x%x\n", instruction.getBitsInstruction());
-    Log::D(EMPTY_STRING) << "0x" << std::hex << instruction.getBitsInstruction() << std::endl;
+    Log::D(EMPTY_STRING) << "0x" << std::hex << instruction.GetBitsInstruction() << std::endl;
 
     return true;
 }

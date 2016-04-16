@@ -7,15 +7,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}") #default: Debug
 set(CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os -std=c++11")
 
 set(SOURCE_FILES
-        RawBinary.cpp
-        Instruction.cpp
-        ExecutionEngine.cpp
+        RawBinary.cpp RawBinary.h
+        Instruction.cpp Instruction.h
+        ExecutionEngine.cpp ExecutionEngine.h
         Context.cpp Context.h
-        adts/RawBufferHandle.cpp
-        Utils.cpp
-        Task.cpp
-        Types.h
-        Types.cpp)
+        adts/RawBufferHandle.cpp adts/RawBufferHandle.h
+        adts/FlipFlop.h
+        Utils.cpp Utils.h
+        Task.cpp Task.h
+        Types.cpp Types.h)
 include_directories(./include)
 
 if(NOT DEFINED OUT_EXE_NAME)

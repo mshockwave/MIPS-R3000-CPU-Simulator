@@ -9,8 +9,6 @@
 #include "Instruction.h"
 #include "Utils.h"
 
-typedef std::function<task_id_t(Context *, Instruction*)> task_t;
-
 namespace task {
 
 #define ASSERT_DEST_REG_NOT_ZERO(dest) \
