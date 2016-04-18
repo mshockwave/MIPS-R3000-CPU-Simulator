@@ -14,38 +14,13 @@
 
 #include "adts/FlipFlop.h"
 
-struct StageRegisters {
-    FlipFlop<reg_t> EXE, DM, WB;
+struct RegisterTuple {
+    reg_t Rd, Rs, Rt;
+    uint8_t Rd_Index, Rs_Index, Rt_Index;
 };
-
-class TaskQueue {
-
-    std::queue<task_t> task_queue;
-
-    mutable std::mutex mx;
-
-public:
-    void Push(const task_t& task){
-        std::lock_guard<std::mutex> lock(mx);
-        task_queue.push(task);
-    }
-
-    task_t& Pop(){
-        std::lock_guard<std::mutex> lock(mx);
-        task_t& t = task_queue.front();
-        task_queue.pop();
-        return t;
-    }
-
-    const task_t& Peek() const {
-        std::lock_guard<std::mutex> lock(mx);
-        return task_queue.front();
-    }
-
-    bool IsEmpty(){
-        std::lock_guard<std::mutex> lock(mx);
-        return task_queue.empty();
-    }
+struct StageRegisters {
+    FlipFlop<RegisterTuple> Regs;
+    FlipFlop<task_id_t> NextTask;
 };
 
 class Context {
@@ -87,10 +62,7 @@ public:
     reg_t &ZERO, &AT, &SP, &FP, &RA;
 
     //(Pipeline)Stage Registers
-    StageRegisters ID_EXE, EXE_DM, DM_WB;
-
-    //All stages' task queue
-    TaskQueue TaskQ_ID, TaskQ_EXE, TaskQ_DM, TaskQ_WB;
+    StageRegisters IF_ID, ID_EXE, EXE_DM, DM_WB;
 
     Context(RawBinary& rawBinary,
             OutputStream& snapshotStream, OutputStream& errorStream) :

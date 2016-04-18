@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "Context.h"
 #include "Task.h"
+#include "Instruction.h"
 
 class ExecutionEngine {
 private:

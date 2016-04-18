@@ -14,12 +14,18 @@ set(SOURCE_FILES
         adts/RawBufferHandle.cpp adts/RawBufferHandle.h
         adts/FlipFlop.h
         Utils.cpp Utils.h
-        Task.cpp Task.h
+        tasks/FirstClassTasks.cpp tasks/FirstClassTasks.h
+        tasks/FragmentTasksR.cpp tasks/FragmentTasksR.h
+        tasks/FragmentTasksI.cpp tasks/FragmentTasksI.h
+        tasks/FragmentTasksJ.cpp tasks/FragmentTasksJ.h
+        tasks/InstructionMap.cpp
+        tasks/Task.h tasks/Task.cpp
+        Task.h
         Types.cpp Types.h)
 include_directories(./include)
 
 if(NOT DEFINED OUT_EXE_NAME)
-    set(OUT_EXE_NAME pipline)
+    set(OUT_EXE_NAME pipeline)
 endif()
 
 add_executable(${OUT_EXE_NAME} ${SOURCE_FILES} main.cpp)
