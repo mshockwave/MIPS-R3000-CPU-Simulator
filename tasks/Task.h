@@ -4,23 +4,19 @@
 
 #include "../Types.h"
 #include "../Utils.h"
+#include "../Instruction.h"
+#include "../Context.h"
 
 #include <cstdint>
 #include <unordered_map>
 
 namespace task {
 
-#define ASSERT_DEST_REG_NOT_ZERO(dest) \
-    if( &(dest) == &(context->ZERO) ){ \
-        context->putError(Error::WRITE_REG_ZERO); \
-        context->AdvancePC(); \
-        return TASK_END; \
-    }
-
 #define DEF_TASK(name, id) \
     const task_id_t name = (id);
 
     const uint32_t TASK_COUNT = 39;
+    const uint32_t FRAG_R_BASE_INDEX = 39;
 
     extern task_t TasksTable[TASK_COUNT];
 
@@ -31,7 +27,7 @@ namespace task {
     void InitFragmentTasksJ();
 
 #define TASK_HANDLER() \
-    [](Context* context, Instruction* instruction) -> task_id_t
+    [](Context* context, Instruction* instruction)->Error
 
     /*Instruction map*/
     /*Map instruction op code -> task_id_t*/
@@ -45,7 +41,6 @@ namespace task {
 
     namespace RInstr{
         /*Routines for R type instructions*/
-
         inline uint8_t GetRs(uint32_t instruction);
 
         inline uint8_t GetRt(uint32_t instruction);
@@ -53,6 +48,8 @@ namespace task {
         inline uint8_t GetRd(uint32_t instruction);
 
         inline uint8_t GetShAmt(uint32_t instruction);
+
+        inline void loadIDRegs(Context* ctx, Instruction* instruction);
     }//namespace RInstr
 
     namespace IInstr{

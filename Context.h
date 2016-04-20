@@ -7,26 +7,47 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <string>
 
 #include "Types.h"
 #include "RawBinary.h"
 #include "Utils.h"
+#include "Instruction.h"
 
 #include "adts/FlipFlop.h"
 
 struct RegisterTuple {
     reg_t Rd, Rs, Rt;
     uint8_t Rd_Index, Rs_Index, Rt_Index;
+
+    RegisterTuple() :
+            Rd_Index(REGISTER_DONT_CARE), Rd(U32_0),
+            Rs_Index(REGISTER_DONT_CARE), Rs(U32_0),
+            Rt_Index(REGISTER_DONT_CARE), Rt(U32_0){}
+};
+struct StageStorage {
+    FlipFlop<RegisterTuple> Regs;
+    FlipFlop<task_id_t> Task;
+
+    void operator=(const StageStorage& rhs){
+        Regs = rhs.Regs.GetCurrent();
+        Task = rhs.Task.GetCurrent();
+    }
 };
 struct StageRegisters {
-    FlipFlop<RegisterTuple> Regs;
-    FlipFlop<task_id_t> NextTask;
+    StageStorage EXE, DM, WB;
+    FlipFlop<Instruction*> Instr;
+    bool Visited;
+
+    StageRegisters() :
+            Visited(false),
+            Instr(nullptr){}
 };
 
 class Context {
 
 #define CHECK_MEMORY_BOUND(offset) \
-    if((offset) > mDataSize && (offset) < SP)
+    if((offset) > mDataSize && (offset) < SP.GetCurrent())
 
 public:
     typedef unsigned long CounterType;
@@ -57,9 +78,11 @@ public:
     addr_t getInstrEndAddr(){ return mInstrEndAddr; }
 
     //Global Registers
-    reg_t Registers[REGISTER_COUNT];
+    FlipFlop<reg_t> Registers[REGISTER_COUNT];
     //Global Special registers
-    reg_t &ZERO, &AT, &SP, &FP, &RA;
+    FlipFlop<reg_t> &ZERO, &AT, &SP, &FP, &RA;
+
+    void tickAllRegisters();
 
     //(Pipeline)Stage Registers
     StageRegisters IF_ID, ID_EXE, EXE_DM, DM_WB;
@@ -86,7 +109,10 @@ public:
         }
 
         //Load PC from rawBinary
-        load2Register(rawBinary.getInstructions(), PC);
+        FlipFlop<reg_t> pc_stub(0);
+        load2Register(rawBinary.getInstructions(), pc_stub);
+        pc_stub.tick();
+        PC = pc_stub.GetCurrent();
         mInstrStartAddr = static_cast<addr_t>(PC);
 
         //Zero memory
@@ -94,6 +120,8 @@ public:
             mMemory[i] = (byte_t)0;
         }
         loadMemory(rawBinary);
+
+        tickAllRegisters();
     }
 
     addr_t GetInstrStartAddress() const{ return mInstrStartAddr; }
@@ -171,7 +199,7 @@ public:
     /*
      * Append error
      * */
-    void putError(Error& error);
+    void PutError(Error &error);
 
 };
 

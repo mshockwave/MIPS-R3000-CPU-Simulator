@@ -10,6 +10,7 @@
 typedef uint8_t byte_t;
 
 const uint8_t REGISTER_COUNT = 32;
+const uint8_t REGISTER_DONT_CARE = REGISTER_COUNT + 1;
 typedef uint32_t reg_t;
 typedef uint32_t word_t;
 typedef uint16_t half_w_t;
@@ -65,6 +66,8 @@ public:
     bool operator==(Error& rhs){
         return this->mErrorId == rhs.mErrorId;
     }
+    bool operator!=(const Error& rhs){ return !(*this == rhs); }
+    bool operator!=(Error& rhs){ return !(*this == rhs); }
 
     //Error mix
     Error operator+(Error& rhs){
@@ -82,7 +85,7 @@ public:
 };
 
 typedef uint32_t task_id_t;
-typedef std::function<task_id_t(Context *, Instruction*)> task_t;
+typedef std::function<Error(Context *, Instruction*)> task_t;
 
 const uint8_t U8_1 = (uint8_t)1;
 const uint32_t U32_1 = (uint32_t)1;

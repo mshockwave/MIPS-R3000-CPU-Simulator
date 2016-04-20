@@ -4,6 +4,7 @@
 
 #include "Types.h"
 #include "RawBinary.h"
+#include "adts/FlipFlop.h"
 
 #include <iostream>
 #include <vector>
@@ -62,11 +63,11 @@ template<
         std::size_t W = 4,
         bool bigEndian = true
 >
-inline void load2Register(RawBinary::raw_container_t &data, reg_t &outputReg){
+inline void load2Register(RawBinary::raw_container_t &data, FlipFlop<reg_t>& outputReg){
     if(UNLIKELY(data.size() < W || (data.begin() + start_index >= data.end()))) return;
     for(std::size_t i = start_index; i < (start_index + W); i++){
         reg_t b = static_cast<reg_t>((bigEndian)? data[i] : data[(W - 1) - i]);
-        outputReg |= (b << ((W - 1 - i) << 3));
+        outputReg = (outputReg.GetCurrent() | (b << ((W - 1 - i) << 3)));
     }
 }
 

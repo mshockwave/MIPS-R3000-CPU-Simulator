@@ -2,6 +2,13 @@
 #include "Context.h"
 
 /*Context*/
+void Context::tickAllRegisters() {
+    int i;
+    for(i = 0; i < REGISTER_COUNT; i++){
+        Registers[i].tick();
+    }
+}
+
 void Context::loadMemory(RawBinary& rawBinary) {
     RawBinary::raw_container_t& dataImg = rawBinary.getDataImg();
 
@@ -9,12 +16,14 @@ void Context::loadMemory(RawBinary& rawBinary) {
     SP = U32_0;
     load2Register(dataImg, SP);
 
-    uint32_t dataLength = 0;
+
+    FlipFlop<uint32_t > dataLength(0);
     load2Register<4>(dataImg, dataLength);
-    mDataSize = dataLength * WORD_WIDTH;
+    dataLength.tick();
+    mDataSize = dataLength.GetCurrent() * WORD_WIDTH;
 
     int i, j, k;
-    for(i = 0, k = 8; i < dataLength; i++, k += WORD_WIDTH){
+    for(i = 0, k = 8; i < dataLength.GetCurrent(); i++, k += WORD_WIDTH){
         for(j = 0; j < WORD_WIDTH; j++){
             mMemory[k - 8 + j] = dataImg[k + j];
         }
@@ -34,7 +43,7 @@ void Context::DumpSnapshot() {
     mSnapShotStream << std::endl << std::endl;
 }
 
-void Context::putError(Error &error) {
+void Context::PutError(Error &error) {
 
     //Check errors
     if(error.contains(Error::WRITE_REG_ZERO)){

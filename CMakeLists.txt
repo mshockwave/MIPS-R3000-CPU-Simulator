@@ -21,7 +21,7 @@ set(SOURCE_FILES
         tasks/InstructionMap.cpp
         tasks/Task.h tasks/Task.cpp
         Task.h
-        Types.cpp Types.h)
+        Types.cpp Types.h engines/IFEngine.cpp engines/IFEngine.h engines/IDEngine.cpp engines/IDEngine.h)
 include_directories(./include)
 
 if(NOT DEFINED OUT_EXE_NAME)
