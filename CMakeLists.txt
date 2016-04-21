@@ -16,15 +16,35 @@ set(SOURCE_FILES
         Utils.cpp Utils.h
         Task.cpp Task.h
         Types.cpp Types.h)
-include_directories(./include)
+include_directories(include)
+
+set(LINK_BOOST_LIBS
+        libboost_system.a
+        libboost_chrono.a
+        libboost_date_time.a)
+if (APPLE)
+    link_directories(${CMAKE_SOURCE_DIR}/lib/darwin)
+    set(LINK_BOOST_LIBS
+            ${LINK_BOOST_LIBS}
+            libboost_thread-mt.a)
+elseif(WIN32)
+    message(FATAL_ERROR "Not support windows yet")
+else()
+    link_directories(${CMAKE_SOURCE_DIR}/lib/linux)
+    set(LINK_BOOST_LIBS
+            ${LINK_BOOST_LIBS}
+            libboost_thread.a)
+endif ()
 
 if(NOT DEFINED OUT_EXE_NAME)
     set(OUT_EXE_NAME pipeline)
 endif()
 
 add_executable(${OUT_EXE_NAME} ${SOURCE_FILES} main.cpp)
+target_link_libraries(${OUT_EXE_NAME} ${LINK_BOOST_LIBS})
 
 add_executable(${OUT_EXE_NAME}Tests ${SOURCE_FILES} tests/TestMain.cpp )
+target_link_libraries(${OUT_EXE_NAME}Tests ${LINK_BOOST_LIBS})
 
 add_custom_target(install-test-data ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tests/test_dataset ${CMAKE_BINARY_DIR}/test_dataset
