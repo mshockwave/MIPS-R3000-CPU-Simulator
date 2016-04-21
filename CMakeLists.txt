@@ -19,7 +19,7 @@ set(SOURCE_FILES
 include_directories(./include)
 
 if(NOT DEFINED OUT_EXE_NAME)
-    set(OUT_EXE_NAME pipline)
+    set(OUT_EXE_NAME pipeline)
 endif()
 
 add_executable(${OUT_EXE_NAME} ${SOURCE_FILES} main.cpp)
