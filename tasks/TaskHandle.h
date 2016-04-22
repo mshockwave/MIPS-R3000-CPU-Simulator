@@ -17,9 +17,6 @@
 
 class TaskHandle {
 
-    typedef std::function<Error(TaskHandle*)> stage_task_t;
-    stage_task_t stage_if, stage_id, stage_ex, stage_dm, stage_wb;
-
 public:
 
     struct ClockHandle{
@@ -126,6 +123,9 @@ public:
             return Error::NONE;
         }
     }
+
+private:
+    stage_task_t stage_if, stage_id, stage_ex, stage_dm, stage_wb;
 };
 
 #endif //ARCHIHW1_TASKBASE_H
