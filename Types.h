@@ -81,8 +81,11 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Error& error);
 };
 
+const unsigned int THREAD_COUNT = 5;
+
 typedef uint32_t task_id_t;
-typedef std::function<task_id_t(Context *, Instruction*)> task_t;
+class TaskHandle;
+typedef TaskHandle task_t;
 
 const uint8_t U8_1 = (uint8_t)1;
 const uint32_t U32_1 = (uint32_t)1;

@@ -15,7 +15,7 @@ set(SOURCE_FILES
         adts/FlipFlop.h
         Utils.cpp Utils.h
         Task.cpp Task.h
-        Types.cpp Types.h)
+        Types.cpp Types.h tasks/TaskHandle.cpp tasks/TaskHandle.h tasks/Tasks.cpp tasks/RTasks.cpp tasks/RTasks.h tasks/ITasks.cpp tasks/ITasks.h tasks/JTasks.cpp tasks/JTasks.h adts/SizedBlockingQueue.cpp adts/SizedBlockingQueue.h)
 include_directories(include)
 
 set(LINK_BOOST_LIBS

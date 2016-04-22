@@ -16,8 +16,6 @@ private:
         task::InitTasks();
     }
 
-    task_id_t dispatchTask(Instruction *instruction, task_id_t taskId);
-
 public:
 
     Context* GetContext(){

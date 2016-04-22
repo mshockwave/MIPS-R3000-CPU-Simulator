@@ -8,6 +8,7 @@
 #include "Context.h"
 #include "Instruction.h"
 #include "Utils.h"
+#include "tasks/TaskHandle.h"
 
 namespace task {
 

@@ -5,48 +5,15 @@
 #include <iomanip>
 
 #include <queue>
+#include <vector>
 #include <thread>
 #include <mutex>
+
+#include <boost/atomic/atomic.hpp>
 
 #include "Types.h"
 #include "RawBinary.h"
 #include "Utils.h"
-
-#include "adts/FlipFlop.h"
-
-struct StageRegisters {
-    FlipFlop<reg_t> EXE, DM, WB;
-};
-
-class TaskQueue {
-
-    std::queue<task_t> task_queue;
-
-    mutable std::mutex mx;
-
-public:
-    void Push(const task_t& task){
-        std::lock_guard<std::mutex> lock(mx);
-        task_queue.push(task);
-    }
-
-    task_t& Pop(){
-        std::lock_guard<std::mutex> lock(mx);
-        task_t& t = task_queue.front();
-        task_queue.pop();
-        return t;
-    }
-
-    const task_t& Peek() const {
-        std::lock_guard<std::mutex> lock(mx);
-        return task_queue.front();
-    }
-
-    bool IsEmpty(){
-        std::lock_guard<std::mutex> lock(mx);
-        return task_queue.empty();
-    }
-};
 
 class Context {
 
@@ -56,6 +23,8 @@ class Context {
 public:
     typedef unsigned long CounterType;
     typedef std::ostream OutputStream;
+
+    typedef std::vector<TaskHandle*> StageRegister;
 
 private:
 
@@ -86,11 +55,28 @@ public:
     //Global Special registers
     reg_t &ZERO, &AT, &SP, &FP, &RA;
 
-    //(Pipeline)Stage Registers
-    StageRegisters ID_EXE, EXE_DM, DM_WB;
+    typedef boost::atomic<TaskHandle*> reg_reserve_t;
+    reg_reserve_t RegReserves[REGISTER_COUNT];
 
-    //All stages' task queue
-    TaskQueue TaskQ_ID, TaskQ_EXE, TaskQ_DM, TaskQ_WB;
+    const unsigned int STAGE_REG_BUF_SIZE = 2;
+    StageRegister IF_ID, ID_EX, EX_DM, DM_WB;
+    inline void pushTask(StageRegister& stage, TaskHandle* task){
+        if(stage.size() < STAGE_REG_BUF_SIZE){
+            stage.push_back(task);
+        }
+    }
+
+    struct ForwardStorage{
+        uint8_t RegId;
+        reg_t RegValue;
+        boost::atomic<bool> Available;
+
+        ForwardStorage() :
+                RegId(0),
+                RegValue(0),
+                Available(false) {}
+    };
+    ForwardStorage FWD_ID_EXE;
 
     Context(RawBinary& rawBinary,
             OutputStream& snapshotStream, OutputStream& errorStream) :
@@ -111,6 +97,7 @@ public:
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
             Registers[i] = (byte_t)0;
+            RegReserves[i] = nullptr;
         }
 
         //Load PC from rawBinary
