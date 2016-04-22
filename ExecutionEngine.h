@@ -6,8 +6,13 @@
 #include "Context.h"
 #include "Task.h"
 
+/*
+ * Normal execution engine
+ * For stages other than IF
+ * */
 class ExecutionEngine {
-private:
+
+protected:
     Context* mContext;
     Instructions& mInstructions;
 
@@ -30,7 +35,7 @@ public:
         init();
     }
 
-    void Start();
+    virtual void Start();
 };
 
 #endif //ARCHIHW1_EXECUTIONENGINE_H

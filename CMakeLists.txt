@@ -6,16 +6,24 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}") #default: Debug
 #Do not use -O3!!
 set(CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os -std=c++11")
 
+set(TASKS_SOURCE_FILES
+        tasks/Tasks.cpp
+        tasks/RTasks.cpp tasks/RTasks.h
+        tasks/ITasks.cpp tasks/ITasks.h
+        tasks/JTasks.cpp tasks/JTasks.h )
+
 set(SOURCE_FILES
         RawBinary.cpp RawBinary.h
         Instruction.cpp Instruction.h
         ExecutionEngine.cpp ExecutionEngine.h
         Context.cpp Context.h
         adts/RawBufferHandle.cpp adts/RawBufferHandle.h
-        adts/FlipFlop.h
         Utils.cpp Utils.h
         Task.cpp Task.h
-        Types.cpp Types.h tasks/TaskHandle.cpp tasks/TaskHandle.h tasks/Tasks.cpp tasks/RTasks.cpp tasks/RTasks.h tasks/ITasks.cpp tasks/ITasks.h tasks/JTasks.cpp tasks/JTasks.h adts/SizedBlockingQueue.cpp adts/SizedBlockingQueue.h)
+        ${TASKS_SOURCE_FILES}
+        Types.cpp Types.h
+        tasks/TaskHandle.cpp tasks/TaskHandle.h
+        IFEngine.cpp IFEngine.h)
 include_directories(include)
 
 set(LINK_BOOST_LIBS
@@ -26,14 +34,16 @@ if (APPLE)
     link_directories(${CMAKE_SOURCE_DIR}/lib/darwin)
     set(LINK_BOOST_LIBS
             ${LINK_BOOST_LIBS}
-            libboost_thread-mt.a)
+            libboost_thread-mt.a
+            libboost_atomic-mt.a)
 elseif(WIN32)
     message(FATAL_ERROR "Not support windows yet")
 else()
     link_directories(${CMAKE_SOURCE_DIR}/lib/linux)
     set(LINK_BOOST_LIBS
             ${LINK_BOOST_LIBS}
-            libboost_thread.a)
+            libboost_thread.a
+            libboost_atomic.a)
 endif ()
 
 if(NOT DEFINED OUT_EXE_NAME)
