@@ -43,6 +43,7 @@ namespace task{
 
                         //Load from forward storage
                         self->RtValue = ctx->FWD_ID_EXE.RegValue;
+                        self->ForwardRt = true;
                     }else{
                         need_wait = true;
                     }
@@ -55,7 +56,8 @@ namespace task{
                              ctx->FWD_ID_EXE.RegId == rs_index){
 
                         //Load from forward storage
-                        self->RtValue = ctx->FWD_ID_EXE.RegValue;
+                        self->RsValue = ctx->FWD_ID_EXE.RegValue;
+                        self->ForwardRs = true;
                     }else{
                         need_wait = true;
                     }

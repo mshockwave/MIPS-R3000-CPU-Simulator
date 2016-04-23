@@ -12,12 +12,19 @@ set(TASKS_SOURCE_FILES
         tasks/ITasks.cpp tasks/ITasks.h
         tasks/JTasks.cpp tasks/JTasks.h )
 
+set(TEST_SOURCE_HEADERS
+        tests/TestCase.h
+        tests/TestUtils.h
+        tests/TestInstruction.h
+        tests/TestAdts.h)
+
 set(SOURCE_FILES
         RawBinary.cpp RawBinary.h
         Instruction.cpp Instruction.h
         ExecutionEngine.cpp ExecutionEngine.h
         Context.cpp Context.h
         adts/RawBufferHandle.cpp adts/RawBufferHandle.h
+        adts/BlockingQueue.cpp adts/BlockingQueue.h
         Utils.cpp Utils.h
         Task.cpp Task.h
         ${TASKS_SOURCE_FILES}
@@ -50,10 +57,12 @@ if(NOT DEFINED OUT_EXE_NAME)
     set(OUT_EXE_NAME pipeline)
 endif()
 
-add_executable(${OUT_EXE_NAME} ${SOURCE_FILES} main.cpp)
+add_executable(${OUT_EXE_NAME}
+        ${SOURCE_FILES} main.cpp)
 target_link_libraries(${OUT_EXE_NAME} ${LINK_BOOST_LIBS})
 
-add_executable(${OUT_EXE_NAME}Tests ${SOURCE_FILES} tests/TestMain.cpp )
+add_executable(${OUT_EXE_NAME}Tests
+        ${SOURCE_FILES} ${TEST_SOURCE_HEADERS} tests/TestMain.cpp )
 target_link_libraries(${OUT_EXE_NAME}Tests ${LINK_BOOST_LIBS})
 
 add_custom_target(install-test-data ALL

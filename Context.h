@@ -14,6 +14,7 @@
 #include "Types.h"
 #include "RawBinary.h"
 #include "Utils.h"
+#include "adts/BlockingQueue.h"
 
 class Context {
 
@@ -190,6 +191,15 @@ public:
      * Append current cycle's snapshot
      * */
     void DumpSnapshot();
+
+    /*
+     * Output streams for stages
+     * */
+    BlockingQueue<std::string> IFMessageQueue,
+            IDMessageQueue,
+            EXMessageQueue,
+            DMMessageQueue,
+            WBMessageQueue;
 
     /*
      * Append error

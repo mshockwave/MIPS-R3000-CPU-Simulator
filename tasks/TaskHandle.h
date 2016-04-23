@@ -37,12 +37,16 @@ public:
     //Registers value storage
     reg_t RtValue, RsValue, RdValue;
 
+    //Information for dumping
+    bool ForwardRt, ForwardRs;
+
     typedef std::function<Error(TaskHandle*)> stage_task_t;
 
     TaskHandle() :
             instruction(nullptr),
             context(nullptr),
-            RtIndex(0), RsIndex(0), RdIndex(0){}
+            RtIndex(0), RsIndex(0), RdIndex(0),
+            ForwardRs(false), ForwardRt(false){}
 
     TaskHandle* Get(Context* ctx, Instruction* instr, ClockHandle* clk){
         auto* task_handle = new TaskHandle();

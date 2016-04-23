@@ -1,12 +1,14 @@
 
 #include "TestInstruction.h"
 #include "TestUtils.h"
+#include "TestAdts.h"
 
 int main(){
 
     //Add test cases
     std::vector<TestCase*> testCases;
     testCases.push_back(new TestUtils());
+    testCases.push_back(new TestAdts());
     testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestInstructionList());
 
