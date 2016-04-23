@@ -60,12 +60,14 @@ public:
         return (mErrorId & e.mErrorId) != 0;
     }
 
-    bool operator==(const Error& rhs){
+    bool operator==(const Error& rhs) const{
         return this->mErrorId == rhs.mErrorId;
     }
     bool operator==(Error& rhs){
         return this->mErrorId == rhs.mErrorId;
     }
+    bool operator!=(const Error& rhs) const{ return !(*this == rhs); }
+    bool operator!=(Error& rhs){ return !(*this == rhs); }
 
     //Error mix
     Error operator+(Error& rhs){

@@ -16,7 +16,7 @@ set(TEST_SOURCE_HEADERS
         tests/TestCase.h
         tests/TestUtils.h
         tests/TestInstruction.h
-        tests/TestAdts.h)
+        tests/TestAdts.h tests/TestTasks.h)
 
 set(SOURCE_FILES
         RawBinary.cpp RawBinary.h

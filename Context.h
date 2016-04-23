@@ -18,6 +18,10 @@
 
 class Context {
 
+#ifndef NDEBUG
+    friend class TestTasks;
+#endif
+
 #define CHECK_MEMORY_BOUND(offset) \
     if((offset) > mDataSize && (offset) < SP)
 
@@ -81,6 +85,41 @@ public:
                 Available(false) {}
     };
     ForwardStorage FWD_ID_EXE;
+
+#ifndef NDEBUG
+    /*
+     * For Unit Test Only!
+     * */
+    Context(OutputStream& snapshotStream, OutputStream& errorStream) :
+            /*Registers*/
+            PC(0),
+            PcJump(false),
+            PcFlush(false),
+            ZERO(Registers[0]),
+            AT(Registers[1]),
+            SP(Registers[29]),
+            FP(Registers[30]),
+            RA(Registers[31]),
+            /*Memory*/
+            mDataSize(0),
+            /*Cycle counter*/
+            mCycleCounter(0),
+            /*Streams*/
+            mSnapShotStream(snapshotStream), mErrorStream(errorStream),
+            mInstrCount(0), mInstrEndAddr(0){
+
+        //Zero registers
+        for(int i = 0; i < REGISTER_COUNT; i++){
+            Registers[i] = (byte_t)0;
+            RegReserves[i] = nullptr;
+        }
+
+        //Zero memory
+        for(int i = 0; i < MEMORY_LENGTH; i++){
+            mMemory[i] = (byte_t)0;
+        }
+    }
+#endif
 
     Context(RawBinary& rawBinary,
             OutputStream& snapshotStream, OutputStream& errorStream) :

@@ -51,7 +51,7 @@ namespace task{
                     if(reg_reserves[rs_index].load() == nullptr){
 
                         //Load from main registers
-                        self->RtValue = ctx->Registers[rs_index];
+                        self->RsValue = ctx->Registers[rs_index];
                     }else if(ctx->FWD_ID_EXE.Available.load() &&
                              ctx->FWD_ID_EXE.RegId == rs_index){
 

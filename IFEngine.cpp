@@ -27,13 +27,25 @@ void IFEngine::Start(){
 
             //Extract op code
             uint32_t op = extractInstrBits(instr.GetBitsInstruction(), 31, 26);
-            task::instr_task_map_t::iterator itOpMap = task::FirstInstrOpMap.find(static_cast<uint8_t>(op));
-            if (UNLIKELY(itOpMap == task::FirstInstrOpMap.end())) {
-                //Not found
-                //Halt
-                return;
+            if(op == 0x00){
+                //R Type Instructions
+                uint32_t func = extractInstrBits(instr.GetBitsInstruction(), 5, 0);
+                task::instr_task_map_t::iterator itOpMap = task::RtypeInstrFuncMap.find(static_cast<uint8_t>(func));
+                if (UNLIKELY(itOpMap == task::RtypeInstrFuncMap.end())) {
+                    //Not found
+                    //Halt
+                    return;
+                }
+                next_task = itOpMap->second;
+            }else{
+                task::instr_task_map_t::iterator itOpMap = task::FirstInstrOpMap.find(static_cast<uint8_t>(op));
+                if (UNLIKELY(itOpMap == task::FirstInstrOpMap.end())) {
+                    //Not found
+                    //Halt
+                    return;
+                }
+                next_task = itOpMap->second;
             }
-            next_task = itOpMap->second;
         }
 
         //TODO: Stop until five halts were read

@@ -29,10 +29,21 @@ public:
     void destroy(){}
 
     //Utils
-    static void assert(bool v, std::string msg){
+    static void Assert(bool v, std::string msg){
         if(!v){
             auto prefix = std::string("Assert failed: ");
             throw (prefix + msg);
+        }
+    }
+    template <typename T>
+    static void AssertEqual(const T& out, const T& expect, std::string prefix){
+        bool result = (out == expect);
+        if(!result){
+            std::stringstream ss;
+            ss << prefix << std::endl;
+            ss << "\t\tExpect: " << expect << std::endl;
+            ss << "\t\tGet: " << out << std::endl;
+            throw ss.str();
         }
     }
 

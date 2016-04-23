@@ -2,6 +2,7 @@
 #include "TestInstruction.h"
 #include "TestUtils.h"
 #include "TestAdts.h"
+#include "TestTasks.h"
 
 int main(){
 
@@ -11,6 +12,7 @@ int main(){
     testCases.push_back(new TestAdts());
     testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestInstructionList());
+    testCases.push_back(new TestTasks());
 
     std::vector<TestCase*>::iterator it = testCases.begin();
     for(; it != testCases.end(); ++it){
