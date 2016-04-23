@@ -19,9 +19,7 @@ namespace task{
                     self->RsIndex = RInstr::GetRs(instr_bits);
 
                     auto* ctx = self->context;
-                    ctx->pushTask(ctx->IF_ID, self);
-
-                    return Error::NONE;
+                    return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPLINE_STALL;
                 })
                 .ID(STAGE_TASK(){
 
@@ -65,15 +63,16 @@ namespace task{
                     //Clean forwarding storage
                     ctx->FWD_ID_EXE.Available.store(false);
 
+                    bool stall = false;
                     if(!need_wait){
                         //Push next task
-                        ctx->pushTask(ctx->ID_EX, self);
+                        stall = !ctx->pushTask(ctx->ID_EX, self);
 
                         //Reserve destination registers
                         ctx->RegReserves[self->RdIndex] = self;
                     }
 
-                    return Error::NONE;
+                    return (stall)? Error::PIPLINE_STALL : Error::NONE;
                 })
                 .EX(STAGE_TASK(){
 
@@ -89,9 +88,7 @@ namespace task{
 
                     self->RdValue = rd_value;
 
-                    ctx->pushTask(ctx->EX_DM, self);
-
-                    return Error::NONE;
+                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPLINE_STALL;
                 })
                 .DM(STAGE_TASK(){
 
@@ -104,9 +101,7 @@ namespace task{
 
                     RISING_EDGE_FENCE();
 
-                    ctx->pushTask(ctx->DM_WB, self);
-
-                    return Error::NONE;
+                    return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPLINE_STALL;
                 })
                 .WB(STAGE_TASK(){
 

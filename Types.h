@@ -50,6 +50,7 @@ public:
     static const uint8_t LEVEL_HALT;
 
     static Error NONE; //Place holder
+    static Error PIPLINE_STALL;
     static Error WRITE_REG_ZERO;
     static Error NUMBER_OVERFLOW;
     static Error MEMORY_ADDR_OVERFLOW;

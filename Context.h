@@ -60,9 +60,12 @@ public:
 
     const unsigned int STAGE_REG_BUF_SIZE = 2;
     StageRegister IF_ID, ID_EX, EX_DM, DM_WB;
-    inline void pushTask(StageRegister& stage, TaskHandle* task){
+    inline bool pushTask(StageRegister& stage, TaskHandle* task){
         if(stage.size() < STAGE_REG_BUF_SIZE){
             stage.push_back(task);
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -82,6 +85,8 @@ public:
             OutputStream& snapshotStream, OutputStream& errorStream) :
             /*Registers*/
             PC(0),
+            PcJump(false),
+            PcFlush(false),
             ZERO(Registers[0]),
             AT(Registers[1]),
             SP(Registers[29]),
@@ -121,8 +126,10 @@ public:
     }
 
     //PC operations
+    bool PcJump;
+    bool PcFlush;
     const reg_t& GetPC(){ return PC; }
-    Error setPC(reg_t pc){
+    Error SetPC(reg_t pc){
         Error e = Error::NONE;
 
         if(pc % WORD_WIDTH != 0)
@@ -134,6 +141,7 @@ public:
         if( !(e == Error::NONE) ) return e;
 
         PC = pc;
+        PcJump = true;
 
         return Error::NONE;
     }

@@ -5,6 +5,10 @@
 #include "Types.h"
 #include "Context.h"
 #include "Task.h"
+#include "tasks/TaskHandle.h"
+
+#define FALLING_EDGE_FENCE() \
+    clock.falling_edge.wait()
 
 /*
  * Normal execution engine
@@ -14,12 +18,7 @@ class ExecutionEngine {
 
 protected:
     Context* mContext;
-    Instructions& mInstructions;
-
-    void init(){
-        task::InitInstructionMap();
-        task::InitTasks();
-    }
+    TaskHandle::ClockHandle& clock;
 
 public:
 
@@ -28,12 +27,9 @@ public:
         return mContext;
     }
 
-    ExecutionEngine(Context& ctx, Instructions& instructions) :
+    ExecutionEngine(Context& ctx, TaskHandle::ClockHandle& clk) :
             mContext(&ctx),
-            mInstructions(instructions) {
-        ctx.setInstructionCount(static_cast<uint32_t>(mInstructions.length()));
-        init();
-    }
+            clock(clk){ }
 
     virtual void Start();
 };

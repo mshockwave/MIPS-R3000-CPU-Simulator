@@ -22,7 +22,7 @@ namespace task {
 #define DEF_TASK(name, id) \
     const task_id_t name = (id);
 
-    const uint32_t TASK_COUNT = 39;
+    const uint32_t TASK_COUNT = 40;
 
     extern task_t TasksTable[TASK_COUNT];
 
@@ -34,6 +34,7 @@ namespace task {
     //Reserve 0
     DEF_TASK(TASK_END, 36)
     DEF_TASK(TASK_BAIL, 38) //Exit with error
+    DEF_TASK(OP_NOP, 39)
 
     //DEF_TASK(TASK_ROOT_DECODER, 1) //Legacy Root Level Decoder
     DEF_TASK(TASK_R_TYPE_DECODER, 2)
