@@ -81,11 +81,28 @@ private:
 #endif
     }
 
+    bool testMultiThreadNoStall(){
+#ifndef NDEBUG
+
+        Log::D(mName) << "Testing two tasks with no stalling..." << std::endl;
+
+        Context ctx(std::cout, std::cout);
+        task::InitInstructionMap();
+        task::InitTasks();
+
+        return true;
+#else
+        Log::E(mName) << "Need to test under Debug configuration" << std::endl;
+        return false;
+#endif
+    }
+
     bool doTest(){
 
         bool result = true;
 
         result &= testSingleThread();
+        result &= testMultiThreadNoStall();
 
         return result;
     }

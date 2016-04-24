@@ -63,7 +63,7 @@ public:
     typedef boost::atomic<TaskHandle*> reg_reserve_t;
     reg_reserve_t RegReserves[REGISTER_COUNT];
 
-    const unsigned int STAGE_REG_BUF_SIZE = 2;
+    const unsigned int STAGE_REG_BUF_SIZE = 1;
     StageRegister IF_ID, ID_EX, EX_DM, DM_WB;
     inline bool pushTask(StageRegister& stage, TaskHandle* task){
         if(stage.size() < STAGE_REG_BUF_SIZE){
@@ -134,6 +134,8 @@ public:
             RA(Registers[31]),
             /*Memory*/
             mDataSize(0),
+            /*Pipeline*/
+            IFStall(false),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -164,6 +166,9 @@ public:
         //Evaluate end instruction address
         mInstrEndAddr = mInstrStartAddr + (mInstrCount - 1) * WORD_WIDTH;
     }
+
+    //Pipeline operations
+    boost::atomic<bool> IFStall;
 
     //PC operations
     bool PcJump;

@@ -29,8 +29,9 @@ public:
 
     Context* context;
     Instruction* instruction;
-    ClockHandle* clock;
+    const ClockHandle* clock;
     std::string name;
+    task_id_t task_id;
 
     //Registers index cache
     uint8_t RtIndex, RsIndex, RdIndex;
@@ -48,7 +49,7 @@ public:
             RtIndex(0), RsIndex(0), RdIndex(0),
             ForwardRs(false), ForwardRt(false){}
 
-    TaskHandle* Get(Context* ctx, Instruction* instr, ClockHandle* clk){
+    TaskHandle* Get(Context* ctx, Instruction* instr, const ClockHandle* clk){
         auto* task_handle = new TaskHandle();
         task_handle->context = ctx;
         task_handle->instruction = instr;
@@ -64,8 +65,9 @@ public:
         return task_handle;
     }
 
-    TaskHandle& Name(std::string name_){
+    TaskHandle& Name(std::string name_, task_id_t id){
         name = name_;
+        task_id = id;
         return *this;
     }
 

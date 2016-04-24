@@ -157,6 +157,13 @@ namespace task {
         inline uint8_t GetShAmt(uint32_t instruction){
             return static_cast<uint8_t>(extractInstrBits(instruction, 10, 6));
         }
+
+        //Common tasks
+        extern TaskHandle::stage_task_t ResolveRegsIF;
+        extern TaskHandle::stage_task_t LoadRegsID;
+        extern TaskHandle::stage_task_t ForwardRegsDM;
+        extern TaskHandle::stage_task_t WriteRegsWB;
+
     } //namespace RInstr
 
     namespace IInstr {

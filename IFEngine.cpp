@@ -2,12 +2,14 @@
 
 void IFEngine::Start(){
 
-    bool stall = false;
+    //bool stall = false;
     TaskHandle* task_obj = nullptr;
 
     while(true) {
 
-        if (!(mContext->PcJump || stall || mContext->PcFlush)) {
+        if (!(  mContext->PcJump ||
+                mContext->PcFlush ||
+                mContext->IFStall.load() )) {
             mContext->AdvancePC();
         } else {
             mContext->PcJump = false;
@@ -63,8 +65,8 @@ void IFEngine::Start(){
         mContext->PcFlush = false;
 
         //TODO: Error handling
-        auto ret = task_obj->DoIF();
-        stall = (ret == Error::PIPLINE_STALL);
+        /*auto ret = */task_obj->DoIF();
+        //stall = (ret == Error::PIPLINE_STALL);
 
         FALLING_EDGE_FENCE();
 
