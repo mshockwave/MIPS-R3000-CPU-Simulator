@@ -55,6 +55,7 @@ public:
         task_handle->instruction = instr;
         task_handle->clock = clk;
         task_handle->name = name;
+        task_handle->task_id = task_id;
 
         task_handle->stage_if = stage_if;
         task_handle->stage_id = stage_id;

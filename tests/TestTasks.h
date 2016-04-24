@@ -6,6 +6,10 @@
 #include "../Context.h"
 #include "../Task.h"
 #include "../tasks/TaskHandle.h"
+#include "../ExecutionEngine.h"
+#include "../IFEngine.h"
+
+#include <boost/thread/thread.hpp>
 
 class TestTasks : public TestCase {
 
@@ -89,6 +93,66 @@ private:
         Context ctx(std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
+
+        ctx.mInstrStartAddr = 0x04;
+        ctx.Registers[1] = 0xA;
+        ctx.Registers[2] = 0xC;
+
+        Instructions instructions;
+        /* add $4, $1, $2 */
+        const byte_t raw_add_instr[4] = { 0x00, 0x22, 0x20, 0x20 };
+        Instruction add_instr(raw_add_instr);
+        instructions.mInstructions.push_back(add_instr);
+        /* sub $3, $2, $1 */
+        const byte_t raw_sub_instr[4] = { 0x00, 0x41, 0x18, 0x22 };
+        Instruction sub_instr(raw_sub_instr);
+        instructions.mInstructions.push_back(sub_instr);
+        /* halt */
+        const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+        Instruction halt_instr(raw_halt_instr);
+        instructions.mInstructions.push_back(halt_instr);
+
+        ctx.setInstructionCount((uint32_t)instructions.length());
+
+        TaskHandle::ClockHandle::Barrier rising_barrier(5);
+        TaskHandle::ClockHandle::Barrier falling_barrier(5);
+        TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
+
+        boost::thread_group group;
+        /*IF*/
+        group.create_thread([&]()->void{
+            IFEngine engine(ctx, instructions, clock_handle);
+            engine.Start();
+        });
+        /*ID*/
+        group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::IDEngineRunnable);
+            engine.Start();
+        });
+        /*EX*/
+        group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::EXEngineRunnable);
+            engine.Start();
+        });
+        /*DM*/
+        group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::DMEngineRunnable);
+            engine.Start();
+        });
+        /*WB*/
+        group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::WBEngineRunnable);
+            engine.Start();
+        });
+
+        group.join_all();
+
+        AssertEqual((int)ctx.Registers[4], 22, "$4 Value");
+        AssertEqual((int)ctx.Registers[3], 2, "$3 Value");
 
         return true;
 #else

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <boost/thread/mutex.hpp>
 
 extern "C"{
 #include <sys/time.h>
@@ -36,6 +37,11 @@ private:
     static std::ostream* sOstream;
 
 public:
+
+    struct Mux{
+        static boost::mutex E, W, V, D;
+    };
+
     static void setStream(std::ostream& ostr){
         sOstream = &ostr;
     }

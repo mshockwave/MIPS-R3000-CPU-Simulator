@@ -12,10 +12,10 @@ namespace engines{
 
         bool stall = false;
         TaskHandle* task_obj = nullptr;
+        auto* ctx = self->GetContext();
+        const auto& clock = self->GetClock();
 
         while(true){
-            auto* ctx = self->GetContext();
-            const auto& clock = self->GetClock();
 
             if(!stall){
                 if(ctx->IF_ID.empty()){
@@ -29,25 +29,49 @@ namespace engines{
                 }
             }
 
+            DEBUG_BLOCK{
+                boost::mutex::scoped_lock lk(Log::Mux::D);
+                if(task_obj == nullptr){
+                    Log::D("IDEngine") << "Next Task null!" << std::endl;
+                }else{
+                    Log::D("IDEngine") << "Next Task: " << task_obj->name << std::endl;
+                }
+            };
+
             if(task_obj == nullptr) continue;
-            //FIXME: Propagate HALT to next stage instead
-            if(task_obj->task_id == task::OP_HALT) break;
 
             auto err = task_obj->DoID();
             stall = (err == Error::PIPELINE_STALL);
             ctx->IFStall.store(stall);
 
+            bool ready_to_dead = task_obj->task_id == task::OP_HALT;
+            if(ready_to_dead){
+                ScopedReadWriteLock::WriteLock lk(ctx->DeadThreadMux);
+                ctx->DeadThreadNum++;
+            }
+
             FALLING_EDGE_FENCE();
 
             //TODO: Print here
+
+            if(ready_to_dead) break;
+        }
+
+        while(ctx->DeadThreadNum < THREAD_COUNT){
+            //Mortuary zone
+
+            clock.rising_edge.wait();
+
+            FALLING_EDGE_FENCE();
         }
     };
 
     ExecutionEngine::engine_runnable_t EXEngineRunnable = ENGINE_RUNNABLE(){
 
+        auto* ctx = self->GetContext();
+        const auto& clock = self->GetClock();
+
         while(true){
-            auto* ctx = self->GetContext();
-            const auto& clock = self->GetClock();
 
             TaskHandle *task_obj;
             if(ctx->ID_EX.empty()){
@@ -60,24 +84,48 @@ namespace engines{
                 ctx->ID_EX.erase(ctx->ID_EX.begin());
             }
 
+            DEBUG_BLOCK{
+                boost::mutex::scoped_lock lk(Log::Mux::D);
+                if(task_obj == nullptr){
+                    Log::D("EXEngine") << "Next Task null!" << std::endl;
+                }else{
+                    Log::D("EXEngine") << "Next Task: " << task_obj->name << std::endl;
+                }
+            };
+
             if(task_obj == nullptr) continue;
-            //FIXME: Propagate HALT to next stage instead
-            if(task_obj->task_id == task::OP_HALT) break;
 
             //TODO: Error handling
             /*auto err = */task_obj->DoEX();
 
+            bool ready_to_dead = task_obj->task_id == task::OP_HALT;
+            if(ready_to_dead){
+                ScopedReadWriteLock::WriteLock lk(ctx->DeadThreadMux);
+                ctx->DeadThreadNum++;
+            }
+
             FALLING_EDGE_FENCE();
 
             //TODO: Print here
+
+            if(ready_to_dead) break;
+        }
+
+        while(ctx->DeadThreadNum < THREAD_COUNT){
+            //Mortuary zone
+
+            clock.rising_edge.wait();
+
+            FALLING_EDGE_FENCE();
         }
     };
 
     ExecutionEngine::engine_runnable_t DMEngineRunnable = ENGINE_RUNNABLE(){
 
+        auto* ctx = self->GetContext();
+        const auto& clock = self->GetClock();
+
         while(true){
-            auto* ctx = self->GetContext();
-            const auto& clock = self->GetClock();
 
             TaskHandle *task_obj;
             if(ctx->EX_DM.empty()){
@@ -90,24 +138,48 @@ namespace engines{
                 ctx->EX_DM.erase(ctx->EX_DM.begin());
             }
 
+            DEBUG_BLOCK{
+                boost::mutex::scoped_lock lk(Log::Mux::D);
+                if(task_obj == nullptr){
+                    Log::D("DMEngine") << "Next Task null!" << std::endl;
+                }else{
+                    Log::D("DMEngine") << "Next Task: " << task_obj->name << std::endl;
+                }
+            };
+
             if(task_obj == nullptr) continue;
-            //FIXME: Propagate HALT to next stage instead
-            if(task_obj->task_id == task::OP_HALT) break;
 
             //TODO: Error handling
             /*auto err = */task_obj->DoDM();
 
+            bool ready_to_dead = task_obj->task_id == task::OP_HALT;
+            if(ready_to_dead){
+                ScopedReadWriteLock::WriteLock lk(ctx->DeadThreadMux);
+                ctx->DeadThreadNum++;
+            }
+
             FALLING_EDGE_FENCE();
 
             //TODO: Print here
+
+            if(ready_to_dead) break;
+        }
+
+        while(ctx->DeadThreadNum < THREAD_COUNT){
+            //Mortuary zone
+
+            clock.rising_edge.wait();
+
+            FALLING_EDGE_FENCE();
         }
     };
 
     ExecutionEngine::engine_runnable_t WBEngineRunnable = ENGINE_RUNNABLE(){
 
+        auto* ctx = self->GetContext();
+        const auto& clock = self->GetClock();
+
         while(true){
-            auto* ctx = self->GetContext();
-            const auto& clock = self->GetClock();
 
             TaskHandle *task_obj;
             if(ctx->DM_WB.empty()){
@@ -120,16 +192,41 @@ namespace engines{
                 ctx->DM_WB.erase(ctx->DM_WB.begin());
             }
 
+            DEBUG_BLOCK{
+                boost::mutex::scoped_lock lk(Log::Mux::D);
+                if(task_obj == nullptr){
+                    Log::D("WBEngine") << "Next Task null!" << std::endl;
+                }else{
+                    Log::D("WBEngine") << "Next Task: " << task_obj->name << std::endl;
+                }
+            };
+
             if(task_obj == nullptr) continue;
-            //FIXME: Propagate HALT to next stage instead
-            if(task_obj->task_id == task::OP_HALT) break;
 
             //TODO: Error handling
             /*auto err = */task_obj->DoWB();
 
+            bool ready_to_dead = task_obj->task_id == task::OP_HALT;
+            if(ready_to_dead){
+                ScopedReadWriteLock::WriteLock lk(ctx->DeadThreadMux);
+                ctx->DeadThreadNum++;
+            }
+
             FALLING_EDGE_FENCE();
 
             //TODO: Print here
+
+            if(ready_to_dead) break;
         }
+
+        while(ctx->DeadThreadNum < THREAD_COUNT){
+            //Mortuary zone
+
+            clock.rising_edge.wait();
+
+            FALLING_EDGE_FENCE();
+        }
+
+        //TODO: Release task memory!!
     };
 } //namespace engines

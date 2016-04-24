@@ -15,6 +15,7 @@
 #include "RawBinary.h"
 #include "Utils.h"
 #include "adts/BlockingQueue.h"
+#include "adts/ScopedReadWriteLock.h"
 
 class Context {
 
@@ -102,6 +103,11 @@ public:
             RA(Registers[31]),
             /*Memory*/
             mDataSize(0),
+            /*Pipeline*/
+            IFStall(false),
+            /*Thread*/
+            DeadThreadMux(),
+            DeadThreadNum(0),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -136,6 +142,9 @@ public:
             mDataSize(0),
             /*Pipeline*/
             IFStall(false),
+            /*Thread*/
+            DeadThreadMux(),
+            DeadThreadNum(0),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -169,6 +178,10 @@ public:
 
     //Pipeline operations
     boost::atomic<bool> IFStall;
+
+    //Thread operations
+    ScopedReadWriteLock::mutex_type DeadThreadMux;
+    int DeadThreadNum;
 
     //PC operations
     bool PcJump;

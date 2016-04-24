@@ -25,6 +25,7 @@ set(SOURCE_FILES
         Context.cpp Context.h
         adts/RawBufferHandle.cpp adts/RawBufferHandle.h
         adts/BlockingQueue.cpp adts/BlockingQueue.h
+        adts/ScopedReadWriteLock.cpp adts/ScopedReadWriteLock.h
         Utils.cpp Utils.h
         Task.cpp Task.h
         ${TASKS_SOURCE_FILES}
