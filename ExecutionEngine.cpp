@@ -34,7 +34,7 @@ namespace engines{
             if(task_obj->task_id == task::OP_HALT) break;
 
             auto err = task_obj->DoID();
-            stall = (err == Error::PIPLINE_STALL);
+            stall = (err == Error::PIPELINE_STALL);
             ctx->IFStall.store(stall);
 
             FALLING_EDGE_FENCE();

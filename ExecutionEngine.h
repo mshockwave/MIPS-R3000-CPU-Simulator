@@ -45,8 +45,9 @@ public:
 
     ExecutionEngine(Context& ctx, TaskHandle::ClockHandle& clk,
                     const engine_runnable_t& runnable_) :
-            ExecutionEngine(ctx, clk),
-            runnable(runnable_){}
+            ExecutionEngine(ctx, clk){
+        runnable = runnable_;
+    }
 
     virtual void Start();
 };

@@ -11,7 +11,7 @@ Error Error::WRITE_REG_ZERO(1, "Write $0 Error");
 Error Error::NUMBER_OVERFLOW(2, "Number Overflow");
 Error Error::MEMORY_ADDR_OVERFLOW(4, LEVEL_HALT, "Address Overflow");
 Error Error::DATA_MISALIGNED(8, LEVEL_HALT, "Misalignment Error");
-Error Error::PIPLINE_STALL(16, "Pipeline stalling");
+Error Error::PIPELINE_STALL(16, "Pipeline stalling");
 
 std::ostream& operator<<(std::ostream& os, const Error& error){
     os << error.mDescription;

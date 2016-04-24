@@ -21,7 +21,7 @@ namespace task{
             self->RsIndex = RInstr::GetRs(instr_bits);
 
             auto* ctx = self->context;
-            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPLINE_STALL;
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
         };
 
         /*
@@ -80,7 +80,7 @@ namespace task{
                 ctx->RegReserves[self->RdIndex] = self;
             }
 
-            return (stall)? Error::PIPLINE_STALL : Error::NONE;
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
         };
 
         /*
@@ -96,7 +96,7 @@ namespace task{
 
             RISING_EDGE_FENCE();
 
-            return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPLINE_STALL;
+            return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPELINE_STALL;
         };
 
         /*
@@ -138,7 +138,7 @@ namespace task{
 
                     self->RdValue = rd_value;
 
-                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPLINE_STALL;
+                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
                 })
                 .DM(RInstr::ForwardRegsDM)
                 .WB(RInstr::WriteRegsWB);
@@ -160,7 +160,7 @@ namespace task{
 
                     self->RdValue = rd_value;
 
-                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPLINE_STALL;
+                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
                 })
                 .DM(RInstr::ForwardRegsDM)
                 .WB(RInstr::WriteRegsWB);

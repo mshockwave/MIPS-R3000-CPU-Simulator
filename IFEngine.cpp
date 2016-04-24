@@ -66,7 +66,7 @@ void IFEngine::Start(){
 
         //TODO: Error handling
         /*auto ret = */task_obj->DoIF();
-        //stall = (ret == Error::PIPLINE_STALL);
+        //stall = (ret == Error::PIPELINE_STALL);
 
         FALLING_EDGE_FENCE();
 
