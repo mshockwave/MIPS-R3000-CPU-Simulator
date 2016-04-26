@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 project(ArchiHW1)
 
 set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -g -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}") #default: Debug
 #Do not use -O3!!
 set(CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os -std=c++11")
 
@@ -56,6 +55,26 @@ endif ()
 
 if(NOT DEFINED OUT_EXE_NAME)
     set(OUT_EXE_NAME pipeline)
+endif()
+
+# Verbose level under Debug type
+# Value: Trace, Normal, Quiet
+if(DEFINED VERBOSE_LEVEL)
+    if(VERBOSE_LEVEL STREQUAL "Trace")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=2")
+
+    elseif(VERBOSE_LEVEL STREQUAL "Normal")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=1")
+
+    elseif(VERBOSE_LEVEL STREQUAL "Quiet")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=0")
+
+    else()
+        message(FATAL_ERROR "VERBOSE_LEVEL values: Trace, Normal, Quiet")
+    endif()
+else()
+    #Default: Normal
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=1")
 endif()
 
 add_executable(${OUT_EXE_NAME}

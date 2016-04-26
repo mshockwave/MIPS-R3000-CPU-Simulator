@@ -29,7 +29,7 @@ namespace engines{
                 }
             }
 
-            DEBUG_BLOCK{
+            TRACE_DEBUG_BLOCK{
                 boost::mutex::scoped_lock lk(Log::Mux::D);
                 if(task_obj == nullptr){
                     Log::D("IDEngine") << "Next Task null!" << std::endl;
@@ -84,7 +84,7 @@ namespace engines{
                 ctx->ID_EX.erase(ctx->ID_EX.begin());
             }
 
-            DEBUG_BLOCK{
+            TRACE_DEBUG_BLOCK{
                 boost::mutex::scoped_lock lk(Log::Mux::D);
                 if(task_obj == nullptr){
                     Log::D("EXEngine") << "Next Task null!" << std::endl;
@@ -138,7 +138,7 @@ namespace engines{
                 ctx->EX_DM.erase(ctx->EX_DM.begin());
             }
 
-            DEBUG_BLOCK{
+            TRACE_DEBUG_BLOCK{
                 boost::mutex::scoped_lock lk(Log::Mux::D);
                 if(task_obj == nullptr){
                     Log::D("DMEngine") << "Next Task null!" << std::endl;
@@ -192,7 +192,7 @@ namespace engines{
                 ctx->DM_WB.erase(ctx->DM_WB.begin());
             }
 
-            DEBUG_BLOCK{
+            TRACE_DEBUG_BLOCK{
                 boost::mutex::scoped_lock lk(Log::Mux::D);
                 if(task_obj == nullptr){
                     Log::D("WBEngine") << "Next Task null!" << std::endl;
