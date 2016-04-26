@@ -71,7 +71,7 @@ namespace task{
             //Clean forwarding storage
             ctx->FWD_ID_EXE.Available.store(false);
 
-            bool stall = false;
+            bool stall = need_wait;
             if(!need_wait){
                 //Push next task
                 stall = !ctx->pushTask(ctx->ID_EX, self);
