@@ -120,36 +120,41 @@ private:
 
         boost::thread_group group;
         /*IF*/
-        group.create_thread([&]()->void{
+        auto* if_thread = group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
             engine.Start();
         });
         /*ID*/
-        group.create_thread([&]()->void{
+        auto* id_thread = group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::IDEngineRunnable);
             engine.Start();
         });
         /*EX*/
-        group.create_thread([&]()->void{
+        auto* ex_thread = group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::EXEngineRunnable);
             engine.Start();
         });
         /*DM*/
-        group.create_thread([&]()->void{
+        auto* dm_thread = group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::DMEngineRunnable);
             engine.Start();
         });
         /*WB*/
-        group.create_thread([&]()->void{
+        auto* wb_thread = group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::WBEngineRunnable);
             engine.Start();
         });
 
-        group.join_all();
+        //group.join_all();
+        ctx.StartPrinterLoop(if_thread,
+                             id_thread,
+                             ex_thread,
+                             dm_thread,
+                             wb_thread);
 
         AssertEqual((int)ctx.Registers[4], 22, "$4 Value");
         AssertEqual((int)ctx.Registers[3], 2, "$3 Value");

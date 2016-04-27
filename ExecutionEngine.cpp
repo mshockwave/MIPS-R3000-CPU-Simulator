@@ -43,6 +43,7 @@ namespace engines{
             auto err = task_obj->DoID();
             stall = (err == Error::PIPELINE_STALL);
             ctx->IFStall.store(stall);
+            //TODO: Print ID forwarding
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -52,9 +53,15 @@ namespace engines{
 
             FALLING_EDGE_FENCE();
 
-            //TODO: Print here
+            std::stringstream ss;
+            ss << task_obj->name;
+            if(stall) ss << " to_be_stalled";
+            ctx->IDMessageQueue.Push(ss.str());
 
-            if(ready_to_dead) break;
+            if(ready_to_dead){
+                ctx->IDMessageQueue.Push(Context::MSG_END);
+                break;
+            }
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){
@@ -96,7 +103,8 @@ namespace engines{
             if(task_obj == nullptr) continue;
 
             //TODO: Error handling
-            /*auto err = */task_obj->DoEX();
+            auto err = task_obj->DoEX();
+            bool stall = (err == Error::PIPELINE_STALL);
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -106,9 +114,15 @@ namespace engines{
 
             FALLING_EDGE_FENCE();
 
-            //TODO: Print here
+            std::stringstream ss;
+            ss << task_obj->name;
+            if(stall) ss << " to_be_stalled";
+            ctx->EXMessageQueue.Push(ss.str());
 
-            if(ready_to_dead) break;
+            if(ready_to_dead){
+                ctx->EXMessageQueue.Push(Context::MSG_END);
+                break;
+            }
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){
@@ -150,7 +164,9 @@ namespace engines{
             if(task_obj == nullptr) continue;
 
             //TODO: Error handling
-            /*auto err = */task_obj->DoDM();
+            auto err = task_obj->DoDM();
+            bool stall = (err == Error::PIPELINE_STALL);
+            //TODO: Print forwarding
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -160,9 +176,15 @@ namespace engines{
 
             FALLING_EDGE_FENCE();
 
-            //TODO: Print here
+            std::stringstream ss;
+            ss << task_obj->name;
+            if(stall) ss << " to_be_stalled";
+            ctx->DMMessageQueue.Push(ss.str());
 
-            if(ready_to_dead) break;
+            if(ready_to_dead){
+                ctx->DMMessageQueue.Push(Context::MSG_END);
+                break;
+            }
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){
@@ -204,7 +226,8 @@ namespace engines{
             if(task_obj == nullptr) continue;
 
             //TODO: Error handling
-            /*auto err = */task_obj->DoWB();
+            auto err = task_obj->DoWB();
+            bool stall = (err == Error::PIPELINE_STALL);
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -214,9 +237,15 @@ namespace engines{
 
             FALLING_EDGE_FENCE();
 
-            //TODO: Print here
+            std::stringstream ss;
+            ss << task_obj->name;
+            if(stall) ss << " to_be_stalled";
+            ctx->WBMessageQueue.Push(ss.str());
 
-            if(ready_to_dead) break;
+            if(ready_to_dead){
+                ctx->WBMessageQueue.Push(Context::MSG_END);
+                break;
+            }
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){

@@ -10,6 +10,9 @@
 #include <mutex>
 
 #include <boost/atomic/atomic.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/chrono/chrono.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "Types.h"
 #include "RawBinary.h"
@@ -247,16 +250,24 @@ public:
     /*
      * Append current cycle's snapshot
      * */
-    void DumpSnapshot();
+    void DumpRegisters();
 
     /*
      * Output streams for stages
      * */
-    BlockingQueue<std::string> IFMessageQueue,
+    static const std::string MSG_END;
+    typedef BlockingQueue<std::string> msg_queue_t;
+    msg_queue_t IFMessageQueue,
             IDMessageQueue,
             EXMessageQueue,
             DMMessageQueue,
             WBMessageQueue;
+
+    void StartPrinterLoop(boost::thread* if_thread,
+                          boost::thread* id_thread,
+                          boost::thread* ex_thread,
+                          boost::thread* dm_thread,
+                          boost::thread* wb_thread);
 
     /*
      * Append error

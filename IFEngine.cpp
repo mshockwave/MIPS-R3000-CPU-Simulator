@@ -5,14 +5,18 @@ void IFEngine::Start(){
     //bool stall = false;
     TaskHandle* task_obj = nullptr;
 
+    bool is_first_cycle = true;
+
     while(true) {
 
         if (!(  mContext->PcJump ||
                 mContext->PcFlush ||
-                mContext->IFStall.load() )) {
+                mContext->IFStall.load() ||
+                is_first_cycle )) {
             mContext->AdvancePC();
         } else {
             mContext->PcJump = false;
+            is_first_cycle = false;
         }
         reg_t pc = mContext->GetPC();
 
@@ -32,7 +36,7 @@ void IFEngine::Start(){
             if(op == 0x00){
                 //R Type Instructions
                 uint32_t func = extractInstrBits(instr.GetBitsInstruction(), 5, 0);
-                DEBUG_BLOCK{
+                TRACE_DEBUG_BLOCK{
                     boost::mutex::scoped_lock lk(Log::Mux::D);
                     Log::D("IFEngine") << "R Type Func: " << (int)func << std::endl;
                 }
@@ -40,7 +44,7 @@ void IFEngine::Start(){
                 if (UNLIKELY(itOpMap == task::RtypeInstrFuncMap.end())) {
                     //Not found
                     //Halt
-                    DEBUG_BLOCK{
+                    TRACE_DEBUG_BLOCK{
                         boost::mutex::scoped_lock lk(Log::Mux::D);
                         Log::D("IFEngine") << "R Type func not found!" << std::endl;
                     }
@@ -48,7 +52,7 @@ void IFEngine::Start(){
                 }
                 next_task = itOpMap->second;
             }else{
-                DEBUG_BLOCK{
+                TRACE_DEBUG_BLOCK{
                     boost::mutex::scoped_lock lk(Log::Mux::D);
                     Log::D("IFEngine") << "Op: " << (int)op << std::endl;
                 }
@@ -56,7 +60,7 @@ void IFEngine::Start(){
                 if (UNLIKELY(itOpMap == task::FirstInstrOpMap.end())) {
                     //Not found
                     //Halt
-                    DEBUG_BLOCK{
+                    TRACE_DEBUG_BLOCK{
                         boost::mutex::scoped_lock lk(Log::Mux::D);
                         Log::D("IFEngine") << "Op not found!" << std::endl;
                     }
@@ -75,7 +79,7 @@ void IFEngine::Start(){
             task_obj = t.Get(mContext, instr_ptr, &clock);
         }
 
-        DEBUG_BLOCK{
+        TRACE_DEBUG_BLOCK{
             boost::mutex::scoped_lock lk(Log::Mux::D);
             Log::D("IFEngine") << "Next Task: " << task_obj->name << std::endl;
         };
@@ -94,10 +98,21 @@ void IFEngine::Start(){
 
         FALLING_EDGE_FENCE();
 
-        //TODO: Print
-        //TODO: Retrieve flush information here
+        if(instr_ptr != nullptr){
+            std::stringstream ss;
+            ss << "0x" << std::setw(8) << std::hex << std::uppercase << instr_ptr->GetBitsInstruction();
+            if(mContext->PcFlush){
+                ss << " to_be_flushed";
+            }else if(mContext->IFStall.load()){
+                ss << " to_be_stalled";
+            }
+            mContext->IFMessageQueue.Push(ss.str());
+        }
 
-        if(ready_to_dead) break;
+        if(ready_to_dead){
+            mContext->IFMessageQueue.Push(Context::MSG_END);
+            break;
+        }
     }
 
     while(mContext->DeadThreadNum < THREAD_COUNT){

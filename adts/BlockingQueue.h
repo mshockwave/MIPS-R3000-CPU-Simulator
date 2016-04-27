@@ -16,32 +16,41 @@ public:
             mx(),
             cv(){}
 
-    void Push(T& v) {
+    void Push(T v) {
         boost::mutex::scoped_lock lk(mx);
         queue.push(v);
-        cv.notify_all();
+        cv.notify_one();
     }
 
-    T& Pop(){
+    T Pop(){
         boost::mutex::scoped_lock lk(mx);
         while(queue.empty()){
             //Block
             cv.wait(lk);
         }
 
-        T& v = queue.front();
+        T v = queue.front();
         queue.pop();
         return v;
     }
 
-    T& Peek(){
+    T Peek(){
         boost::mutex::scoped_lock lk(mx);
+        while(queue.empty()){
+            //Block
+            cv.wait(lk);
+        }
         return queue.front();
     }
 
     bool IsEmpty(){
         boost::mutex::scoped_lock lk(mx);
         return queue.empty();
+    }
+
+    size_t Size(){
+        boost::mutex::scoped_lock lk(mx);
+        return queue.size();
     }
 
 private:
