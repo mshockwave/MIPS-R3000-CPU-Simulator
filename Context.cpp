@@ -80,16 +80,11 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
     while(!(if_dead && id_dead &&
             ex_dead && dm_dead && wb_dead)){
 
-        std::string tmp;
 
         if(!if_dead){
-            tmp = IFMessageQueue.Pop();
-            if(tmp != MSG_END){
-                if_msg = tmp;
-            }else{
-                trimOutput(if_msg);
-                if_dead |= true;
-            }
+            if_msg = IFMessageQueue.PopAndCheck(Context::MSG_END, if_dead);
+        }else{
+            trimOutput(if_msg);
         }
         {
 #ifndef NDEBUG
@@ -99,13 +94,9 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!id_dead){
-            tmp = IDMessageQueue.Pop();
-            if(tmp != MSG_END){
-                id_msg = tmp;
-            }else{
-                trimOutput(id_msg);
-                id_dead |= true;
-            }
+            id_msg = IDMessageQueue.PopAndCheck(Context::MSG_END, id_dead);
+        }else{
+            trimOutput(id_msg);
         }
         {
 #ifndef NDEBUG
@@ -115,13 +106,9 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!ex_dead){
-            tmp = EXMessageQueue.Pop();
-            if(tmp != MSG_END){
-                ex_msg = tmp;
-            }else{
-                trimOutput(ex_msg);
-                ex_dead |= true;
-            }
+            ex_msg = EXMessageQueue.PopAndCheck(Context::MSG_END, ex_dead);
+        }else{
+            trimOutput(ex_msg);
         }
         {
 #ifndef NDEBUG
@@ -131,13 +118,9 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!dm_dead){
-            tmp = DMMessageQueue.Pop();
-            if(tmp != MSG_END){
-                dm_msg = tmp;
-            }else{
-                trimOutput(dm_msg);
-                dm_dead |= true;
-            }
+            dm_msg = DMMessageQueue.PopAndCheck(Context::MSG_END, dm_dead);
+        }else{
+            trimOutput(dm_msg);
         }
         {
 #ifndef NDEBUG
@@ -147,13 +130,9 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!wb_dead){
-            tmp = WBMessageQueue.Pop();
-            if(tmp != MSG_END){
-                wb_msg = tmp;
-            }else{
-                trimOutput(wb_msg);
-                wb_dead |= true;
-            }
+            wb_msg = WBMessageQueue.PopAndCheck(Context::MSG_END, wb_dead);
+        }else{
+            trimOutput(wb_msg);
         }
         {
 #ifndef NDEBUG

@@ -33,6 +33,22 @@ public:
         queue.pop();
         return v;
     }
+    T PopAndCheck(const T& cmpr, bool& result){
+        boost::mutex::scoped_lock lk(mx);
+        while(queue.empty()){
+            //Block
+            cv.wait(lk);
+        }
+
+        T v = queue.front();
+        queue.pop();
+        if(!queue.empty()){
+            result = (cmpr == queue.front());
+        }else{
+            result = false;
+        }
+        return v;
+    }
 
     T Peek(){
         boost::mutex::scoped_lock lk(mx);
