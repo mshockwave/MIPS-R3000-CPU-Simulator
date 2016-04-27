@@ -94,7 +94,7 @@ private:
         task::InitInstructionMap();
         task::InitTasks();
 
-        ctx.mInstrStartAddr = 0x04;
+        ctx.mInstrStartAddr = 0x00;
         ctx.Registers[1] = 0xA;
         ctx.Registers[2] = 0xC;
 
@@ -179,7 +179,7 @@ private:
         task::InitInstructionMap();
         task::InitTasks();
 
-        ctx.mInstrStartAddr = 0x04;
+        ctx.mInstrStartAddr = 0x00;
         ctx.Registers[1] = 0xA;
         ctx.Registers[2] = 0xC;
 
