@@ -59,6 +59,14 @@ void Context::putError(Error &error) {
     }
 }
 
+static void trimOutput(std::string& str){
+    //Find first space
+    auto index = str.find(' ');
+    if(index != std::string::npos){
+        str = str.substr(0, index);
+    }
+}
+
 void Context::StartPrinterLoop(boost::thread* if_thread,
                                boost::thread* id_thread,
                                boost::thread* ex_thread,
@@ -79,6 +87,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             if(tmp != MSG_END){
                 if_msg = tmp;
             }else{
+                trimOutput(if_msg);
                 if_dead |= true;
             }
         }
@@ -94,6 +103,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             if(tmp != MSG_END){
                 id_msg = tmp;
             }else{
+                trimOutput(id_msg);
                 id_dead |= true;
             }
         }
@@ -109,6 +119,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             if(tmp != MSG_END){
                 ex_msg = tmp;
             }else{
+                trimOutput(ex_msg);
                 ex_dead |= true;
             }
         }
@@ -124,6 +135,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             if(tmp != MSG_END){
                 dm_msg = tmp;
             }else{
+                trimOutput(dm_msg);
                 dm_dead |= true;
             }
         }
@@ -139,6 +151,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             if(tmp != MSG_END){
                 wb_msg = tmp;
             }else{
+                trimOutput(wb_msg);
                 wb_dead |= true;
             }
         }
