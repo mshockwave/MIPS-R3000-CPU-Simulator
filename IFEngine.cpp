@@ -100,7 +100,7 @@ void IFEngine::Start(){
 
         if(instr_ptr != nullptr){
             std::stringstream ss;
-            ss << "0x" << std::setw(8) << std::hex << std::uppercase << instr_ptr->GetBitsInstruction();
+            ss << std::setfill('0') << "0x" << std::setw(8) << std::hex << std::uppercase << instr_ptr->GetBitsInstruction();
             if(mContext->PcFlush){
                 ss << " to_be_flushed";
             }else if(mContext->IFStall.load()){
