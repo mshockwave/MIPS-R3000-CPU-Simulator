@@ -15,7 +15,7 @@ namespace task{
 
 
         /*Init special task*/
-        TasksTable[OP_NOP].Name("nop", OP_NOP)
+        TasksTable[OP_NOP].Name("NOP", OP_NOP)
                 .IF(STAGE_TASK(){
 
                     auto* ctx = self->context;
@@ -62,7 +62,7 @@ namespace task{
                     return Error::NONE;
                 });
 
-        TasksTable[OP_HALT].Name("halt", OP_HALT)
+        TasksTable[OP_HALT].Name("HALT", OP_HALT)
                 .IF(STAGE_TASK(){
 
                     auto* ctx = self->context;

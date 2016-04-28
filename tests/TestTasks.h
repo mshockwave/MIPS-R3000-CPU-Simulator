@@ -49,7 +49,7 @@ private:
         auto* add_task = task::TasksTable[task::OP_ADD]
                 .Get(&ctx, &add_instr, &clock_handle);
 
-        AssertEqual(add_task->name, std::string("add"), "Test task");
+        AssertEqual(add_task->name, std::string("ADD"), "Test task");
 
         auto err = add_task->DoIF();
         //Log::V(mName) << "IF error: " << err << std::endl;
@@ -73,8 +73,6 @@ private:
         err = add_task->DoDM();
         //Log::V(mName) << "DM error: " << err << std::endl;
         AssertEqual(err, Error::NONE, "DM return result");
-        AssertEqual(ctx.FWD_ID_EXE.Available.load(), true, "Forward storage available");
-        AssertEqual((int)ctx.FWD_ID_EXE.RegId, 4, "Forward register index");
 
         delete add_task;
 

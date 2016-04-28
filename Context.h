@@ -64,8 +64,27 @@ public:
     //Global Special registers
     reg_t &ZERO, &AT, &SP, &FP, &RA;
 
-    typedef boost::atomic<TaskHandle*> reg_reserve_t;
-    reg_reserve_t RegReserves[REGISTER_COUNT];
+    struct RegReserve {
+        TaskHandle* Holder;
+        reg_t Value;
+
+        bool IDAvailable, EXAvailable;
+        bool EXForward;
+
+        RegReserve() :
+                Holder(nullptr),
+                Value(0),
+                IDAvailable(false), EXAvailable(false),
+                EXForward(false){ }
+        void Reset(TaskHandle* h){
+            Holder = h;
+            Value = 0;
+            IDAvailable = EXAvailable = false;
+            EXForward = false;
+        }
+    };
+    //typedef boost::atomic<TaskHandle*> reg_reserve_t;
+    RegReserve RegReserves[REGISTER_COUNT];
 
     const unsigned int STAGE_REG_BUF_SIZE = 1;
     StageRegister IF_ID, ID_EX, EX_DM, DM_WB;
@@ -78,17 +97,6 @@ public:
         }
     }
 
-    struct ForwardStorage{
-        uint8_t RegId;
-        reg_t RegValue;
-        boost::atomic<bool> Available;
-
-        ForwardStorage() :
-                RegId(0),
-                RegValue(0),
-                Available(false) {}
-    };
-    ForwardStorage FWD_ID_EXE;
 
 #ifndef NDEBUG
     /*
@@ -120,7 +128,7 @@ public:
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
             Registers[i] = (byte_t)0;
-            RegReserves[i] = nullptr;
+            RegReserves[i].Reset(nullptr);
         }
 
         //Zero memory
@@ -156,7 +164,7 @@ public:
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
             Registers[i] = (byte_t)0;
-            RegReserves[i] = nullptr;
+            RegReserves[i].Reset(nullptr);
         }
 
         //Load PC from rawBinary

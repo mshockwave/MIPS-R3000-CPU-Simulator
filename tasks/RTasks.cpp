@@ -27,6 +27,7 @@ namespace task{
         /*
          * Load rs, rt value
          * And detect stalling
+         * For non-branch operations
          * */
         TaskHandle::stage_task_t LoadRegsID = STAGE_TASK(){
             auto* ctx = self->context;
@@ -40,36 +41,33 @@ namespace task{
             auto rs_index = self->RsIndex;
 
             bool need_wait = false;
-            if(reg_reserves[rt_index].load() == nullptr){
+            if(reg_reserves[rt_index].Holder == nullptr){
 
                 //Load from main registers
                 self->RtValue = ctx->Registers[rt_index];
-            }else if(ctx->FWD_ID_EXE.Available.load() &&
-                     ctx->FWD_ID_EXE.RegId == rt_index){
 
-                //Load from forward storage
-                self->RtValue = ctx->FWD_ID_EXE.RegValue;
-                self->ForwardRt = true;
+            }else if(reg_reserves[rt_index].EXAvailable){
+
+                //Can EX Forward
+                reg_reserves[rt_index].EXForward = true;
+
             }else{
                 need_wait = true;
             }
 
-            if(reg_reserves[rs_index].load() == nullptr){
+            if(reg_reserves[rs_index].Holder == nullptr){
 
                 //Load from main registers
                 self->RsValue = ctx->Registers[rs_index];
-            }else if(ctx->FWD_ID_EXE.Available.load() &&
-                     ctx->FWD_ID_EXE.RegId == rs_index){
 
-                //Load from forward storage
-                self->RsValue = ctx->FWD_ID_EXE.RegValue;
-                self->ForwardRs = true;
+            }else if(reg_reserves[rs_index].EXAvailable){
+
+                //Can EX Forward
+                reg_reserves[rs_index].EXForward = true;
+
             }else{
                 need_wait = true;
             }
-
-            //Clean forwarding storage
-            ctx->FWD_ID_EXE.Available.store(false);
 
             bool stall = need_wait;
             if(!need_wait){
@@ -77,7 +75,8 @@ namespace task{
                 stall = !ctx->pushTask(ctx->ID_EX, self);
 
                 //Reserve destination registers
-                ctx->RegReserves[self->RdIndex] = self;
+                //ctx->RegReserves[self->RdIndex] = self;
+                ctx->RegReserves[self->RdIndex].Reset(self);
             }
 
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
@@ -89,10 +88,12 @@ namespace task{
         TaskHandle::stage_task_t ForwardRegsDM = STAGE_TASK(){
             auto* ctx = self->context;
 
+            /*
             //Write to forwarding storage
             ctx->FWD_ID_EXE.RegId = self->RdIndex;
             ctx->FWD_ID_EXE.RegValue = self->RdValue;
             ctx->FWD_ID_EXE.Available.store(true);
+             */
 
             RISING_EDGE_FENCE();
 
@@ -108,8 +109,8 @@ namespace task{
             //Write back to main registers
             ctx->Registers[self->RdIndex] = self->RdValue;
             //Clean destination register reservation
-            if(ctx->RegReserves[self->RdIndex].load() == self){
-                ctx->RegReserves[self->RdIndex] = nullptr;
+            if(ctx->RegReserves[self->RdIndex].Holder == self){
+                ctx->RegReserves[self->RdIndex].Reset(nullptr);
             }
 
             RISING_EDGE_FENCE();
@@ -121,16 +122,27 @@ namespace task{
 
     void InitRTasks(){
 
-        TasksTable[OP_ADD].Name("add", OP_ADD)
+        TasksTable[OP_ADD].Name("ADD", OP_ADD)
                 .IF(RInstr::ResolveRegsIF)
                 .ID(RInstr::LoadRegsID)
                 .EX(STAGE_TASK(){
 
                     auto* ctx = self->context;
+                    auto& reg_reserves = ctx->RegReserves;
 
                     //TODO: Error detection
                     auto rt_value = self->RtValue;
                     auto rs_value = self->RsValue;
+                    if(reg_reserves[self->RtIndex].EXForward){
+                        rt_value = reg_reserves[self->RtIndex].Value;
+                    }
+                    if(reg_reserves[self->RsIndex].EXForward){
+                        rs_value = reg_reserves[self->RsIndex].Value;
+                    }
+
+                    // Prepare forwarding info
+                    // For result of this stage
+                    reg_reserves[self->RdIndex].EXAvailable = true;
 
                     auto rd_value = rt_value + rs_value;
 
@@ -138,27 +150,43 @@ namespace task{
 
                     self->RdValue = rd_value;
 
+                    reg_reserves[self->RdIndex].Value = rd_value;
+                    reg_reserves[self->RdIndex].IDAvailable = true;
+
                     return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
                 })
                 .DM(RInstr::ForwardRegsDM)
                 .WB(RInstr::WriteRegsWB);
 
-        TasksTable[OP_SUB].Name("sub", OP_SUB)
+        TasksTable[OP_SUB].Name("SUB", OP_SUB)
                 .IF(RInstr::ResolveRegsIF)
                 .ID(RInstr::LoadRegsID)
                 .EX(STAGE_TASK(){
 
                     auto* ctx = self->context;
+                    auto& reg_reserves = ctx->RegReserves;
 
                     //TODO: Error detection
                     auto rt_value = self->RtValue;
                     auto rs_value = self->RsValue;
+                    if(reg_reserves[self->RtIndex].EXForward){
+                        rt_value = reg_reserves[self->RtIndex].Value;
+                    }
+                    if(reg_reserves[self->RsIndex].EXForward){
+                        rs_value = reg_reserves[self->RsIndex].Value;
+                    }
+
+                    // Prepare forwarding info
+                    // For result of this stage
+                    reg_reserves[self->RdIndex].EXAvailable = true;
 
                     auto rd_value = rs_value - rt_value;
 
                     RISING_EDGE_FENCE();
 
                     self->RdValue = rd_value;
+
+                    reg_reserves[self->RdIndex].IDAvailable = true;
 
                     return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
                 })

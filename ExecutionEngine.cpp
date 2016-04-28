@@ -102,6 +102,16 @@ namespace engines{
 
             if(task_obj == nullptr) continue;
 
+            //Forwarding message
+            int rt_forward_reg_id = -1;
+            int rs_forward_reg_id = -1;
+            if(ctx->RegReserves[task_obj->RsIndex].EXForward){
+                rs_forward_reg_id =  task_obj->RsIndex;
+            }
+            if(ctx->RegReserves[task_obj->RtIndex].EXForward){
+                rt_forward_reg_id =  task_obj->RtIndex;
+            }
+
             //TODO: Error handling
             auto err = task_obj->DoEX();
             bool stall = (err == Error::PIPELINE_STALL);
@@ -116,7 +126,16 @@ namespace engines{
 
             std::stringstream ss;
             ss << task_obj->name;
-            if(stall) ss << " to_be_stalled";
+            if(stall){
+                ss << " to_be_stalled";
+            }else{
+                if(rs_forward_reg_id > 0){
+                    ss << " fwd_EX-DM_rs$" << rs_forward_reg_id;
+                }
+                if(rt_forward_reg_id > 0){
+                    ss << " fwd_EX-DM_rt$" << rt_forward_reg_id;
+                }
+            }
             ctx->EXMessageQueue.Push(ss.str());
 
             if(ready_to_dead){
