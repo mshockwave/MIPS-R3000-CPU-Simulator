@@ -24,6 +24,7 @@ class Context {
 
 #ifndef NDEBUG
     friend class TestTasks;
+    friend class TestTasksError;
 #endif
 
 #define CHECK_MEMORY_BOUND(offset) \
@@ -262,11 +263,6 @@ public:
     CounterType GetCycleCounter(){ return mCycleCounter; }
 
     /*
-     * Append current cycle's snapshot
-     * */
-    void DumpRegisters();
-
-    /*
      * Output queues for stages
      * */
     static const std::string MSG_END;
@@ -284,6 +280,9 @@ public:
             DMErrorQueue,
             WBErrorQueue;
 
+    typedef BlockingQueue<RegsDiff> reg_queue_t;
+    reg_queue_t RegsQueue;
+
     void StartPrinterLoop(boost::thread* if_thread,
                           boost::thread* id_thread,
                           boost::thread* ex_thread,
@@ -293,7 +292,7 @@ public:
     /*
      * Append error
      * */
-    void putError(Error& error);
+    void PutError(Error &error);
 
 };
 

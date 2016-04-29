@@ -272,6 +272,8 @@ namespace engines{
         auto* ctx = self->GetContext();
         const auto& clock = self->GetClock();
 
+        int cycle = 0;
+
         while(true){
 
             TaskHandle *task_obj;
@@ -313,10 +315,10 @@ namespace engines{
                     //Halt
                     ctx->ThreadGroup->interrupt_all();
                 }else{
+                    err.SetCycle(cycle+1);
                     ctx->WBErrorQueue.Push(err);
                 }
             }
-            //TODO: Push to register message queue
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -328,6 +330,8 @@ namespace engines{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
                 ctx->WBMessageQueue.Push(Context::MSG_END);
+                regs_diff.Abort = true;
+                ctx->RegsQueue.Push(regs_diff);
                 return;
             }
 
@@ -336,10 +340,16 @@ namespace engines{
             if(stall) ss << " to_be_stalled";
             ctx->WBMessageQueue.Push(ss.str());
 
+            ctx->RegsQueue.Push(regs_diff);
+
+            delete task_obj;
+
             if(ready_to_dead){
                 ctx->WBMessageQueue.Push(Context::MSG_END);
                 break;
             }
+
+            cycle++;
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){
@@ -355,6 +365,5 @@ namespace engines{
             }
         }
 
-        //TODO: Release task memory!!
     };
 } //namespace engines

@@ -38,11 +38,15 @@ private:
     //1 for the severe level, halt
     uint8_t mErrorLevel;
 
+    //Record happened cycle
+    int cycle;
+
 protected:
     Error(uint8_t id, uint8_t level, std::string description) :
             mErrorId(id),
             mDescription(description),
-            mErrorLevel(level) {}
+            mErrorLevel(level),
+            cycle(-1) {}
     Error(uint8_t id, std::string description) :
             Error(id, LEVEL_CONTINUE, description){}
 
@@ -58,6 +62,8 @@ public:
     static Error DATA_MISALIGNED;
 
     inline uint8_t GetErrorLevel() { return mErrorLevel; }
+    inline int GetCycle(){ return cycle; }
+    inline void SetCycle(int cycle_){ cycle = cycle_; }
 
     inline bool contains(const Error& e){
         return (mErrorId & e.mErrorId) != 0;
@@ -74,14 +80,18 @@ public:
 
     //Error mix
     Error operator+(Error& rhs){
-        return Error(rhs.mErrorId | this->mErrorId,
-                     rhs.mErrorLevel | this->mErrorLevel,
-                     "Mix Error");
+        Error e(rhs.mErrorId | this->mErrorId,
+                rhs.mErrorLevel | this->mErrorLevel,
+                "Mix Error");
+        e.SetCycle((this->cycle < 0)? rhs.cycle : this->cycle);
+        return e;
     }
     const Error operator+(const Error& rhs){
-        return Error(rhs.mErrorId | this->mErrorId,
-                     rhs.mErrorLevel | this->mErrorLevel,
-                     "Mix Error");
+        Error e(rhs.mErrorId | this->mErrorId,
+                rhs.mErrorLevel | this->mErrorLevel,
+                "Mix Error");
+        e.SetCycle((this->cycle < 0)? rhs.cycle : this->cycle);
+        return e;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Error& error);
@@ -103,13 +113,13 @@ struct RegsDiff {
     reg_t RegValue;
 
     reg_t PC;
-    bool IsTerminated;
+    bool Abort;
 
     RegsDiff() :
             RegIndex(0),
             RegValue(0),
             PC(0),
-            IsTerminated(false) { }
+            Abort(false) { }
 };
 
 #endif //ARCHIHW1_TYPES_H

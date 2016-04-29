@@ -34,6 +34,7 @@ struct Instructions{
      * For unit tests
      * */
     friend class TestTasks;
+    friend class TestTasksError;
 #endif
 
 private:

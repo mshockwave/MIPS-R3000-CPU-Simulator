@@ -24,38 +24,26 @@ void Context::loadMemory(RawBinary& rawBinary) {
     }
 }
 
-void Context::DumpRegisters() {
-
-    for(int i = 0; i < REGISTER_COUNT; i++){
-        mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << std::dec << i;
-        mSnapShotStream << ": 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << Registers[i] << std::endl;
-    }
-    mSnapShotStream << "PC: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << PC << std::endl;
-
-    //Epilogue
-    //mSnapShotStream << std::endl << std::endl;
-}
-
-void Context::putError(Error &error) {
+void Context::PutError(Error &error) {
 
     //Check errors
     if(error.contains(Error::WRITE_REG_ZERO)){
-        mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
+        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
         mErrorStream << Error::WRITE_REG_ZERO << std::endl;
     }
 
     if(error.contains(Error::MEMORY_ADDR_OVERFLOW)){
-        mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
+        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
         mErrorStream << Error::MEMORY_ADDR_OVERFLOW << std::endl;
     }
 
     if(error.contains(Error::DATA_MISALIGNED)){
-        mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
+        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
         mErrorStream << Error::DATA_MISALIGNED << std::endl;
     }
 
     if(error.contains(Error::NUMBER_OVERFLOW)){
-        mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
+        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
         mErrorStream << Error::NUMBER_OVERFLOW << std::endl;
     }
 }
@@ -78,6 +66,13 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 
     std::string if_msg, id_msg, ex_msg, dm_msg, wb_msg;
 
+    reg_t registers_clone[REGISTER_COUNT];
+    int i;
+    for(i = 0; i < REGISTER_COUNT; i++){
+        registers_clone[i] = Registers[i];
+    }
+    reg_t pc_;
+
     while(!(if_dead && id_dead &&
             ex_dead && dm_dead && wb_dead)){
 
@@ -99,10 +94,21 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         if(!WBErrorQueue.IsEmpty()){
             err = (err + WBErrorQueue.Pop());
         }
-        putError(err);
+        if(err != Error::NONE) PutError(err);
 
         mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
-        //TODO: Print registers
+
+        auto regs_diff = RegsQueue.Pop();
+        if(regs_diff.Abort) break;
+        if(regs_diff.RegIndex > 0){
+            registers_clone[regs_diff.RegIndex] = regs_diff.RegValue;
+        }
+        pc_ = regs_diff.PC;
+        for(i = 0; i < REGISTER_COUNT; i++){
+            mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << std::dec << i;
+            mSnapShotStream << ": 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << registers_clone[i] << std::endl;
+        }
+        mSnapShotStream << "PC: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << pc_ << std::endl;
 
         if(!if_dead){
             if_msg = IFMessageQueue.PopAndCheck(Context::MSG_END, &if_dead);
