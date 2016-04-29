@@ -46,7 +46,7 @@ namespace engines{
 
             auto err = task_obj->DoID();
             stall = (err == Error::PIPELINE_STALL);
-            ctx->IFStall.store(stall);
+            ctx->IFStall = stall;
 
             //ID Forwarding stuff
             int rs_forward_reg_id = -1;

@@ -11,7 +11,7 @@ void IFEngine::Start(){
 
         if (!(  mContext->PcJump ||
                 mContext->PcFlush.load() > 0 ||
-                mContext->IFStall.load() ||
+                mContext->IFStall ||
                 is_first_cycle )) {
             mContext->AdvancePC();
         } else {
@@ -75,7 +75,7 @@ void IFEngine::Start(){
             //Release previous
             delete task_obj;
         }
-        if( (!mContext->IFStall.load()) || task_obj == nullptr){
+        if( !mContext->IFStall || task_obj == nullptr){
             task_obj = t.Get(mContext, instr_ptr, &clock);
         }
 
@@ -101,7 +101,7 @@ void IFEngine::Start(){
             ss << std::setfill('0') << "0x" << std::setw(8) << std::hex << std::uppercase << instr_ptr->GetBitsInstruction();
             if(mContext->PcFlush.load() > 0){
                 ss << " to_be_flushed";
-            }else if(mContext->IFStall.load()){
+            }else if(mContext->IFStall){
                 ss << " to_be_stalled";
             }
             mContext->IFMessageQueue.Push(ss.str());

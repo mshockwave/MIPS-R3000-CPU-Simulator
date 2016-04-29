@@ -188,7 +188,7 @@ public:
     }
 
     //Pipeline operations
-    boost::atomic<bool> IFStall;
+    bool IFStall;
 
     //Thread operations
     ScopedReadWriteLock::mutex_type DeadThreadMux;
