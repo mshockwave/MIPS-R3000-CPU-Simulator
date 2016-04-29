@@ -64,11 +64,11 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
+            bool ready_to_abort = false;
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->IDMessageQueue.Push(Context::MSG_END);
-                return;
+                ready_to_abort = true;
             }
 
             std::stringstream ss;
@@ -85,6 +85,11 @@ namespace engines{
             }
             ctx->IDMessageQueue.Push(ss.str());
 
+            if(ready_to_abort){
+                ctx->IDMessageQueue.Push(Context::MSG_END);
+                return;
+            }
+
             if(ready_to_dead){
                 ctx->IDMessageQueue.Push(Context::MSG_END);
                 break;
@@ -99,7 +104,7 @@ namespace engines{
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->IDMessageQueue.Push(Context::MSG_END);
+                //ctx->IDMessageQueue.Push(Context::MSG_END);
                 return;
             }
         }
@@ -154,11 +159,11 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
+            bool ready_to_abort = false;
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->EXMessageQueue.Push(Context::MSG_END);
-                return;
+                ready_to_abort = true;
             }
 
             std::stringstream ss;
@@ -175,6 +180,11 @@ namespace engines{
             }
             ctx->EXMessageQueue.Push(ss.str());
 
+            if(ready_to_abort){
+                ctx->EXMessageQueue.Push(Context::MSG_END);
+                return;
+            }
+
             if(ready_to_dead){
                 ctx->EXMessageQueue.Push(Context::MSG_END);
                 break;
@@ -189,7 +199,7 @@ namespace engines{
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->EXMessageQueue.Push(Context::MSG_END);
+                //ctx->EXMessageQueue.Push(Context::MSG_END);
                 return;
             }
         }
@@ -235,17 +245,22 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
+            bool ready_to_abort = false;
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->DMMessageQueue.Push(Context::MSG_END);
-                return;
+                ready_to_abort = true;
             }
 
             std::stringstream ss;
             ss << task_obj->name;
             if(stall) ss << " to_be_stalled";
             ctx->DMMessageQueue.Push(ss.str());
+
+            if(ready_to_abort){
+                ctx->DMMessageQueue.Push(Context::MSG_END);
+                return;
+            }
 
             if(ready_to_dead){
                 ctx->DMMessageQueue.Push(Context::MSG_END);
@@ -261,7 +276,7 @@ namespace engines{
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->DMMessageQueue.Push(Context::MSG_END);
+                //ctx->DMMessageQueue.Push(Context::MSG_END);
                 return;
             }
         }
@@ -311,12 +326,11 @@ namespace engines{
             }
 
             if(err != Error::NONE && !stall){
+                err.SetCycle(cycle+1);
+                ctx->WBErrorQueue.Push(err);
                 if(err.GetErrorLevel() >= Error::LEVEL_HALT){
                     //Halt
                     ctx->ThreadGroup->interrupt_all();
-                }else{
-                    err.SetCycle(cycle+1);
-                    ctx->WBErrorQueue.Push(err);
                 }
             }
 
@@ -326,13 +340,11 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
+            bool ready_to_abort = false;
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->WBMessageQueue.Push(Context::MSG_END);
-                regs_diff.Abort = true;
-                ctx->RegsQueue.Push(regs_diff);
-                return;
+                ready_to_abort = true;
             }
 
             std::stringstream ss;
@@ -340,9 +352,16 @@ namespace engines{
             if(stall) ss << " to_be_stalled";
             ctx->WBMessageQueue.Push(ss.str());
 
-            ctx->RegsQueue.Push(regs_diff);
-
             delete task_obj;
+
+            if(ready_to_abort){
+                ctx->WBMessageQueue.Push(Context::MSG_END);
+                regs_diff.Abort = true;
+                ctx->RegsQueue.Push(regs_diff);
+                return;
+            }
+
+            ctx->RegsQueue.Push(regs_diff);
 
             if(ready_to_dead){
                 ctx->WBMessageQueue.Push(Context::MSG_END);
@@ -360,7 +379,7 @@ namespace engines{
             try{
                 FALLING_EDGE_FENCE();
             }catch(boost::thread_interrupted&){
-                ctx->WBMessageQueue.Push(Context::MSG_END);
+                //ctx->WBMessageQueue.Push(Context::MSG_END);
                 return;
             }
         }

@@ -292,7 +292,7 @@ public:
     /*
      * Append error
      * */
-    void PutError(Error &error);
+    bool PrintError();
 
 };
 

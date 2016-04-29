@@ -24,9 +24,34 @@ void Context::loadMemory(RawBinary& rawBinary) {
     }
 }
 
-void Context::PutError(Error &error) {
+bool Context::PrintError() {
 
     //Check errors
+    bool empty = true;
+    Error error = Error::NONE;
+    if(!IFErrorQueue.IsEmpty()){
+        error = (error + IFErrorQueue.Pop());
+        empty = false;
+    }
+    if(!IDErrorQueue.IsEmpty()){
+        error = (error + IDErrorQueue.Pop());
+        empty = false;
+    }
+    if(!EXErrorQueue.IsEmpty()){
+        error = (error + EXErrorQueue.Pop());
+        empty = false;
+    }
+    if(!DMErrorQueue.IsEmpty()){
+        error = (error + DMErrorQueue.Pop());
+        empty = false;
+    }
+    if(!WBErrorQueue.IsEmpty()){
+        error = (error + WBErrorQueue.Pop());
+        empty = false;
+    }
+
+    if(empty) return true;
+
     if(error.contains(Error::WRITE_REG_ZERO)){
         mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
         mErrorStream << Error::WRITE_REG_ZERO << std::endl;
@@ -46,6 +71,8 @@ void Context::PutError(Error &error) {
         mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
         mErrorStream << Error::NUMBER_OVERFLOW << std::endl;
     }
+
+    return false;
 }
 
 static void trimOutput(std::string& str){
@@ -76,30 +103,13 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
     while(!(if_dead && id_dead &&
             ex_dead && dm_dead && wb_dead)){
 
-        //Print errors and registers
-        //Collect errors
-        Error err = Error::NONE;
-        if(!IFErrorQueue.IsEmpty()){
-            err = (err + IFErrorQueue.Pop());
-        }
-        if(!IDErrorQueue.IsEmpty()){
-            err = (err + IDErrorQueue.Pop());
-        }
-        if(!EXErrorQueue.IsEmpty()){
-            err = (err + EXErrorQueue.Pop());
-        }
-        if(!DMErrorQueue.IsEmpty()){
-            err = (err + DMErrorQueue.Pop());
-        }
-        if(!WBErrorQueue.IsEmpty()){
-            err = (err + WBErrorQueue.Pop());
-        }
-        if(err != Error::NONE) PutError(err);
+        //Print errors
+        PrintError();
+
+        auto regs_diff = RegsQueue.Pop();
 
         mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
 
-        auto regs_diff = RegsQueue.Pop();
-        if(regs_diff.Abort) break;
         if(regs_diff.RegIndex > 0){
             registers_clone[regs_diff.RegIndex] = regs_diff.RegValue;
         }
@@ -185,6 +195,8 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             }
         }
 
+        if(regs_diff.Abort) break;
+
         /*
         const boost::chrono::microseconds dur(0);
         if_dead |= if_thread->try_join_for(dur);
@@ -195,6 +207,9 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
          */
         IncCycleCounter();
     }
+
+    //Clean rest of the errors
+    while(!PrintError());
 
     /*
      * Remember to join before exit!!

@@ -94,11 +94,11 @@ void IFEngine::Start(){
             mContext->DeadThreadNum++;
         }
 
+        bool ready_to_abort = false;
         try{
             FALLING_EDGE_FENCE();
         }catch(boost::thread_interrupted&){
-            mContext->IFMessageQueue.Push(Context::MSG_END);
-            return;
+            ready_to_abort = true;
         }
 
         if(instr_ptr != nullptr){
@@ -110,6 +110,11 @@ void IFEngine::Start(){
                 ss << " to_be_stalled";
             }
             mContext->IFMessageQueue.Push(ss.str());
+        }
+
+        if(ready_to_abort){
+            mContext->IFMessageQueue.Push(Context::MSG_END);
+            return;
         }
 
         if(ready_to_dead){
@@ -126,7 +131,7 @@ void IFEngine::Start(){
         try{
             FALLING_EDGE_FENCE();
         }catch(boost::thread_interrupted&){
-            mContext->IFMessageQueue.Push(Context::MSG_END);
+            //mContext->IFMessageQueue.Push(Context::MSG_END);
             return;
         }
     }
