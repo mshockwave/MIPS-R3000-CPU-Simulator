@@ -69,18 +69,18 @@ public:
         reg_t Value;
 
         bool IDAvailable, EXAvailable;
-        bool EXForward;
+        bool EXForward, IDForward;
 
         RegReserve() :
                 Holder(nullptr),
                 Value(0),
                 IDAvailable(false), EXAvailable(false),
-                EXForward(false){ }
+                EXForward(false), IDForward(false){ }
         void Reset(TaskHandle* h){
             Holder = h;
             Value = 0;
             IDAvailable = EXAvailable = false;
-            EXForward = false;
+            EXForward = IDForward = false;
         }
     };
     //typedef boost::atomic<TaskHandle*> reg_reserve_t;
@@ -106,7 +106,7 @@ public:
             /*Registers*/
             PC(0),
             PcJump(false),
-            PcFlush(false),
+            PcFlush(0),
             ZERO(Registers[0]),
             AT(Registers[1]),
             SP(Registers[29]),
@@ -143,7 +143,7 @@ public:
             /*Registers*/
             PC(0),
             PcJump(false),
-            PcFlush(false),
+            PcFlush(0),
             ZERO(Registers[0]),
             AT(Registers[1]),
             SP(Registers[29]),
@@ -196,7 +196,8 @@ public:
 
     //PC operations
     bool PcJump;
-    bool PcFlush;
+    boost::atomic_int PcFlush;
+    const int PC_FLUSH_CONSUMER_COUNT = 2;
     const reg_t& GetPC(){ return PC; }
     Error SetPC(reg_t pc){
         Error e = Error::NONE;

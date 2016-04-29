@@ -10,7 +10,7 @@ void IFEngine::Start(){
     while(true) {
 
         if (!(  mContext->PcJump ||
-                mContext->PcFlush ||
+                mContext->PcFlush.load() > 0 ||
                 mContext->IFStall.load() ||
                 is_first_cycle )) {
             mContext->AdvancePC();
@@ -71,7 +71,7 @@ void IFEngine::Start(){
         }
 
         auto &t = task::TasksTable[next_task];
-        if(mContext->PcFlush && task_obj != nullptr){
+        if(mContext->PcFlush.fetch_sub(1) > 0 && task_obj != nullptr){
             //Release previous
             delete task_obj;
         }
@@ -83,8 +83,6 @@ void IFEngine::Start(){
             boost::mutex::scoped_lock lk(Log::Mux::D);
             Log::D("IFEngine") << "Next Task: " << task_obj->name << std::endl;
         };
-
-        mContext->PcFlush = false;
 
         //TODO: Error handling
         /*auto ret = */task_obj->DoIF();
@@ -101,7 +99,7 @@ void IFEngine::Start(){
         if(instr_ptr != nullptr){
             std::stringstream ss;
             ss << std::setfill('0') << "0x" << std::setw(8) << std::hex << std::uppercase << instr_ptr->GetBitsInstruction();
-            if(mContext->PcFlush){
+            if(mContext->PcFlush.load() > 0){
                 ss << " to_be_flushed";
             }else if(mContext->IFStall.load()){
                 ss << " to_be_stalled";

@@ -21,6 +21,10 @@ namespace engines{
                 if(ctx->IF_ID.empty()){
                     //Insert NOP
                     task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
+                }else if(ctx->PcFlush.fetch_sub(1) > 0){
+                    //Pop old task and insert NOP
+                    ctx->IF_ID.erase(ctx->IF_ID.begin());
+                    task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
                 }else{
                     //Get from IF_ID stage register
                     task_obj = ctx->IF_ID.front();
@@ -43,7 +47,16 @@ namespace engines{
             auto err = task_obj->DoID();
             stall = (err == Error::PIPELINE_STALL);
             ctx->IFStall.store(stall);
-            //TODO: Print ID forwarding
+
+            //ID Forwarding stuff
+            int rs_forward_reg_id = -1;
+            int rt_forward_reg_id = -1;
+            if(ctx->RegReserves[task_obj->RsIndex].IDForward){
+                rs_forward_reg_id = task_obj->RsIndex;
+            }
+            if(ctx->RegReserves[task_obj->RtIndex].IDForward){
+                rt_forward_reg_id = task_obj->RtIndex;
+            }
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -55,7 +68,16 @@ namespace engines{
 
             std::stringstream ss;
             ss << task_obj->name;
-            if(stall) ss << " to_be_stalled";
+            if(stall){
+                ss << " to_be_stalled";
+            }else{
+                if(rs_forward_reg_id > 0){
+                    ss << " fwd_EX-DM_rs$" << rs_forward_reg_id;
+                }
+                if(rt_forward_reg_id > 0){
+                    ss << " fwd_EX-DM_rt$" << rt_forward_reg_id;
+                }
+            }
             ctx->IDMessageQueue.Push(ss.str());
 
             if(ready_to_dead){
