@@ -83,7 +83,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 
 
         if(!if_dead){
-            if_msg = IFMessageQueue.PopAndCheck(Context::MSG_END, if_dead);
+            if_msg = IFMessageQueue.PopAndCheck(Context::MSG_END, &if_dead);
         }else{
             trimOutput(if_msg);
         }
@@ -95,7 +95,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!id_dead){
-            id_msg = IDMessageQueue.PopAndCheck(Context::MSG_END, id_dead);
+            id_msg = IDMessageQueue.PopAndCheck(Context::MSG_END, &id_dead);
         }else{
             trimOutput(id_msg);
         }
@@ -107,7 +107,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!ex_dead){
-            ex_msg = EXMessageQueue.PopAndCheck(Context::MSG_END, ex_dead);
+            ex_msg = EXMessageQueue.PopAndCheck(Context::MSG_END, &ex_dead);
         }else{
             trimOutput(ex_msg);
         }
@@ -119,7 +119,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!dm_dead){
-            dm_msg = DMMessageQueue.PopAndCheck(Context::MSG_END, dm_dead);
+            dm_msg = DMMessageQueue.PopAndCheck(Context::MSG_END, &dm_dead);
         }else{
             trimOutput(dm_msg);
         }
@@ -131,7 +131,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         }
 
         if(!wb_dead){
-            wb_msg = WBMessageQueue.PopAndCheck(Context::MSG_END, wb_dead);
+            wb_msg = WBMessageQueue.PopAndCheck(Context::MSG_END, &wb_dead);
         }else{
             trimOutput(wb_msg);
         }
@@ -142,11 +142,13 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             mSnapShotStream << "WB: " << wb_msg << std::endl << std::endl;
         }
 
+        /*
         const boost::chrono::microseconds dur(0);
         if_dead |= if_thread->try_join_for(dur);
         id_dead |= id_thread->try_join_for(dur);
         ex_dead |= ex_thread->try_join_for(dur);
         dm_dead |= dm_thread->try_join_for(dur);
         wb_dead |= wb_thread->try_join_for(dur);
+         */
     }
 }
