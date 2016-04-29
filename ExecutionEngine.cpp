@@ -64,7 +64,12 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->IDMessageQueue.Push(Context::MSG_END);
+                return;
+            }
 
             std::stringstream ss;
             ss << task_obj->name;
@@ -91,7 +96,12 @@ namespace engines{
 
             clock.rising_edge.wait();
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->IDMessageQueue.Push(Context::MSG_END);
+                return;
+            }
         }
     };
 
@@ -144,7 +154,12 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->EXMessageQueue.Push(Context::MSG_END);
+                return;
+            }
 
             std::stringstream ss;
             ss << task_obj->name;
@@ -171,7 +186,12 @@ namespace engines{
 
             clock.rising_edge.wait();
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->EXMessageQueue.Push(Context::MSG_END);
+                return;
+            }
         }
     };
 
@@ -215,7 +235,12 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->DMMessageQueue.Push(Context::MSG_END);
+                return;
+            }
 
             std::stringstream ss;
             ss << task_obj->name;
@@ -233,7 +258,12 @@ namespace engines{
 
             clock.rising_edge.wait();
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->DMMessageQueue.Push(Context::MSG_END);
+                return;
+            }
         }
     };
 
@@ -266,9 +296,27 @@ namespace engines{
 
             if(task_obj == nullptr) continue;
 
-            //TODO: Error handling
             auto err = task_obj->DoWB();
             bool stall = (err == Error::PIPELINE_STALL);
+
+            //Record modified registers
+            RegsDiff regs_diff;
+            regs_diff.PC = ctx->GetPC();
+            uint8_t m_index = task_obj->ModifyRegIndex;
+            if( m_index > 0 && m_index < REGISTER_COUNT){
+                regs_diff.RegIndex = m_index;
+                regs_diff.RegValue = ctx->Registers[m_index];
+            }
+
+            if(err != Error::NONE && !stall){
+                if(err.GetErrorLevel() >= Error::LEVEL_HALT){
+                    //Halt
+                    ctx->ThreadGroup->interrupt_all();
+                }else{
+                    ctx->WBErrorQueue.Push(err);
+                }
+            }
+            //TODO: Push to register message queue
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -276,7 +324,12 @@ namespace engines{
                 ctx->DeadThreadNum++;
             }
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->WBMessageQueue.Push(Context::MSG_END);
+                return;
+            }
 
             std::stringstream ss;
             ss << task_obj->name;
@@ -294,7 +347,12 @@ namespace engines{
 
             clock.rising_edge.wait();
 
-            FALLING_EDGE_FENCE();
+            try{
+                FALLING_EDGE_FENCE();
+            }catch(boost::thread_interrupted&){
+                ctx->WBMessageQueue.Push(Context::MSG_END);
+                return;
+            }
         }
 
         //TODO: Release task memory!!

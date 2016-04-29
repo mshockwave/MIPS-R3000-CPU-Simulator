@@ -94,7 +94,12 @@ void IFEngine::Start(){
             mContext->DeadThreadNum++;
         }
 
-        FALLING_EDGE_FENCE();
+        try{
+            FALLING_EDGE_FENCE();
+        }catch(boost::thread_interrupted&){
+            mContext->IFMessageQueue.Push(Context::MSG_END);
+            return;
+        }
 
         if(instr_ptr != nullptr){
             std::stringstream ss;
@@ -118,6 +123,11 @@ void IFEngine::Start(){
 
         clock.rising_edge.wait();
 
-        FALLING_EDGE_FENCE();
+        try{
+            FALLING_EDGE_FENCE();
+        }catch(boost::thread_interrupted&){
+            mContext->IFMessageQueue.Push(Context::MSG_END);
+            return;
+        }
     }
 }

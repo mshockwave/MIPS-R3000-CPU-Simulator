@@ -11,6 +11,7 @@
 #include <functional>
 
 #define FALLING_EDGE_FENCE() \
+    boost::this_thread::interruption_point(); \
     clock.falling_edge.wait()
 
 /*

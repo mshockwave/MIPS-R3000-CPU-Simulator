@@ -107,7 +107,14 @@ namespace task{
             auto* ctx = self->context;
 
             //Write back to main registers
-            ctx->Registers[self->RdIndex] = self->RdValue;
+            //Check whether write to $0
+            Error err = Error::NONE;
+            if(self->RdIndex == 0){
+                err = Error::WRITE_REG_ZERO;
+            }else{
+                ctx->Registers[self->RdIndex] = self->RdValue;
+            }
+
             //Clean destination register reservation
             if(ctx->RegReserves[self->RdIndex].Holder == self){
                 ctx->RegReserves[self->RdIndex].Reset(nullptr);
@@ -115,7 +122,7 @@ namespace task{
 
             RISING_EDGE_FENCE();
 
-            return Error::NONE;
+            return err;
         };
 
     }//namespace RInstr

@@ -23,7 +23,7 @@ private:
 #ifndef NDEBUG
         Log::D(mName) << "Testing single task on single thread..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        Context ctx(nullptr, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -88,7 +88,8 @@ private:
 
         Log::D(mName) << "Verifying value: two tasks with no stalling..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -116,7 +117,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
@@ -168,7 +168,8 @@ private:
 
         Log::D(mName) << "Verifying value: two tasks with stalling..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -196,7 +197,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
@@ -250,7 +250,8 @@ private:
 
         Log::D(mName) << "Verifying value: three tasks with stalling..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -282,7 +283,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
@@ -334,7 +334,8 @@ private:
 
         Log::D(mName) << "Verifying printer: two tasks with no stalling..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -362,7 +363,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         auto* if_thread = group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
@@ -417,7 +417,8 @@ private:
 
         Log::D(mName) << "Verifying printer: three tasks with stalling..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -449,7 +450,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         auto* if_thread = group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
@@ -509,7 +509,8 @@ private:
 
         Log::D(mName) << "Verifying printer: branch instruction flush without stalling..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -543,7 +544,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         auto* if_thread = group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
@@ -600,7 +600,8 @@ private:
 
         Log::D(mName) << "Verifying printer: branch instruction flush and stall..." << std::endl;
 
-        Context ctx(std::cout, std::cout);
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
         task::InitInstructionMap();
         task::InitTasks();
 
@@ -634,7 +635,6 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(5);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
-        boost::thread_group group;
         /*IF*/
         auto* if_thread = group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);

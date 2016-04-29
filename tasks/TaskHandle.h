@@ -38,6 +38,8 @@ public:
     //Registers value storage
     reg_t RtValue, RsValue, RdValue;
 
+    uint8_t ModifyRegIndex;
+
     //Information for dumping
     bool ForwardRt, ForwardRs;
 
@@ -47,6 +49,7 @@ public:
             instruction(nullptr),
             context(nullptr),
             RtIndex(0), RsIndex(0), RdIndex(0),
+            ModifyRegIndex(0),
             ForwardRs(false), ForwardRt(false){}
 
     TaskHandle* Get(Context* ctx, Instruction* instr, const ClockHandle* clk){

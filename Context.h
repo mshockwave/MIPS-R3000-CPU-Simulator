@@ -102,7 +102,8 @@ public:
     /*
      * For Unit Test Only!
      * */
-    Context(OutputStream& snapshotStream, OutputStream& errorStream) :
+    Context(boost::thread_group* threads,
+            OutputStream& snapshotStream, OutputStream& errorStream) :
             /*Registers*/
             PC(0),
             PcJump(false),
@@ -119,6 +120,7 @@ public:
             /*Thread*/
             DeadThreadMux(),
             DeadThreadNum(0),
+            ThreadGroup(threads),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -139,6 +141,7 @@ public:
 #endif
 
     Context(RawBinary& rawBinary,
+            boost::thread_group *threads,
             OutputStream& snapshotStream, OutputStream& errorStream) :
             /*Registers*/
             PC(0),
@@ -156,6 +159,7 @@ public:
             /*Thread*/
             DeadThreadMux(),
             DeadThreadNum(0),
+            ThreadGroup(threads),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -193,6 +197,7 @@ public:
     //Thread operations
     ScopedReadWriteLock::mutex_type DeadThreadMux;
     int DeadThreadNum;
+    boost::thread_group* ThreadGroup;
 
     //PC operations
     bool PcJump;
@@ -262,7 +267,7 @@ public:
     void DumpRegisters();
 
     /*
-     * Output streams for stages
+     * Output queues for stages
      * */
     static const std::string MSG_END;
     typedef BlockingQueue<std::string> msg_queue_t;
@@ -271,6 +276,13 @@ public:
             EXMessageQueue,
             DMMessageQueue,
             WBMessageQueue;
+
+    typedef BlockingQueue<Error> err_queue_t;
+    err_queue_t IFErrorQueue,
+            IDErrorQueue,
+            EXErrorQueue,
+            DMErrorQueue,
+            WBErrorQueue;
 
     void StartPrinterLoop(boost::thread* if_thread,
                           boost::thread* id_thread,

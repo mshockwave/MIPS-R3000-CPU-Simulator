@@ -44,11 +44,6 @@ void Context::putError(Error &error) {
         mErrorStream << Error::WRITE_REG_ZERO << std::endl;
     }
 
-    if(error.contains(Error::NUMBER_OVERFLOW)){
-        mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
-        mErrorStream << Error::NUMBER_OVERFLOW << std::endl;
-    }
-
     if(error.contains(Error::MEMORY_ADDR_OVERFLOW)){
         mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
         mErrorStream << Error::MEMORY_ADDR_OVERFLOW << std::endl;
@@ -57,6 +52,11 @@ void Context::putError(Error &error) {
     if(error.contains(Error::DATA_MISALIGNED)){
         mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
         mErrorStream << Error::DATA_MISALIGNED << std::endl;
+    }
+
+    if(error.contains(Error::NUMBER_OVERFLOW)){
+        mErrorStream << "In cycle " << std::dec << mCycleCounter << ": ";
+        mErrorStream << Error::NUMBER_OVERFLOW << std::endl;
     }
 }
 
@@ -81,9 +81,32 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
     while(!(if_dead && id_dead &&
             ex_dead && dm_dead && wb_dead)){
 
+        //Print errors and registers
+        //Collect errors
+        Error err = Error::NONE;
+        if(!IFErrorQueue.IsEmpty()){
+            err = (err + IFErrorQueue.Pop());
+        }
+        if(!IDErrorQueue.IsEmpty()){
+            err = (err + IDErrorQueue.Pop());
+        }
+        if(!EXErrorQueue.IsEmpty()){
+            err = (err + EXErrorQueue.Pop());
+        }
+        if(!DMErrorQueue.IsEmpty()){
+            err = (err + DMErrorQueue.Pop());
+        }
+        if(!WBErrorQueue.IsEmpty()){
+            err = (err + WBErrorQueue.Pop());
+        }
+        putError(err);
+
+        mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
+        //TODO: Print registers
 
         if(!if_dead){
             if_msg = IFMessageQueue.PopAndCheck(Context::MSG_END, &if_dead);
+            if_dead |= (if_msg == Context::MSG_END);
         }else{
             trimOutput(if_msg);
         }
@@ -91,11 +114,14 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 #ifndef NDEBUG
             boost::mutex::scoped_lock lk(Log::Mux::D);
 #endif
-            mSnapShotStream << "IF: " << if_msg << std::endl;
+            if(if_msg != Context::MSG_END){
+                mSnapShotStream << "IF: " << if_msg << std::endl;
+            }
         }
 
         if(!id_dead){
             id_msg = IDMessageQueue.PopAndCheck(Context::MSG_END, &id_dead);
+            id_dead |= (id_msg == Context::MSG_END);
         }else{
             trimOutput(id_msg);
         }
@@ -103,11 +129,14 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 #ifndef NDEBUG
             boost::mutex::scoped_lock lk(Log::Mux::D);
 #endif
-            mSnapShotStream << "ID: " << id_msg << std::endl;
+            if(id_msg != Context::MSG_END){
+                mSnapShotStream << "ID: " << id_msg << std::endl;
+            }
         }
 
         if(!ex_dead){
             ex_msg = EXMessageQueue.PopAndCheck(Context::MSG_END, &ex_dead);
+            ex_dead |= (ex_msg == Context::MSG_END);
         }else{
             trimOutput(ex_msg);
         }
@@ -115,11 +144,14 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 #ifndef NDEBUG
             boost::mutex::scoped_lock lk(Log::Mux::D);
 #endif
-            mSnapShotStream << "EX: " << ex_msg << std::endl;
+            if(ex_msg != Context::MSG_END){
+                mSnapShotStream << "EX: " << ex_msg << std::endl;
+            }
         }
 
         if(!dm_dead){
             dm_msg = DMMessageQueue.PopAndCheck(Context::MSG_END, &dm_dead);
+            dm_dead |= (dm_msg == Context::MSG_END);
         }else{
             trimOutput(dm_msg);
         }
@@ -127,11 +159,14 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 #ifndef NDEBUG
             boost::mutex::scoped_lock lk(Log::Mux::D);
 #endif
-            mSnapShotStream << "DM: " << dm_msg << std::endl;
+            if(dm_msg != Context::MSG_END){
+                mSnapShotStream << "DM: " << dm_msg << std::endl;
+            }
         }
 
         if(!wb_dead){
             wb_msg = WBMessageQueue.PopAndCheck(Context::MSG_END, &wb_dead);
+            wb_dead |= (wb_msg == Context::MSG_END);
         }else{
             trimOutput(wb_msg);
         }
@@ -139,7 +174,9 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 #ifndef NDEBUG
             boost::mutex::scoped_lock lk(Log::Mux::D);
 #endif
-            mSnapShotStream << "WB: " << wb_msg << std::endl << std::endl;
+            if(wb_msg != Context::MSG_END){
+                mSnapShotStream << "WB: " << wb_msg << std::endl << std::endl;
+            }
         }
 
         /*
@@ -150,5 +187,16 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         dm_dead |= dm_thread->try_join_for(dur);
         wb_dead |= wb_thread->try_join_for(dur);
          */
+        IncCycleCounter();
     }
+
+    /*
+     * Remember to join before exit!!
+     * */
+    //FIXME: Use thread group instead
+    if_thread->join();
+    id_thread->join();
+    ex_thread->join();
+    dm_thread->join();
+    wb_thread->join();
 }

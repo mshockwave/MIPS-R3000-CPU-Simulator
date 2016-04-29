@@ -6,6 +6,7 @@
 #include <functional>
 #include <string>
 #include <ostream>
+#include <unordered_map>
 
 typedef uint8_t byte_t;
 
@@ -56,6 +57,8 @@ public:
     static Error MEMORY_ADDR_OVERFLOW;
     static Error DATA_MISALIGNED;
 
+    inline uint8_t GetErrorLevel() { return mErrorLevel; }
+
     inline bool contains(const Error& e){
         return (mErrorId & e.mErrorId) != 0;
     }
@@ -93,5 +96,20 @@ typedef TaskHandle task_t;
 const uint8_t U8_1 = (uint8_t)1;
 const uint32_t U32_1 = (uint32_t)1;
 const uint32_t U32_0 = (uint32_t)0;
+
+struct RegsDiff {
+
+    uint8_t RegIndex;
+    reg_t RegValue;
+
+    reg_t PC;
+    bool IsTerminated;
+
+    RegsDiff() :
+            RegIndex(0),
+            RegValue(0),
+            PC(0),
+            IsTerminated(false) { }
+};
 
 #endif //ARCHIHW1_TYPES_H
