@@ -10,11 +10,6 @@ private:
     value_t current, next;
 
 public:
-
-    FlipFlop(const value_t& v){
-        this->WriteNext(v);
-    }
-
     void tick(){
         current = next;
     }
@@ -27,16 +22,9 @@ public:
     bool operator==(const FlipFlop<value_t>& rhs){ return GetCurrent() == rhs.GetCurrent(); }
     bool operator!=(const FlipFlop<value_t>& rhs){ return !(*this == rhs); }
 
-    void operator=(const FlipFlop<value_t>& rhs){
+    FlipFlop<value_t>& operator=(const FlipFlop<value_t>& rhs){
         this->WriteNext(rhs.GetCurrent());
-    }
-    void operator=(const value_t& v){
-        this->WriteNext(v);
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const FlipFlop<value_t> self){
-        os << self.GetCurrent();
-        return os;
+        return *this;
     }
 };
 

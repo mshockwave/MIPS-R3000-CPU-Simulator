@@ -20,30 +20,6 @@ namespace task {
         inline uint8_t GetShAmt(uint32_t instruction){
             return static_cast<uint8_t>(extractInstrBits(instruction, 10, 6));
         }
-
-        template <
-                bool load_rs = true,
-                bool load_rt = true,
-                bool load_rd = true
-        >
-        inline void loadIDRegs(Context* ctx, Instruction* instruction){
-            RegisterTuple regs;
-            if(load_rs){
-                regs.Rs_Index = GetRs(instruction->GetBitsInstruction());
-                regs.Rs = ctx->Registers[regs.Rs_Index].GetCurrent();
-            }
-
-            if(load_rt){
-                regs.Rt_Index = GetRt(instruction->GetBitsInstruction());
-                regs.Rt = ctx->Registers[regs.Rt_Index].GetCurrent();
-            }
-
-            if(load_rd){
-                regs.Rd_Index = GetRs(instruction->GetBitsInstruction());
-            }
-
-            ctx->ID_EXE.EXE.Regs = regs;
-        }
     } //namespace RInstr
 
     namespace IInstr {
