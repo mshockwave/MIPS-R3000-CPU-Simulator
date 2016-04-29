@@ -26,7 +26,7 @@ bool TestUtils::doTest() {
         uint32_t slice = extractInstrBits(value, 11, 5);
         std::stringstream ss;
         ss << "Expect 26, " << "get " << slice << std::endl;
-        assert(slice == (uint32_t)26, ss.str());
+        Assert(slice == (uint32_t) 26, ss.str());
     }
 
     //Test loading data to register
@@ -39,7 +39,7 @@ bool TestUtils::doTest() {
         //Log::D(mName) << "Register value: 0x" << std::hex << reg1 << std::endl;
         std::stringstream ss;
         ss << "Expect 0x12345678, " << "get 0x" << std::hex << reg1 << std::endl;
-        assert(reg1 == static_cast<reg_t>(0x12345678), ss.str());
+        Assert(reg1 == static_cast<reg_t>(0x12345678), ss.str());
     }
 
     //Test byte order reverse
@@ -53,9 +53,9 @@ bool TestUtils::doTest() {
         u16Val = reverse16ByteOrder(u16Val);
         std::stringstream ss;
         ss << "Expect 0x78563412, " << "get 0x" << std::hex << u32Val << std::endl;
-        assert(u32Val == 0x78563412, ss.str());
+        Assert(u32Val == 0x78563412, ss.str());
         ss << "Expect 0x78563412, " << "get 0x" << std::hex << u16Val << std::endl;
-        assert(u16Val == 0x3412, ss.str());
+        Assert(u16Val == 0x3412, ss.str());
     }
 
     return true;

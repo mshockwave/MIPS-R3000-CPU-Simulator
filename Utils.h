@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <boost/thread/mutex.hpp>
 
 extern "C"{
 #include <sys/time.h>
@@ -23,12 +24,28 @@ const std::string EMPTY_STRING("");
     #define LIKELY(condition) (condition)
 #endif
 
-#if defined(NDEBUG)
-    #define DEBUG_BLOCK \
-        if(0)
-#else
+#if !defined(NDEBUG) && VERBOSE_LEVEL >= 0 //Quiet
     #define DEBUG_BLOCK \
         if(1)
+#else
+    #define DEBUG_BLOCK \
+        if(0)
+#endif
+
+#if !defined(NDEBUG) && VERBOSE_LEVEL >= 1 //Normal
+    #define NORMAL_DEBUG_BLOCK \
+        if(1)
+#else
+    #define NORMAL_DEBUG_BLOCK \
+        if(0)
+#endif
+
+#if !defined(NDEBUG) && VERBOSE_LEVEL >= 2 //Trace
+    #define TRACE_DEBUG_BLOCK \
+        if(1)
+#else
+    #define TRACE_DEBUG_BLOCK \
+        if(0)
 #endif
 
 class Log {
@@ -36,6 +53,11 @@ private:
     static std::ostream* sOstream;
 
 public:
+
+    struct Mux{
+        static boost::mutex E, W, V, D;
+    };
+
     static void setStream(std::ostream& ostr){
         sOstream = &ostr;
     }

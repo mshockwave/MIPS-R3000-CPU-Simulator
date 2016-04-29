@@ -28,10 +28,25 @@ public:
 };
 
 struct Instructions{
+
+#ifndef NDEBUG
+    /*
+     * For unit tests
+     * */
+    friend class TestTasks;
+    friend class TestTasksError;
+#endif
+
 private:
     std::vector<Instruction> mInstructions;
 
 public:
+#ifndef NDEBUG
+    /*
+     * For unit tests
+     * */
+    Instructions(){}
+#endif
     Instructions(RawBinary& binary);
 
     typedef std::vector<Instruction>::iterator iterator;

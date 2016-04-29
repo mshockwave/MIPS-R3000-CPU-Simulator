@@ -2,9 +2,21 @@ cmake_minimum_required(VERSION 2.8)
 project(ArchiHW1)
 
 set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -g -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}") #default: Debug
 #Do not use -O3!!
 set(CMAKE_CXX_FLAGS_RELEASE   "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os -std=c++11")
+
+set(TASKS_SOURCE_FILES
+        tasks/Tasks.cpp
+        tasks/RTasks.cpp tasks/RTasks.h
+        tasks/ITasks.cpp tasks/ITasks.h
+        tasks/JTasks.cpp tasks/JTasks.h )
+
+set(TEST_SOURCE_HEADERS
+        tests/TestCase.h
+        tests/TestUtils.h
+        tests/TestInstruction.h
+        tests/TestAdts.h
+        tests/TestTasks.h tests/TestTasksError.h)
 
 set(SOURCE_FILES
         RawBinary.cpp RawBinary.h
@@ -12,25 +24,67 @@ set(SOURCE_FILES
         ExecutionEngine.cpp ExecutionEngine.h
         Context.cpp Context.h
         adts/RawBufferHandle.cpp adts/RawBufferHandle.h
-        adts/FlipFlop.h
+        adts/BlockingQueue.cpp adts/BlockingQueue.h
+        adts/ScopedReadWriteLock.cpp adts/ScopedReadWriteLock.h
         Utils.cpp Utils.h
-        tasks/FirstClassTasks.cpp tasks/FirstClassTasks.h
-        tasks/FragmentTasksR.cpp tasks/FragmentTasksR.h
-        tasks/FragmentTasksI.cpp tasks/FragmentTasksI.h
-        tasks/FragmentTasksJ.cpp tasks/FragmentTasksJ.h
-        tasks/InstructionMap.cpp
-        tasks/Task.h tasks/Task.cpp
-        Task.h
-        Types.cpp Types.h)
-include_directories(./include)
+        Task.cpp Task.h
+        ${TASKS_SOURCE_FILES}
+        Types.cpp Types.h
+        tasks/TaskHandle.cpp tasks/TaskHandle.h
+        IFEngine.cpp IFEngine.h)
+include_directories(include)
+
+set(LINK_BOOST_LIBS
+        libboost_system.a
+        libboost_chrono.a
+        libboost_date_time.a)
+if (APPLE)
+    link_directories(${CMAKE_SOURCE_DIR}/lib/darwin)
+    set(LINK_BOOST_LIBS
+            ${LINK_BOOST_LIBS}
+            libboost_thread-mt.a
+            libboost_atomic-mt.a)
+elseif(WIN32)
+    message(FATAL_ERROR "Not support windows yet")
+else()
+    link_directories(${CMAKE_SOURCE_DIR}/lib/linux)
+    set(LINK_BOOST_LIBS
+            ${LINK_BOOST_LIBS}
+            libboost_thread.a
+            libboost_atomic.a)
+endif ()
 
 if(NOT DEFINED OUT_EXE_NAME)
     set(OUT_EXE_NAME pipeline)
 endif()
 
-add_executable(${OUT_EXE_NAME} ${SOURCE_FILES} main.cpp)
+# Verbose level under Debug type
+# Value: Trace, Normal, Quiet
+if(DEFINED VERBOSE_LEVEL)
+    if(VERBOSE_LEVEL STREQUAL "Trace")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=2")
 
-add_executable(${OUT_EXE_NAME}Tests ${SOURCE_FILES} tests/TestMain.cpp )
+    elseif(VERBOSE_LEVEL STREQUAL "Normal")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=1")
+
+    elseif(VERBOSE_LEVEL STREQUAL "Quiet")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=0")
+
+    else()
+        message(FATAL_ERROR "VERBOSE_LEVEL values: Trace, Normal, Quiet")
+    endif()
+else()
+    #Default: Normal
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DVERBOSE_LEVEL=1")
+endif()
+
+add_executable(${OUT_EXE_NAME}
+        ${SOURCE_FILES} main.cpp)
+target_link_libraries(${OUT_EXE_NAME} ${LINK_BOOST_LIBS})
+
+add_executable(${OUT_EXE_NAME}Tests
+        ${SOURCE_FILES} ${TEST_SOURCE_HEADERS} tests/TestMain.cpp )
+target_link_libraries(${OUT_EXE_NAME}Tests ${LINK_BOOST_LIBS})
 
 add_custom_target(install-test-data ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tests/test_dataset ${CMAKE_BINARY_DIR}/test_dataset

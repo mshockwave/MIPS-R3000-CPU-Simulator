@@ -1,16 +1,20 @@
 
 #include "TestInstruction.h"
 #include "TestUtils.h"
-#include "TestExecutionEngine.h"
+#include "TestAdts.h"
+#include "TestTasks.h"
+#include "TestTasksError.h"
 
 int main(){
 
     //Add test cases
     std::vector<TestCase*> testCases;
     testCases.push_back(new TestUtils());
+    testCases.push_back(new TestAdts());
     testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestInstructionList());
-    //testCases.push_back(new TestExecutionEngine());
+    testCases.push_back(new TestTasks());
+    testCases.push_back(new TestTasksError());
 
     std::vector<TestCase*>::iterator it = testCases.begin();
     for(; it != testCases.end(); ++it){

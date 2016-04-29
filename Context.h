@@ -5,25 +5,27 @@
 #include <iomanip>
 
 #include <queue>
+#include <vector>
 #include <thread>
 #include <mutex>
+
+#include <boost/atomic/atomic.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/chrono/chrono.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "Types.h"
 #include "RawBinary.h"
 #include "Utils.h"
-
-#include "adts/FlipFlop.h"
-
-struct RegisterTuple {
-    reg_t Rd, Rs, Rt;
-    uint8_t Rd_Index, Rs_Index, Rt_Index;
-};
-struct StageRegisters {
-    FlipFlop<RegisterTuple> Regs;
-    FlipFlop<task_id_t> NextTask;
-};
+#include "adts/BlockingQueue.h"
+#include "adts/ScopedReadWriteLock.h"
 
 class Context {
+
+#ifndef NDEBUG
+    friend class TestTasks;
+    friend class TestTasksError;
+#endif
 
 #define CHECK_MEMORY_BOUND(offset) \
     if((offset) > mDataSize && (offset) < SP)
@@ -31,6 +33,8 @@ class Context {
 public:
     typedef unsigned long CounterType;
     typedef std::ostream OutputStream;
+
+    typedef std::vector<TaskHandle*> StageRegister;
 
 private:
 
@@ -61,13 +65,50 @@ public:
     //Global Special registers
     reg_t &ZERO, &AT, &SP, &FP, &RA;
 
-    //(Pipeline)Stage Registers
-    StageRegisters IF_ID, ID_EXE, EXE_DM, DM_WB;
+    struct RegReserve {
+        TaskHandle* Holder;
+        reg_t Value;
 
-    Context(RawBinary& rawBinary,
+        bool IDAvailable, EXAvailable;
+        bool EXForward, IDForward;
+
+        RegReserve() :
+                Holder(nullptr),
+                Value(0),
+                IDAvailable(false), EXAvailable(false),
+                EXForward(false), IDForward(false){ }
+        void Reset(TaskHandle* h){
+            Holder = h;
+            Value = 0;
+            IDAvailable = EXAvailable = false;
+            EXForward = IDForward = false;
+        }
+    };
+    //typedef boost::atomic<TaskHandle*> reg_reserve_t;
+    RegReserve RegReserves[REGISTER_COUNT];
+
+    const unsigned int STAGE_REG_BUF_SIZE = 1;
+    StageRegister IF_ID, ID_EX, EX_DM, DM_WB;
+    inline bool pushTask(StageRegister& stage, TaskHandle* task){
+        if(stage.size() < STAGE_REG_BUF_SIZE){
+            stage.push_back(task);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+#ifndef NDEBUG
+    /*
+     * For Unit Test Only!
+     * */
+    Context(boost::thread_group* threads,
             OutputStream& snapshotStream, OutputStream& errorStream) :
             /*Registers*/
             PC(0),
+            PcJump(false),
+            PcFlush(0),
             ZERO(Registers[0]),
             AT(Registers[1]),
             SP(Registers[29]),
@@ -75,6 +116,51 @@ public:
             RA(Registers[31]),
             /*Memory*/
             mDataSize(0),
+            /*Pipeline*/
+            IFStall(false),
+            /*Thread*/
+            DeadThreadMux(),
+            DeadThreadNum(0),
+            ThreadGroup(threads),
+            /*Cycle counter*/
+            mCycleCounter(0),
+            /*Streams*/
+            mSnapShotStream(snapshotStream), mErrorStream(errorStream),
+            mInstrCount(0), mInstrEndAddr(0){
+
+        //Zero registers
+        for(int i = 0; i < REGISTER_COUNT; i++){
+            Registers[i] = (byte_t)0;
+            RegReserves[i].Reset(nullptr);
+        }
+
+        //Zero memory
+        for(int i = 0; i < MEMORY_LENGTH; i++){
+            mMemory[i] = (byte_t)0;
+        }
+    }
+#endif
+
+    Context(RawBinary& rawBinary,
+            boost::thread_group *threads,
+            OutputStream& snapshotStream, OutputStream& errorStream) :
+            /*Registers*/
+            PC(0),
+            PcJump(false),
+            PcFlush(0),
+            ZERO(Registers[0]),
+            AT(Registers[1]),
+            SP(Registers[29]),
+            FP(Registers[30]),
+            RA(Registers[31]),
+            /*Memory*/
+            mDataSize(0),
+            /*Pipeline*/
+            IFStall(false),
+            /*Thread*/
+            DeadThreadMux(),
+            DeadThreadNum(0),
+            ThreadGroup(threads),
             /*Cycle counter*/
             mCycleCounter(0),
             /*Streams*/
@@ -83,6 +169,7 @@ public:
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
             Registers[i] = (byte_t)0;
+            RegReserves[i].Reset(nullptr);
         }
 
         //Load PC from rawBinary
@@ -105,9 +192,20 @@ public:
         mInstrEndAddr = mInstrStartAddr + (mInstrCount - 1) * WORD_WIDTH;
     }
 
+    //Pipeline operations
+    bool IFStall;
+
+    //Thread operations
+    ScopedReadWriteLock::mutex_type DeadThreadMux;
+    int DeadThreadNum;
+    boost::thread_group* ThreadGroup;
+
     //PC operations
+    bool PcJump;
+    boost::atomic_int PcFlush;
+    static const int PC_FLUSH_CONSUMER_COUNT;
     const reg_t& GetPC(){ return PC; }
-    Error setPC(reg_t pc){
+    Error SetPC(reg_t pc){
         Error e = Error::NONE;
 
         if(pc % WORD_WIDTH != 0)
@@ -119,6 +217,7 @@ public:
         if( !(e == Error::NONE) ) return e;
 
         PC = pc;
+        PcJump = true;
 
         return Error::NONE;
     }
@@ -164,14 +263,36 @@ public:
     CounterType GetCycleCounter(){ return mCycleCounter; }
 
     /*
-     * Append current cycle's snapshot
+     * Output queues for stages
      * */
-    void DumpSnapshot();
+    static const std::string MSG_END;
+    typedef BlockingQueue<std::string> msg_queue_t;
+    msg_queue_t IFMessageQueue,
+            IDMessageQueue,
+            EXMessageQueue,
+            DMMessageQueue,
+            WBMessageQueue;
+
+    typedef BlockingQueue<Error> err_queue_t;
+    err_queue_t IFErrorQueue,
+            IDErrorQueue,
+            EXErrorQueue,
+            DMErrorQueue,
+            WBErrorQueue;
+
+    typedef BlockingQueue<RegsDiff> reg_queue_t;
+    reg_queue_t RegsQueue;
+
+    void StartPrinterLoop(boost::thread* if_thread,
+                          boost::thread* id_thread,
+                          boost::thread* ex_thread,
+                          boost::thread* dm_thread,
+                          boost::thread* wb_thread);
 
     /*
      * Append error
      * */
-    void putError(Error& error);
+    bool PrintError();
 
 };
 
