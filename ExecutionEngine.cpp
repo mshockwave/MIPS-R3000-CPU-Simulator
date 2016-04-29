@@ -72,10 +72,10 @@ namespace engines{
                 ss << " to_be_stalled";
             }else{
                 if(rs_forward_reg_id > 0){
-                    ss << " fwd_EX-DM_rs$" << rs_forward_reg_id;
+                    ss << " fwd_EX-DM_rs_$" << rs_forward_reg_id;
                 }
                 if(rt_forward_reg_id > 0){
-                    ss << " fwd_EX-DM_rt$" << rt_forward_reg_id;
+                    ss << " fwd_EX-DM_rt_$" << rt_forward_reg_id;
                 }
             }
             ctx->IDMessageQueue.Push(ss.str());
@@ -152,10 +152,10 @@ namespace engines{
                 ss << " to_be_stalled";
             }else{
                 if(rs_forward_reg_id > 0){
-                    ss << " fwd_EX-DM_rs$" << rs_forward_reg_id;
+                    ss << " fwd_EX-DM_rs_$" << rs_forward_reg_id;
                 }
                 if(rt_forward_reg_id > 0){
-                    ss << " fwd_EX-DM_rt$" << rt_forward_reg_id;
+                    ss << " fwd_EX-DM_rt_$" << rt_forward_reg_id;
                 }
             }
             ctx->EXMessageQueue.Push(ss.str());
