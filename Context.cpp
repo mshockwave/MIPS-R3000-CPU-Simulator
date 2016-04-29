@@ -3,6 +3,7 @@
 
 /*Context*/
 const std::string Context::MSG_END("#END#");
+const int Context::PC_FLUSH_CONSUMER_COUNT = 2;
 
 void Context::loadMemory(RawBinary& rawBinary) {
     RawBinary::raw_container_t& dataImg = rawBinary.getDataImg();

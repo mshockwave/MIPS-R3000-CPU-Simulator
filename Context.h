@@ -197,7 +197,7 @@ public:
     //PC operations
     bool PcJump;
     boost::atomic_int PcFlush;
-    const int PC_FLUSH_CONSUMER_COUNT = 2;
+    static const int PC_FLUSH_CONSUMER_COUNT;
     const reg_t& GetPC(){ return PC; }
     Error SetPC(reg_t pc){
         Error e = Error::NONE;
