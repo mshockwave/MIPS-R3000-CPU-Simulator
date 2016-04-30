@@ -142,7 +142,11 @@ namespace task{
                     // For result of this stage
                     reg_reserves[self->RdIndex].EXAvailable = true;
 
+                    Error err = Error::NONE;
+                    
                     auto rd_value = rt_value + rs_value;
+                    auto overflow = isSumOverflow(rt_value, rs_value, rd_value);
+                    if(overflow) err = err + Error::NUMBER_OVERFLOW;
 
                     RISING_EDGE_FENCE();
 
@@ -151,7 +155,7 @@ namespace task{
                     reg_reserves[self->RdIndex].Value = rd_value;
                     reg_reserves[self->RdIndex].IDAvailable = true;
 
-                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+                    return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
                 })
                 .DM(RInstr::ForwardRegsDM)
                 .WB(RInstr::WriteRegsWB);
@@ -178,7 +182,11 @@ namespace task{
                     // For result of this stage
                     reg_reserves[self->RdIndex].EXAvailable = true;
 
+                    Error err = Error::NONE;
+                    
                     auto rd_value = rs_value - rt_value;
+                    bool overflow = isSumOverflow(rs_value, twoComplement(rt_value), rd_value);
+                    if(overflow) err = err + Error::NUMBER_OVERFLOW;
 
                     RISING_EDGE_FENCE();
 
@@ -186,7 +194,7 @@ namespace task{
 
                     reg_reserves[self->RdIndex].IDAvailable = true;
 
-                    return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+                    return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
                 })
                 .DM(RInstr::ForwardRegsDM)
                 .WB(RInstr::WriteRegsWB);

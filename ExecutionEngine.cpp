@@ -114,6 +114,8 @@ namespace engines{
 
         auto* ctx = self->GetContext();
         const auto& clock = self->GetClock();
+        
+        int cycle = 0;
 
         while(true){
 
@@ -152,6 +154,15 @@ namespace engines{
             //TODO: Error handling
             auto err = task_obj->DoEX();
             bool stall = (err == Error::PIPELINE_STALL);
+            
+            if(err != Error::NONE && !stall){
+                err.SetCycle(cycle+1);
+                ctx->EXErrorQueue.Push(err);
+                if(err.GetErrorLevel() >= Error::LEVEL_HALT){
+                    //Halt
+                    ctx->ThreadGroup->interrupt_all();
+                }
+            }
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -189,6 +200,8 @@ namespace engines{
                 ctx->EXMessageQueue.Push(Context::MSG_END);
                 break;
             }
+            
+            cycle++;
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){
