@@ -209,6 +209,8 @@ namespace engines{
 
         auto* ctx = self->GetContext();
         const auto& clock = self->GetClock();
+        
+        int cycle = 0;
 
         while(true){
 
@@ -234,10 +236,17 @@ namespace engines{
 
             if(task_obj == nullptr) continue;
 
-            //TODO: Error handling
             auto err = task_obj->DoDM();
             bool stall = (err == Error::PIPELINE_STALL);
-            //TODO: Print forwarding
+            
+            if(err != Error::NONE && !stall){
+                err.SetCycle(cycle+1);
+                ctx->DMErrorQueue.Push(err);
+                if(err.GetErrorLevel() >= Error::LEVEL_HALT){
+                    //Halt
+                    ctx->ThreadGroup->interrupt_all();
+                }
+            }
 
             bool ready_to_dead = task_obj->task_id == task::OP_HALT;
             if(ready_to_dead){
@@ -266,6 +275,8 @@ namespace engines{
                 ctx->DMMessageQueue.Push(Context::MSG_END);
                 break;
             }
+            
+            cycle++;
         }
 
         while(ctx->DeadThreadNum < THREAD_COUNT){

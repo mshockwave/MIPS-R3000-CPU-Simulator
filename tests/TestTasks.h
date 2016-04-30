@@ -102,14 +102,18 @@ private:
         const byte_t raw_add_instr[4] = { 0x00, 0x22, 0x20, 0x20 };
         Instruction add_instr(raw_add_instr);
         instructions.mInstructions.push_back(add_instr);
+        
         /* sub $3, $2, $1 */
         const byte_t raw_sub_instr[4] = { 0x00, 0x41, 0x18, 0x22 };
         Instruction sub_instr(raw_sub_instr);
         instructions.mInstructions.push_back(sub_instr);
-        /* halt */
+        
+        /* halt x5 */
         const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
         Instruction halt_instr(raw_halt_instr);
-        instructions.mInstructions.push_back(halt_instr);
+        for(int i = 0; i < 5; i++){
+            instructions.mInstructions.push_back(halt_instr);
+        }
 
         ctx.setInstructionCount((uint32_t)instructions.length());
 
@@ -182,14 +186,18 @@ private:
         const byte_t raw_add_instr[4] = { 0x00, 0x22, 0x20, 0x20 };
         Instruction add_instr(raw_add_instr);
         instructions.mInstructions.push_back(add_instr);
+        
         /* sub $3, $4, $1 */
         const byte_t raw_sub_instr[4] = { 0x00, 0x81, 0x18, 0x22 };
         Instruction sub_instr(raw_sub_instr);
         instructions.mInstructions.push_back(sub_instr);
-        /* halt */
+        
+        /* halt x5 */
         const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
         Instruction halt_instr(raw_halt_instr);
-        instructions.mInstructions.push_back(halt_instr);
+        for(int i = 0; i < 5; i++){
+            instructions.mInstructions.push_back(halt_instr);
+        }
 
         ctx.setInstructionCount((uint32_t)instructions.length());
 
@@ -264,18 +272,23 @@ private:
         const byte_t raw_add_instr[4] = { 0x00, 0x22, 0x20, 0x20 };
         Instruction add_instr(raw_add_instr);
         instructions.mInstructions.push_back(add_instr);
+        
         /* sub $3, $4, $1 */
         const byte_t raw_sub_instr[4] = { 0x00, 0x81, 0x18, 0x22 };
         Instruction sub_instr(raw_sub_instr);
         instructions.mInstructions.push_back(sub_instr);
+        
         /* add $5, $1, $2 */
         const byte_t raw_add_instr2[4] = { 0x00, 0x22, 0x28, 0x20 };
         Instruction add_instr2(raw_add_instr2);
         instructions.mInstructions.push_back(add_instr2);
-        /* halt */
+        
+        /* halt x5 */
         const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
         Instruction halt_instr(raw_halt_instr);
-        instructions.mInstructions.push_back(halt_instr);
+        for(int i = 0; i < 5; i++){
+            instructions.mInstructions.push_back(halt_instr);
+        }
 
         ctx.setInstructionCount((uint32_t)instructions.length());
 
@@ -348,14 +361,18 @@ private:
         const byte_t raw_add_instr[4] = { 0x00, 0x22, 0x20, 0x20 };
         Instruction add_instr(raw_add_instr);
         instructions.mInstructions.push_back(add_instr);
+        
         /* sub $3, $2, $1 */
         const byte_t raw_sub_instr[4] = { 0x00, 0x41, 0x18, 0x22 };
         Instruction sub_instr(raw_sub_instr);
         instructions.mInstructions.push_back(sub_instr);
-        /* halt */
+        
+        /* halt x5 */
         const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
         Instruction halt_instr(raw_halt_instr);
-        instructions.mInstructions.push_back(halt_instr);
+        for(int i = 0; i < 5; i++){
+            instructions.mInstructions.push_back(halt_instr);
+        }
 
         ctx.setInstructionCount((uint32_t)instructions.length());
 
@@ -431,18 +448,23 @@ private:
         const byte_t raw_add_instr[4] = { 0x00, 0x22, 0x20, 0x20 };
         Instruction add_instr(raw_add_instr);
         instructions.mInstructions.push_back(add_instr);
+        
         /* sub $3, $4, $1 */
         const byte_t raw_sub_instr[4] = { 0x00, 0x81, 0x18, 0x22 };
         Instruction sub_instr(raw_sub_instr);
         instructions.mInstructions.push_back(sub_instr);
+        
         /* add $5, $1, $2 */
         const byte_t raw_add_instr2[4] = { 0x00, 0x22, 0x28, 0x20 };
         Instruction add_instr2(raw_add_instr2);
         instructions.mInstructions.push_back(add_instr2);
-        /* halt */
+        
+        /* halt x5 */
         const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
         Instruction halt_instr(raw_halt_instr);
-        instructions.mInstructions.push_back(halt_instr);
+        for(int i = 0; i < 5; i++){
+            instructions.mInstructions.push_back(halt_instr);
+        }
 
         ctx.setInstructionCount((uint32_t)instructions.length());
 

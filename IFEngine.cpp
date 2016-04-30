@@ -5,19 +5,12 @@ void IFEngine::Start(){
     //bool stall = false;
     TaskHandle* task_obj = nullptr;
 
-    bool is_first_cycle = true;
+    //bool is_first_cycle = true;
+    
+    int halt_counter = 0;
 
     while(true) {
 
-        if (!(  mContext->PcJump ||
-                mContext->PcFlush.load() > 0 ||
-                mContext->IFStall ||
-                is_first_cycle )) {
-            mContext->AdvancePC();
-        } else {
-            mContext->PcJump = false;
-            is_first_cycle = false;
-        }
         reg_t pc = mContext->GetPC();
 
         task_id_t next_task;
@@ -88,17 +81,18 @@ void IFEngine::Start(){
         /*auto ret = */task_obj->DoIF();
         //stall = (ret == Error::PIPELINE_STALL);
 
-        bool ready_to_dead = (task_obj->task_id == task::OP_HALT);
-        if(ready_to_dead){
-            ScopedReadWriteLock::WriteLock lk(mContext->DeadThreadMux);
-            mContext->DeadThreadNum++;
-        }
-
         bool ready_to_abort = false;
         try{
             FALLING_EDGE_FENCE();
         }catch(boost::thread_interrupted&){
             ready_to_abort = true;
+        }
+        
+        bool ready_to_dead = (task_obj->task_id == task::OP_HALT) &&
+                                ( ((mContext->IFStall)? halt_counter : ++halt_counter) >= 4 );
+        if(ready_to_dead){
+            ScopedReadWriteLock::WriteLock lk(mContext->DeadThreadMux);
+            mContext->DeadThreadNum++;
         }
 
         if(instr_ptr != nullptr){
@@ -110,6 +104,14 @@ void IFEngine::Start(){
                 ss << " to_be_stalled";
             }
             mContext->IFMessageQueue.Push(ss.str());
+        }
+        
+        if (!(mContext->PcJump ||
+              mContext->PcFlush.load() > 0 ||
+              mContext->IFStall)) {
+            mContext->AdvancePC();
+        } else {
+            mContext->PcJump = false;
         }
 
         if(ready_to_abort){
