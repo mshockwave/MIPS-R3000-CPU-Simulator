@@ -1,7 +1,7 @@
 #include "ITasks.h"
 
 namespace task{
-    void InitITasks(){
+    namespace IInstr{
         /*
          * Load rs, rt index
          * */
@@ -11,18 +11,426 @@ namespace task{
              * Since first half cycle is reserved for instruction loading
              * */
             RISING_EDGE_FENCE();
-
+            
             //Decode registers index
             auto instr_bits = self->instruction->GetBitsInstruction();
             self->RtIndex = IInstr::GetRt(instr_bits);
             self->RsIndex = IInstr::GetRs(instr_bits);
-
+            
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
         };
+        
+        /*
+         * Load rs value
+         * And detect stalling
+         * For non-branch operations
+         * */
+        TaskHandle::stage_task_t LoadRsRegID = STAGE_TASK(){
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            // Do not load registers
+            // In first half cycle
+            RISING_EDGE_FENCE();
+            
+            auto rt_index = self->RtIndex;
+            auto rs_index = self->RsIndex;
+            
+            bool need_wait = false;
+            
+            if(reg_reserves[rs_index].Holder == nullptr){
+                
+                //Load from main registers
+                self->RsValue = ctx->Registers[rs_index];
+                
+            }else if(reg_reserves[rs_index].EXAvailable){
+                
+                //Can EX Forward
+                reg_reserves[rs_index].EXForward = true;
+                
+            }else{
+                need_wait = true;
+            }
+            
+            bool stall = need_wait;
+            if(!need_wait){
+                //Push next task
+                stall = !ctx->pushTask(ctx->ID_EX, self);
+                
+                //Reserve destination registers
+                ctx->RegReserves[rt_index].Reset(self);
+            }
+            
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
+        };
+        
+        /*
+         * Load rs, rt value
+         * And detect stalling
+         * For non-branch operations
+         * */
+        TaskHandle::stage_task_t LoadRegsID = STAGE_TASK(){
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            // Do not load registers
+            // In first half cycle
+            RISING_EDGE_FENCE();
+            
+            auto rt_index = self->RtIndex;
+            auto rs_index = self->RsIndex;
+            
+            bool need_wait = false;
+            if(reg_reserves[rt_index].Holder == nullptr){
+                
+                //Load from main registers
+                self->RtValue = ctx->Registers[rt_index];
+                
+            }else if(reg_reserves[rt_index].EXAvailable){
+                
+                //Can EX Forward
+                reg_reserves[rt_index].EXForward = true;
+                
+            }else{
+                need_wait = true;
+            }
+            
+            if(reg_reserves[rs_index].Holder == nullptr){
+                
+                //Load from main registers
+                self->RsValue = ctx->Registers[rs_index];
+                
+            }else if(reg_reserves[rs_index].EXAvailable){
+                
+                //Can EX Forward
+                reg_reserves[rs_index].EXForward = true;
+                
+            }else{
+                need_wait = true;
+            }
+            
+            bool stall = need_wait;
+            if(!need_wait){
+                //Push next task
+                stall = !ctx->pushTask(ctx->ID_EX, self);
+            }
+            
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
+        };
+        
+        TaskHandle::stage_task_t EmptyDM = STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPELINE_STALL;
+        };
+        
+        TaskHandle::stage_task_t EmptyWB = STAGE_TASK(){
+            
+            RISING_EDGE_FENCE();
+            
+            return Error::NONE;
+        };
+        
+        /*
+         * Caculate offset: rs + imm(signed)
+         * And store in self->RsValue
+         */
+        TaskHandle::stage_task_t CaculateMemOffsetEX = STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            
+            rs_value += static_cast<int32_t>(signExtend16(imm));
+            
+            RISING_EDGE_FENCE();
+            
+            self->RsValue = rs_value;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        };
+        
+        /*
+         * Write rt back to main registers
+         * */
+        TaskHandle::stage_task_t WriteRegsWB = STAGE_TASK() {
+            auto* ctx = self->context;
+            
+            //Write back to main registers
+            //Check whether write to $0
+            Error err = Error::NONE;
+            if(self->RtIndex == 0){
+                err = Error::WRITE_REG_ZERO;
+            }else{
+                ctx->Registers[self->RtIndex] = self->RtValue;
+            }
+            
+            //Clean destination register reservation
+            if(ctx->RegReserves[self->RtIndex].Holder == self){
+                ctx->RegReserves[self->RtIndex].Reset(nullptr);
+            }
+            
+            RISING_EDGE_FENCE();
+            
+            return err;
+        };
+        
+    }; //namespace IInstr
+    
+    void InitITasks(){
+        
+        TasksTable[OP_ADDI].Name("ADDI", OP_ADDI)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
+            
+            auto rt_value = rs_value + signExtend16(imm);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RtValue = rt_value;
+            
+            reg_reserves[self->RtIndex].Value = rt_value;
+            reg_reserves[self->RtIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_ADDIU].Name("ADDIU", OP_ADDIU)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //No overflow exception
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
+            
+            auto rt_value = rs_value + static_cast<reg_t>(imm);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RtValue = rt_value;
+            
+            reg_reserves[self->RtIndex].Value = rt_value;
+            reg_reserves[self->RtIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_LW].Name("LW", OP_LW)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Do not read memory on the first cycle
+            RISING_EDGE_FENCE();
+            
+            Error err = Error::NONE;
+            try{
+                word_t v = ctx->GetMemoryWord(self->RsValue);
+                self->RtValue = v;
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_LH].Name("LH", OP_LH)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Do not read memory on the first cycle
+            RISING_EDGE_FENCE();
+            
+            Error err = Error::NONE;
+            try{
+                half_w_t v = ctx->GetMemoryHalfWord(self->RsValue);
+                self->RtValue = signExtend16(v);
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_LHU].Name("LHU", OP_LHU)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Do not read memory on the first cycle
+            RISING_EDGE_FENCE();
+            
+            Error err = Error::NONE;
+            try{
+                half_w_t v = ctx->GetMemoryHalfWord(self->RsValue);
+                self->RtValue = static_cast<reg_t>(v);
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_LB].Name("LB", OP_LB)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Do not read memory on the first cycle
+            RISING_EDGE_FENCE();
+            
+            Error err = Error::NONE;
+            try{
+                byte_t v = ctx->GetMemoryByte(self->RsValue);
+                self->RtValue = signExtend8(v);
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_LBU].Name("LBU", OP_LBU)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Do not read memory on the first cycle
+            RISING_EDGE_FENCE();
+            
+            Error err = Error::NONE;
+            try{
+                byte_t v = ctx->GetMemoryByte(self->RsValue);
+                self->RtValue = static_cast<reg_t>(v);
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_SW].Name("SW", OP_SW)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRegsID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Store memory on the first cycle
+            Error err = Error::NONE;
+            try{
+                auto& v = ctx->GetMemoryWord(self->RsValue);
+                v = self->RtValue;
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            RISING_EDGE_FENCE();
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::EmptyWB);
+        
+        TasksTable[OP_SH].Name("SH", OP_SH)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRegsID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Store memory on the first cycle
+            Error err = Error::NONE;
+            try{
+                auto& v = ctx->GetMemoryHalfWord(self->RsValue);
+                v = static_cast<half_w_t>(self->RtValue & 0x0000FFFF);
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            RISING_EDGE_FENCE();
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::EmptyWB);
+        
+        TasksTable[OP_SB].Name("SB", OP_SB)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRegsID)
+        .EX(IInstr::CaculateMemOffsetEX)
+        .DM(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            //Store memory on the first cycle
+            Error err = Error::NONE;
+            try{
+                auto& v = ctx->GetMemoryByte(self->RsValue);
+                v = static_cast<byte_t>(self->RtValue & 0x000000FF);
+            }catch(const Error& e){
+                err = e;
+            }
+            
+            RISING_EDGE_FENCE();
+            
+            return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
+        })
+        .WB(IInstr::EmptyWB);
 
         TasksTable[OP_BEQ].Name("BEQ", OP_BEQ)
-                .IF(ResolveRegsIF)
+                .IF(IInstr::ResolveRegsIF)
                 .ID(STAGE_TASK(){
                     auto* ctx = self->context;
                     auto& reg_reserves = ctx->RegReserves;
@@ -97,15 +505,10 @@ namespace task{
 
                     return Error::NONE;
                 })
-                .WB(STAGE_TASK(){
-
-                    RISING_EDGE_FENCE();
-
-                    return Error::NONE;
-                });
+                .WB(IInstr::EmptyWB);
 
         TasksTable[OP_BNE].Name("BNE", OP_BNE)
-                .IF(ResolveRegsIF)
+                .IF(IInstr::ResolveRegsIF)
                 .ID(STAGE_TASK(){
                     auto* ctx = self->context;
                     auto& reg_reserves = ctx->RegReserves;
@@ -180,12 +583,7 @@ namespace task{
 
                     return Error::NONE;
                 })
-                .WB(STAGE_TASK(){
-
-                    RISING_EDGE_FENCE();
-
-                    return Error::NONE;
-                });
+                .WB(IInstr::EmptyWB);
 
         TasksTable[OP_BGTZ].Name("BGTZ", OP_BGTZ)
                 .IF(STAGE_TASK(){
@@ -263,11 +661,6 @@ namespace task{
 
                     return Error::NONE;
                 })
-                .WB(STAGE_TASK(){
-
-                    RISING_EDGE_FENCE();
-
-                    return Error::NONE;
-                });
+                .WB(IInstr::EmptyWB);
     }
 }

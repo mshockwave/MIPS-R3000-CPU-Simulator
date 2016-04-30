@@ -82,18 +82,8 @@ namespace task{
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
         };
 
-        /*
-         * Forward rd result
-         * */
         TaskHandle::stage_task_t ForwardRegsDM = STAGE_TASK(){
             auto* ctx = self->context;
-
-            /*
-            //Write to forwarding storage
-            ctx->FWD_ID_EXE.RegId = self->RdIndex;
-            ctx->FWD_ID_EXE.RegValue = self->RdValue;
-            ctx->FWD_ID_EXE.Available.store(true);
-             */
 
             RISING_EDGE_FENCE();
 

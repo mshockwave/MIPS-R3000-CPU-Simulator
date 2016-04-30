@@ -228,7 +228,7 @@ public:
 
     //mMemory operations
     //const byte_t* getMemoryR() { return const_cast<const byte_t*>(mMemory); }
-    word_t& getMemoryWord(addr_t offset){
+    word_t& GetMemoryWord(addr_t offset){
         Error e = Error::NONE;
 
         //Check alignment
@@ -240,7 +240,7 @@ public:
 
         return *((word_t*)(mMemory + offset));
     }
-    half_w_t& getMemoryHalfWord(addr_t offset){
+    half_w_t& GetMemoryHalfWord(addr_t offset){
         Error e = Error::NONE;
 
         //Check alignment
@@ -252,7 +252,7 @@ public:
 
         return *((half_w_t*)(mMemory + offset));
     }
-    byte_t& getMemoryByte(addr_t offset){
+    byte_t& GetMemoryByte(addr_t offset){
         //Check boundary
         CHECK_MEMORY_BOUND(offset) throw Error::MEMORY_ADDR_OVERFLOW;
 
