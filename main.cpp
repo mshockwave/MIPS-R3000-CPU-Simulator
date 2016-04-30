@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
         strncpy(testCasePath, argv[1], sizeof(char) * 100);
     }
 
+    /*
     try{
         std::stringstream ssInstrImage;
         ssInstrImage << testCasePath << FILE_PATH_SEP << "iimage.bin";
@@ -59,4 +60,6 @@ int main(int argc, char **argv) {
         Log::E("Main") << "Encounter Unexpected Error" << std::endl;
         return 1;
     }
+     */
+    return 0;
 }

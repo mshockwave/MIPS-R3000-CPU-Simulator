@@ -83,11 +83,11 @@ add_executable(${OUT_EXE_NAME}
 target_link_libraries(${OUT_EXE_NAME} ${LINK_BOOST_LIBS})
 
 add_executable(${OUT_EXE_NAME}Tests
-        ${SOURCE_FILES} ${TEST_SOURCE_HEADERS} tests/TestMain.cpp )
+              ${SOURCE_FILES} ${TEST_SOURCE_HEADERS} tests/TestMain.cpp )
 target_link_libraries(${OUT_EXE_NAME}Tests ${LINK_BOOST_LIBS})
+add_custom_command(TARGET ${OUT_EXE_NAME}Tests POST_BUILD
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/tests/test_dataset $<TARGET_FILE_DIR:${OUT_EXE_NAME}Tests>/test_dataset
+                  COMMENT "Install dataset folders...")
 
-add_custom_target(install-test-data ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tests/test_dataset ${CMAKE_BINARY_DIR}/test_dataset
-        COMMENT "Install dataset folders...")
 #Clean dataset either
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/test_dataset)
+#set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/test_dataset)
