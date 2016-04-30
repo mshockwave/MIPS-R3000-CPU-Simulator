@@ -681,19 +681,108 @@ private:
         return false;
 #endif
     }
+    
+    bool verifyValPrinterITasks(){
+#ifndef NDEBUG
+        
+        Log::D(mName) << "Verifying values and printer: I type instructions" << std::endl;
+        
+        boost::thread_group group;
+        Context ctx(&group, std::cout, std::cout);
+        task::InitInstructionMap();
+        task::InitTasks();
+        
+        ctx.mInstrStartAddr = 0x00;
+        
+        Instructions instructions;
+        /* addi $1, $2, 2 */
+        const byte_t raw_add_instr[4] = { 0x20, 0x41, 0x00, 0x02 };
+        Instruction add_instr(raw_add_instr);
+        instructions.mInstructions.push_back(add_instr);
+        
+        /* addi $3, $4, -1 */
+        const byte_t raw_add_instr2[4] = { 0x20, 0x83, 0xFF, 0xFF };
+        Instruction add_instr2(raw_add_instr2);
+        instructions.mInstructions.push_back(add_instr2);
+        
+        /* here: halt x5 */
+        const byte_t raw_halt_instr[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+        Instruction halt_instr(raw_halt_instr);
+        for(int i = 0; i < 5; i++){
+            instructions.mInstructions.push_back(halt_instr);
+        }
+        
+        ctx.setInstructionCount((uint32_t)instructions.length());
+        
+        TaskHandle::ClockHandle::Barrier rising_barrier(5);
+        TaskHandle::ClockHandle::Barrier falling_barrier(5);
+        TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
+        
+        /*IF*/
+        auto* if_thread = group.create_thread([&]()->void{
+            IFEngine engine(ctx, instructions, clock_handle);
+            engine.Start();
+        });
+        /*ID*/
+        auto* id_thread = group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::IDEngineRunnable);
+            engine.Start();
+        });
+        /*EX*/
+        auto* ex_thread = group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::EXEngineRunnable);
+            engine.Start();
+        });
+        /*DM*/
+        auto* dm_thread = group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::DMEngineRunnable);
+            engine.Start();
+        });
+        /*WB*/
+        auto* wb_thread = group.create_thread([&]()->void{
+            ExecutionEngine engine(ctx, clock_handle,
+                                   engines::WBEngineRunnable);
+            engine.Start();
+        });
+        
+        ctx.StartPrinterLoop(if_thread,
+                             id_thread,
+                             ex_thread,
+                             dm_thread,
+                             wb_thread);
+        //group.join_all();
+        
+        AssertEqual((int)ctx.Registers[1], 2, "$1 Value");
+        AssertEqual((int)ctx.Registers[3], -1, "$3 Value");
+        
+        return true;
+#else
+        Log::E(mName) << "Need to test under Debug configuration" << std::endl;
+        return false;
+#endif
+
+    }
 
     bool doTest(){
 
         bool result = true;
 
+        /*
         result &= testSingleThread();
         result &= verifyValMultiThreadNoStall();
         result &= verifyValMultiThreadStall1();
         result &= verifyValMultiThreadStall2();
+         */
+        result &= verifyValPrinterITasks();
+        /*
         result &= verifyPrinterMultiThreadNoStall();
         result &= verifyPrinterMultiThreadStall();
         result &= verifyPrinterBranchFlushNoStall();
         result &= verifyPrinterBranchFlushStall1();
+         */
 
         return result;
     }

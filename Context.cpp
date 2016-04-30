@@ -93,31 +93,30 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
 
     std::string if_msg, id_msg, ex_msg, dm_msg, wb_msg;
 
+    //Zero cycle
+    mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
+    
     reg_t registers_clone[REGISTER_COUNT];
     int i;
     for(i = 0; i < REGISTER_COUNT; i++){
         registers_clone[i] = Registers[i];
+        mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << std::dec << i;
+        mSnapShotStream << ": 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << registers_clone[i] << std::endl;
     }
     reg_t pc_;
 
-    while(!(if_dead && id_dead &&
-            ex_dead && dm_dead && wb_dead)){
+    while(true){
 
         //Print errors
         PrintError();
 
         auto regs_diff = RegsQueue.Pop();
 
-        mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
-
+        //Update register differents
         if(regs_diff.RegIndex > 0){
             registers_clone[regs_diff.RegIndex] = regs_diff.RegValue;
         }
         pc_ = regs_diff.PC;
-        for(i = 0; i < REGISTER_COUNT; i++){
-            mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << std::dec << i;
-            mSnapShotStream << ": 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << registers_clone[i] << std::endl;
-        }
         mSnapShotStream << "PC: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << pc_ << std::endl;
 
         if(!if_dead){
@@ -195,17 +194,18 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
             }
         }
 
-        if(regs_diff.Abort) break;
-
-        /*
-        const boost::chrono::microseconds dur(0);
-        if_dead |= if_thread->try_join_for(dur);
-        id_dead |= id_thread->try_join_for(dur);
-        ex_dead |= ex_thread->try_join_for(dur);
-        dm_dead |= dm_thread->try_join_for(dur);
-        wb_dead |= wb_thread->try_join_for(dur);
-         */
+        if(regs_diff.Abort || (if_dead && id_dead &&
+                               ex_dead && dm_dead && wb_dead)) break;
+        
         IncCycleCounter();
+        
+        mSnapShotStream << "cycle " << std::dec << mCycleCounter << std::endl;
+        
+        for(i = 0; i < REGISTER_COUNT; i++){
+            mSnapShotStream << '$' << std::setfill('0') << std::setw(2) << std::dec << i;
+            mSnapShotStream << ": 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << registers_clone[i] << std::endl;
+        }
+
     }
 
     //Clean rest of the errors

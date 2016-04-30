@@ -171,6 +171,7 @@ namespace task{
                 err = Error::WRITE_REG_ZERO;
             }else{
                 ctx->Registers[self->RtIndex] = self->RtValue;
+                self->ModifyRegIndex = self->RtIndex;
             }
             
             //Clean destination register reservation
@@ -206,7 +207,7 @@ namespace task{
             // For result of this stage
             reg_reserves[self->RtIndex].EXAvailable = true;
             
-            auto rt_value = rs_value + signExtend16(imm);
+            auto rt_value = rs_value + static_cast<int32_t>(signExtend16(imm));
             
             RISING_EDGE_FENCE();
             

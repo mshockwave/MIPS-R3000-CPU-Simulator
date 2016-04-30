@@ -103,6 +103,7 @@ namespace task{
                 err = Error::WRITE_REG_ZERO;
             }else{
                 ctx->Registers[self->RdIndex] = self->RdValue;
+                self->ModifyRegIndex = self->RdIndex;
             }
 
             //Clean destination register reservation
