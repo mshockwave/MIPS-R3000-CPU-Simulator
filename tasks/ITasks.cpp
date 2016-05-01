@@ -429,6 +429,105 @@ namespace task{
             return (ctx->pushTask(ctx->DM_WB, self))? err : Error::PIPELINE_STALL;
         })
         .WB(IInstr::EmptyWB);
+        
+        TasksTable[OP_LUI].Name("LUI", OP_LUI)
+        .IF(STAGE_TASK(){
+            /*
+             * This IF lambda is always executed in last half cycle
+             * Since first half cycle is reserved for instruction loading
+             * */
+            RISING_EDGE_FENCE();
+            
+            //Decode registers index
+            auto instr_bits = self->instruction->GetBitsInstruction();
+            self->RtIndex = IInstr::GetRt(instr_bits);
+            
+            auto* ctx = self->context;
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .ID(STAGE_TASK(){
+            
+            RISING_EDGE_FENCE();
+            
+            auto* ctx = self->context;
+            //Reserve destination registers
+            ctx->RegReserves[self->RtIndex].Reset(self);
+            
+            return (ctx->pushTask(ctx->ID_EX, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .EX(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            self->RtValue = static_cast<reg_t>(imm << 16);
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_ANDI].Name("ANDI", OP_ANDI)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            self->RtValue = (self->RsValue & static_cast<reg_t>(imm));
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_ORI].Name("ORI", OP_ORI)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            self->RtValue = (self->RsValue | static_cast<reg_t>(imm));
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_NORI].Name("NORI", OP_NORI)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            self->RtValue = ~(self->RsValue | static_cast<reg_t>(imm));
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
+        
+        TasksTable[OP_SLTI].Name("SLTI", OP_SLTI)
+        .IF(IInstr::ResolveRegsIF)
+        .ID(IInstr::LoadRsRegID)
+        .EX(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
+            int32_t s_rs = static_cast<int32_t>(self->RsValue);
+            int32_t s_imm = static_cast<int32_t>(signExtend16(imm));
+            self->RtValue = (s_rs < s_imm)? U32_1 : U32_0;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(IInstr::EmptyDM)
+        .WB(IInstr::WriteRegsWB);
 
         TasksTable[OP_BEQ].Name("BEQ", OP_BEQ)
                 .IF(IInstr::ResolveRegsIF)

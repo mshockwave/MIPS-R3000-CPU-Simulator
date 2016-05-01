@@ -69,22 +69,26 @@ public:
         TaskHandle* Holder;
         reg_t Value;
 
+        bool ForbitReservation;
         bool IDAvailable, EXAvailable;
         bool EXForward, IDForward;
 
         RegReserve() :
                 Holder(nullptr),
                 Value(0),
+                ForbitReservation(false),
                 IDAvailable(false), EXAvailable(false),
                 EXForward(false), IDForward(false){ }
         void Reset(TaskHandle* h){
-            Holder = h;
+            
+            if(!ForbitReservation) Holder = h;
+            
             Value = 0;
             IDAvailable = EXAvailable = false;
             EXForward = IDForward = false;
         }
     };
-    //typedef boost::atomic<TaskHandle*> reg_reserve_t;
+    
     RegReserve RegReserves[REGISTER_COUNT];
 
     const unsigned int STAGE_REG_BUF_SIZE = 1;
@@ -133,6 +137,7 @@ public:
             Registers[i] = (byte_t)0;
             RegReserves[i].Reset(nullptr);
         }
+        RegReserves[0].ForbitReservation = true;
 
         //Zero memory
         for(int i = 0; i < MEMORY_LENGTH; i++){
@@ -171,6 +176,7 @@ public:
             Registers[i] = (byte_t)0;
             RegReserves[i].Reset(nullptr);
         }
+        RegReserves[0].ForbitReservation = true;
 
         //Load PC from rawBinary
         load2Register(rawBinary.getInstructions(), PC);
