@@ -28,23 +28,31 @@ void IFEngine::Start(){
             //Extract op code
             uint32_t op = extractInstrBits(instr.GetBitsInstruction(), 31, 26);
             if(op == 0x00){
-                //R Type Instructions
-                uint32_t func = extractInstrBits(instr.GetBitsInstruction(), 5, 0);
-                TRACE_DEBUG_BLOCK{
-                    boost::mutex::scoped_lock lk(Log::Mux::D);
-                    Log::D("IFEngine") << "R Type Func: " << (int)func << std::endl;
-                }
-                task::instr_task_map_t::iterator itOpMap = task::RtypeInstrFuncMap.find(static_cast<uint8_t>(func));
-                if (UNLIKELY(itOpMap == task::RtypeInstrFuncMap.end())) {
-                    //Not found
-                    //Halt
+                
+                uint32_t instr_bits = instr.GetBitsInstruction();
+                if(isEqualX(25, 21, instr_bits, 0x00000000)){
+                    //sll $0, $0, $0
+                    next_task = task::OP_NOP;
+                }else{
+                    //R Type Instructions
+                    uint32_t func = extractInstrBits(instr_bits, 5, 0);
                     TRACE_DEBUG_BLOCK{
                         boost::mutex::scoped_lock lk(Log::Mux::D);
-                        Log::D("IFEngine") << "R Type func not found!" << std::endl;
+                        Log::D("IFEngine") << "R Type Func: " << (int)func << std::endl;
                     }
-                    return;
+                    task::instr_task_map_t::iterator itOpMap = task::RtypeInstrFuncMap.find(static_cast<uint8_t>(func));
+                    if (UNLIKELY(itOpMap == task::RtypeInstrFuncMap.end())) {
+                        //Not found
+                        //Halt
+                        TRACE_DEBUG_BLOCK{
+                            boost::mutex::scoped_lock lk(Log::Mux::D);
+                            Log::D("IFEngine") << "R Type func not found!" << std::endl;
+                        }
+                        return;
+                    }
+                    next_task = itOpMap->second;
                 }
-                next_task = itOpMap->second;
+                
             }else{
                 TRACE_DEBUG_BLOCK{
                     boost::mutex::scoped_lock lk(Log::Mux::D);
