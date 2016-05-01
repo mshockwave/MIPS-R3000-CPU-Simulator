@@ -274,14 +274,15 @@ public:
             WBMessageQueue;
 
     typedef BlockingQueue<Error> err_queue_t;
-    err_queue_t IFErrorQueue,
-            IDErrorQueue,
-            EXErrorQueue,
+    err_queue_t EXErrorQueue,
             DMErrorQueue,
             WBErrorQueue;
 
     typedef BlockingQueue<RegsDiff> reg_queue_t;
     reg_queue_t RegsQueue;
+    
+    typedef BlockingQueue<reg_t> pc_queue_t;
+    pc_queue_t PcQueue;
 
     void StartPrinterLoop(boost::thread* if_thread,
                           boost::thread* id_thread,

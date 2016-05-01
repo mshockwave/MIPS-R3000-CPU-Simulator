@@ -12,6 +12,7 @@ void IFEngine::Start(){
     while(true) {
 
         reg_t pc = mContext->GetPC();
+        mContext->PcQueue.Push(pc);
 
         task_id_t next_task;
         Instruction *instr_ptr = nullptr;
@@ -116,11 +117,13 @@ void IFEngine::Start(){
 
         if(ready_to_abort){
             mContext->IFMessageQueue.Push(Context::MSG_END);
+            mContext->PcQueue.Push(mContext->GetPC());
             return;
         }
 
         if(ready_to_dead){
             mContext->IFMessageQueue.Push(Context::MSG_END);
+            mContext->PcQueue.Push(mContext->GetPC());
             break;
         }
     }

@@ -29,14 +29,6 @@ bool Context::PrintError() {
     //Check errors
     bool empty = true;
     Error error = Error::NONE;
-    if(!IFErrorQueue.IsEmpty()){
-        error = (error + IFErrorQueue.Pop());
-        empty = false;
-    }
-    if(!IDErrorQueue.IsEmpty()){
-        error = (error + IDErrorQueue.Pop());
-        empty = false;
-    }
     if(!EXErrorQueue.IsEmpty()){
         error = (error + EXErrorQueue.Pop());
         empty = false;
@@ -116,7 +108,7 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
         if(regs_diff.RegIndex > 0){
             registers_clone[regs_diff.RegIndex] = regs_diff.RegValue;
         }
-        pc_ = regs_diff.PC;
+        pc_ = PcQueue.Pop();
         mSnapShotStream << "PC: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << pc_ << std::endl;
 
         if(!if_dead){

@@ -52,9 +52,10 @@ namespace task{
             uint32_t partPC = extractInstrBits(pc, 31, 28);
             pc = (partPC << 28);
             
+            ctx->PcFlush = Context::PC_FLUSH_CONSUMER_COUNT;
             Error e = ctx->SetPC( pc | (addr << 2) );
             
-            return e;
+            return (ctx->pushTask(ctx->ID_EX, self))? e : Error::PIPELINE_STALL;
         })
         .EX(JInstr::EmptyEX)
         .DM(JInstr::EmptyDM)
@@ -75,9 +76,10 @@ namespace task{
             uint32_t partPC = extractInstrBits(pc, 31, 28);
             pc = (partPC << 28);
             
+            ctx->PcFlush = Context::PC_FLUSH_CONSUMER_COUNT;
             Error e = ctx->SetPC( pc | (addr << 2) );
             
-            return e;
+            return (ctx->pushTask(ctx->ID_EX, self))? e : Error::PIPELINE_STALL;
         })
         .EX(JInstr::EmptyEX)
         .DM(JInstr::EmptyDM)

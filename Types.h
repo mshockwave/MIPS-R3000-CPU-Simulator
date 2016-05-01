@@ -112,13 +112,11 @@ struct RegsDiff {
     uint8_t RegIndex;
     reg_t RegValue;
 
-    reg_t PC;
     bool Abort;
 
     RegsDiff() :
             RegIndex(0),
             RegValue(0),
-            PC(0),
             Abort(false) { }
 };
 

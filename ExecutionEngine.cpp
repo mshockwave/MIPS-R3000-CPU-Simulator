@@ -342,7 +342,6 @@ namespace engines{
 
             //Record modified registers
             RegsDiff regs_diff;
-            regs_diff.PC = ctx->GetPC();
             uint8_t m_index = task_obj->ModifyRegIndex;
             if( m_index > 0 && m_index < REGISTER_COUNT){
                 regs_diff.RegIndex = m_index;
