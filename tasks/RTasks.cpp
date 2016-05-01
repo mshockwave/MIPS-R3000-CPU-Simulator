@@ -453,6 +453,252 @@ namespace task{
         .DM(RInstr::EmptyDM)
         .WB(RInstr::WriteRegsWB);
         
+        TasksTable[OP_SLL].Name("SLL", OP_SLL)
+        .IF(STAGE_TASK(){
+            /*
+             * This IF lambda is always executed in last half cycle
+             * Since first half cycle is reserved for instruction loading
+             * */
+            RISING_EDGE_FENCE();
+            
+            //Decode registers index
+            auto instr_bits = self->instruction->GetBitsInstruction();
+            self->RdIndex = RInstr::GetRd(instr_bits);
+            self->RtIndex = RInstr::GetRt(instr_bits);
+            
+            auto* ctx = self->context;
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .ID(STAGE_TASK(){
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            // Do not load registers
+            // In first half cycle
+            RISING_EDGE_FENCE();
+            
+            auto rt_index = self->RtIndex;
+            
+            bool need_wait = false;
+            if(reg_reserves[rt_index].Holder == nullptr){
+                
+                //Load from main registers
+                self->RtValue = ctx->Registers[rt_index];
+                
+            }else if(reg_reserves[rt_index].EXAvailable){
+                
+                //Can EX Forward
+                reg_reserves[rt_index].EXForward = true;
+                
+            }else{
+                need_wait = true;
+            }
+            
+            bool stall = need_wait;
+            if(!need_wait){
+                //Push next task
+                stall = !ctx->pushTask(ctx->ID_EX, self);
+                
+                //Reserve destination registers
+                //ctx->RegReserves[self->RdIndex] = self;
+                ctx->RegReserves[self->RdIndex].Reset(self);
+            }
+            
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
+        })
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rt_value = self->RtValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            uint8_t sh_amt = RInstr::GetShAmt(self->instruction->GetBitsInstruction());
+            auto rd_value = (rt_value << sh_amt);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_SRL].Name("SRL", OP_SRL)
+        .IF(STAGE_TASK(){
+            /*
+             * This IF lambda is always executed in last half cycle
+             * Since first half cycle is reserved for instruction loading
+             * */
+            RISING_EDGE_FENCE();
+            
+            //Decode registers index
+            auto instr_bits = self->instruction->GetBitsInstruction();
+            self->RdIndex = RInstr::GetRd(instr_bits);
+            self->RtIndex = RInstr::GetRt(instr_bits);
+            
+            auto* ctx = self->context;
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .ID(STAGE_TASK(){
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            // Do not load registers
+            // In first half cycle
+            RISING_EDGE_FENCE();
+            
+            auto rt_index = self->RtIndex;
+            
+            bool need_wait = false;
+            if(reg_reserves[rt_index].Holder == nullptr){
+                
+                //Load from main registers
+                self->RtValue = ctx->Registers[rt_index];
+                
+            }else if(reg_reserves[rt_index].EXAvailable){
+                
+                //Can EX Forward
+                reg_reserves[rt_index].EXForward = true;
+                
+            }else{
+                need_wait = true;
+            }
+            
+            bool stall = need_wait;
+            if(!need_wait){
+                //Push next task
+                stall = !ctx->pushTask(ctx->ID_EX, self);
+                
+                //Reserve destination registers
+                //ctx->RegReserves[self->RdIndex] = self;
+                ctx->RegReserves[self->RdIndex].Reset(self);
+            }
+            
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
+        })
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            reg_t rt_value = self->RtValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            uint8_t sh_amt = RInstr::GetShAmt(self->instruction->GetBitsInstruction());
+            reg_t rd_value = (rt_value >> sh_amt);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_SRA].Name("SRA", OP_SRA)
+        .IF(STAGE_TASK(){
+            /*
+             * This IF lambda is always executed in last half cycle
+             * Since first half cycle is reserved for instruction loading
+             * */
+            RISING_EDGE_FENCE();
+            
+            //Decode registers index
+            auto instr_bits = self->instruction->GetBitsInstruction();
+            self->RdIndex = RInstr::GetRd(instr_bits);
+            self->RtIndex = RInstr::GetRt(instr_bits);
+            
+            auto* ctx = self->context;
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .ID(STAGE_TASK(){
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            // Do not load registers
+            // In first half cycle
+            RISING_EDGE_FENCE();
+            
+            auto rt_index = self->RtIndex;
+            
+            bool need_wait = false;
+            if(reg_reserves[rt_index].Holder == nullptr){
+                
+                //Load from main registers
+                self->RtValue = ctx->Registers[rt_index];
+                
+            }else if(reg_reserves[rt_index].EXAvailable){
+                
+                //Can EX Forward
+                reg_reserves[rt_index].EXForward = true;
+                
+            }else{
+                need_wait = true;
+            }
+            
+            bool stall = need_wait;
+            if(!need_wait){
+                //Push next task
+                stall = !ctx->pushTask(ctx->ID_EX, self);
+                
+                //Reserve destination registers
+                //ctx->RegReserves[self->RdIndex] = self;
+                ctx->RegReserves[self->RdIndex].Reset(self);
+            }
+            
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
+        })
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            reg_t rt_value = self->RtValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            uint8_t sh_amt = RInstr::GetShAmt(self->instruction->GetBitsInstruction());
+            auto rd_value = (static_cast<int32_t>(rt_value) >> sh_amt);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = static_cast<reg_t>(rd_value);
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
         TasksTable[OP_JR].Name("JR", OP_JR)
         .IF(RInstr::ResolveRegsIF)
         .ID(STAGE_TASK(){
