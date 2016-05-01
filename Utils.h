@@ -144,7 +144,24 @@ inline uint32_t signExtend8(uint8_t v){
     return static_cast<uint32_t>(ex >> 24);
 }
 
-//Do not insert new line
+/*Equal with don't care bits*/
+inline bool isEqualX(uint32_t dc_mask, uint32_t a, uint32_t b){
+    uint32_t a_p = a & (~dc_mask);
+    uint32_t b_p = b & (~dc_mask);
+    return a_p == b_p;
+}
+/*
+ * Equal with don't care bits
+ * Bit mask = [msb, lsb]
+ */
+inline bool isEqualX(uint8_t msb, uint8_t lsb, uint32_t a, uint32_t b){
+    uint8_t bitsCount = msb - lsb + U8_1;
+    uint32_t mask = createBitMask(bitsCount);
+    mask = (mask << lsb);
+    return isEqualX(mask, a, b);
+}
+
+/*Do not insert new line*/
 #define OSTREAM_HEX_OUTPUT_FMT(width) std::setfill('0') << std::setw((width)) << std::hex << std::uppercase
 
 inline long getCurrentTimeMs(){

@@ -28,6 +28,15 @@ bool TestUtils::doTest() {
         ss << "Expect 26, " << "get " << slice << std::endl;
         Assert(slice == (uint32_t) 26, ss.str());
     }
+    
+    //Test don't care equal
+    {
+        Log::V(mName) << "Testing don't care equal" << std::endl;
+        const uint32_t value_a = 0x12345678;
+        const uint32_t value_b = 0x12005678;
+        auto result = isEqualX(23, 16, value_a, value_b);
+        AssertEqual(result, true, "0x12345678 == 0x005678 with don't care [23, 16] bits");
+    }
 
     //Test loading data to register
     {
