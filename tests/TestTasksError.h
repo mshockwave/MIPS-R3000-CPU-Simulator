@@ -52,40 +52,36 @@ private:
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
 
         /*IF*/
-        auto* if_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
             engine.Start();
         });
         /*ID*/
-        auto* id_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::IDEngineRunnable);
             engine.Start();
         });
         /*EX*/
-        auto* ex_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::EXEngineRunnable);
             engine.Start();
         });
         /*DM*/
-        auto* dm_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::DMEngineRunnable);
             engine.Start();
         });
         /*WB*/
-        auto* wb_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::WBEngineRunnable);
             engine.Start();
         });
 
-        ctx.StartPrinterLoop(if_thread,
-                             id_thread,
-                             ex_thread,
-                             dm_thread,
-                             wb_thread);
+        ctx.StartPrinterLoop(&group);
 
         //Log::V(mName) << "$4 Value: " << (int)ctx.Registers[4] << std::endl;
         //Log::V(mName) << "$3 Value: " << (int)ctx.Registers[3] << std::endl;
@@ -137,40 +133,36 @@ private:
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
         
         /*IF*/
-        auto* if_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
             engine.Start();
         });
         /*ID*/
-        auto* id_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::IDEngineRunnable);
             engine.Start();
         });
         /*EX*/
-        auto* ex_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::EXEngineRunnable);
             engine.Start();
         });
         /*DM*/
-        auto* dm_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::DMEngineRunnable);
             engine.Start();
         });
         /*WB*/
-        auto* wb_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::WBEngineRunnable);
             engine.Start();
         });
         
-        ctx.StartPrinterLoop(if_thread,
-                             id_thread,
-                             ex_thread,
-                             dm_thread,
-                             wb_thread);
+        ctx.StartPrinterLoop(&group);
         
         return true;
 #else
@@ -214,40 +206,36 @@ private:
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
         
         /*IF*/
-        auto* if_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             IFEngine engine(ctx, instructions, clock_handle);
             engine.Start();
         });
         /*ID*/
-        auto* id_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::IDEngineRunnable);
             engine.Start();
         });
         /*EX*/
-        auto* ex_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::EXEngineRunnable);
             engine.Start();
         });
         /*DM*/
-        auto* dm_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::DMEngineRunnable);
             engine.Start();
         });
         /*WB*/
-        auto* wb_thread = group.create_thread([&]()->void{
+        group.create_thread([&]()->void{
             ExecutionEngine engine(ctx, clock_handle,
                                    engines::WBEngineRunnable);
             engine.Start();
         });
         
-        ctx.StartPrinterLoop(if_thread,
-                             id_thread,
-                             ex_thread,
-                             dm_thread,
-                             wb_thread);
+        ctx.StartPrinterLoop(&group);
         
         //Log::V(mName) << "$4 Value: " << (int)ctx.Registers[4] << std::endl;
         //Log::V(mName) << "$3 Value: " << (int)ctx.Registers[3] << std::endl;

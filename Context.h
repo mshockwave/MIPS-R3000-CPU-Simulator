@@ -290,11 +290,7 @@ public:
     typedef BlockingQueue<reg_t> pc_queue_t;
     pc_queue_t PcQueue;
 
-    void StartPrinterLoop(boost::thread* if_thread,
-                          boost::thread* id_thread,
-                          boost::thread* ex_thread,
-                          boost::thread* dm_thread,
-                          boost::thread* wb_thread);
+    void StartPrinterLoop(boost::thread_group*);
 
     /*
      * Append error

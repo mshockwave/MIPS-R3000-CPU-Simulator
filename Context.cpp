@@ -75,11 +75,8 @@ static void trimOutput(std::string& str){
     }
 }
 
-void Context::StartPrinterLoop(boost::thread* if_thread,
-                               boost::thread* id_thread,
-                               boost::thread* ex_thread,
-                               boost::thread* dm_thread,
-                               boost::thread* wb_thread) {
+void Context::StartPrinterLoop(boost::thread_group* threads) {
+    
     bool if_dead = false, id_dead = false,
             ex_dead = false, dm_dead = false, wb_dead = false;
 
@@ -206,10 +203,5 @@ void Context::StartPrinterLoop(boost::thread* if_thread,
     /*
      * Remember to join before exit!!
      * */
-    //FIXME: Use thread group instead
-    if_thread->join();
-    id_thread->join();
-    ex_thread->join();
-    dm_thread->join();
-    wb_thread->join();
+    threads->join_all();
 }
