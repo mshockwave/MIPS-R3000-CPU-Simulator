@@ -82,7 +82,7 @@ namespace task{
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
         };
 
-        TaskHandle::stage_task_t ForwardRegsDM = STAGE_TASK(){
+        TaskHandle::stage_task_t EmptyDM = STAGE_TASK(){
             auto* ctx = self->context;
 
             RISING_EDGE_FENCE();
@@ -157,8 +157,44 @@ namespace task{
 
                     return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
                 })
-                .DM(RInstr::ForwardRegsDM)
+                .DM(RInstr::EmptyDM)
                 .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_ADDU].Name("ADDU", OP_ADDU)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            auto rd_value = rt_value + rs_value;
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
 
         TasksTable[OP_SUB].Name("SUB", OP_SUB)
                 .IF(RInstr::ResolveRegsIF)
@@ -196,7 +232,281 @@ namespace task{
 
                     return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
                 })
-                .DM(RInstr::ForwardRegsDM)
+                .DM(RInstr::EmptyDM)
                 .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_AND].Name("AND", OP_AND)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            auto rd_value = rt_value & rs_value;
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_OR].Name("OR", OP_OR)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            auto rd_value = rt_value | rs_value;
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_XOR].Name("XOR", OP_XOR)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            auto rd_value = rt_value ^ rs_value;
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_NOR].Name("NOR", OP_NOR)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            auto rd_value = ~(rt_value | rs_value);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_NAND].Name("NAND", OP_NAND)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            auto rd_value = ~(rt_value & rs_value);
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_SLT].Name("SLT", OP_SLT)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(RInstr::LoadRegsID)
+        .EX(STAGE_TASK(){
+            
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            //TODO: Error detection
+            auto rt_value = self->RtValue;
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RtIndex].EXForward){
+                rt_value = reg_reserves[self->RtIndex].Value;
+            }
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RdIndex].EXAvailable = true;
+            
+            int32_t s_rt = static_cast<int32_t>(rt_value);
+            int32_t s_rs = static_cast<int32_t>(rs_value);
+            auto rd_value = (s_rs < s_rt)? U32_1 : U32_0;
+            
+            RISING_EDGE_FENCE();
+            
+            self->RdValue = rd_value;
+            
+            reg_reserves[self->RdIndex].Value = rd_value;
+            reg_reserves[self->RdIndex].IDAvailable = true;
+            
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(RInstr::WriteRegsWB);
+        
+        TasksTable[OP_JR].Name("JR", OP_JR)
+        .IF(RInstr::ResolveRegsIF)
+        .ID(STAGE_TASK(){
+            auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rs_index = self->RsIndex;
+            
+            bool rs_load = false;
+            reg_t rs_value = 0;
+            
+            // Load ID forwarding stuff here
+            // To avoiding race condition on falling edge
+            if(reg_reserves[rs_index].Holder != nullptr &&
+               reg_reserves[rs_index].IDAvailable){
+                rs_value = reg_reserves[rs_index].Value;
+                rs_load = true;
+                reg_reserves[rs_index].IDForward = true;
+            }
+            
+            RISING_EDGE_FENCE();
+            
+            bool need_wait = false;
+            if(reg_reserves[rs_index].Holder == nullptr){
+                rs_value = ctx->Registers[rs_index];
+            }else if(!rs_load){
+                need_wait = true;
+            }
+            
+            bool stall = need_wait;
+            if(!need_wait){
+                
+                ctx->PcFlush = Context::PC_FLUSH_CONSUMER_COUNT;
+                ctx->SetPC(rs_value);
+                
+                //Push next task
+                stall = !ctx->pushTask(ctx->ID_EX, self);
+            }
+            
+            return (stall)? Error::PIPELINE_STALL : Error::NONE;
+        })
+        .EX(STAGE_TASK(){
+            
+            RISING_EDGE_FENCE();
+            
+            auto* ctx = self->context;
+            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
+        .DM(RInstr::EmptyDM)
+        .WB(STAGE_TASK(){
+            
+            RISING_EDGE_FENCE();
+            
+            return Error::NONE;
+        });
     }
 }
