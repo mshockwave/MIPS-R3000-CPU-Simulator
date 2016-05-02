@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
         
         Context ctx(raw_binary, &group,
                     snapShotOut, errorOut);
+        task::InitInstructionMap();
+        task::InitTasks();
         
         ctx.setInstructionCount((uint32_t)instructions.length());
         
@@ -90,6 +92,14 @@ int main(int argc, char **argv) {
         
         return 0;
 
+    }catch(const char *e){
+        Log::E("Main") << e << std::endl;
+        
+        snapShotOut.close();
+        errorOut.close();
+        
+        return 1;
+        
     }catch(const Error& e){
         Log::E("Main") << e << std::endl;
         

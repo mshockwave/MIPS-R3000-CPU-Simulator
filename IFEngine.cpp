@@ -64,7 +64,7 @@ void IFEngine::Start(){
                     //Halt
                     TRACE_DEBUG_BLOCK{
                         boost::mutex::scoped_lock lk(Log::Mux::D);
-                        Log::D("IFEngine") << "Op not found!" << std::endl;
+                        Log::D("IFEngine") << "Op not found: " << (int)op << std::endl;
                     }
                     return;
                 }
