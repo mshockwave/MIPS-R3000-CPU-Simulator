@@ -16,7 +16,7 @@ void IFEngine::Start(){
 
         task_id_t next_task;
         Instruction *instr_ptr = nullptr;
-        if (pc < mContext->GetInstrStartAddress()) {
+        if (pc < mContext->GetInstrStartAddress() || pc > mContext->GetInstrEndAddr()) {
             //Put NOP
             next_task = task::OP_NOP;
             instr_ptr = nullptr;
@@ -78,7 +78,10 @@ void IFEngine::Start(){
             delete task_obj;
         }
         if( !mContext->IFStall || task_obj == nullptr){
-            task_obj = t.Get(mContext, instr_ptr, &clock);
+            task_obj = t.Get(mContext,
+                             instr_ptr,
+                             pc,
+                             &clock);
         }
 
         TRACE_DEBUG_BLOCK{
@@ -107,6 +110,16 @@ void IFEngine::Start(){
         if(instr_ptr != nullptr){
             std::stringstream ss;
             ss << std::setfill('0') << "0x" << std::setw(8) << std::hex << std::uppercase << instr_ptr->GetBitsInstruction();
+            if(mContext->PcFlush.load() > 0){
+                ss << " to_be_flushed";
+            }else if(mContext->IFStall){
+                ss << " to_be_stalled";
+            }
+            mContext->IFMessageQueue.Push(ss.str());
+            
+        }else if(task_obj->task_id == task::OP_NOP){
+            std::stringstream ss;
+            ss << "0x00000000";
             if(mContext->PcFlush.load() > 0){
                 ss << " to_be_flushed";
             }else if(mContext->IFStall){

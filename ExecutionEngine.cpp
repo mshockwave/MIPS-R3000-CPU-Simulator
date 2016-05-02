@@ -20,11 +20,11 @@ namespace engines{
             if(!stall){
                 if(ctx->IF_ID.empty()){
                     //Insert NOP
-                    task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
+                    task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, U32_0, &clock);
                 }else if(ctx->PcFlush.fetch_sub(1) > 0){
                     //Pop old task and insert NOP
                     ctx->IF_ID.erase(ctx->IF_ID.begin());
-                    task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
+                    task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, U32_0, &clock);
                 }else{
                     //Get from IF_ID stage register
                     task_obj = ctx->IF_ID.front();
@@ -122,7 +122,7 @@ namespace engines{
             TaskHandle *task_obj;
             if(ctx->ID_EX.empty()){
                 //Insert NOP
-                task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
+                task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, U32_0, &clock);
             }else{
                 //Get from ID_EX stage register
                 task_obj = ctx->ID_EX.front();
@@ -230,7 +230,7 @@ namespace engines{
             TaskHandle *task_obj;
             if(ctx->EX_DM.empty()){
                 //Insert NOP
-                task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
+                task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, U32_0, &clock);
             }else{
                 //Get from ID_EX stage register
                 task_obj = ctx->EX_DM.front();
@@ -318,7 +318,7 @@ namespace engines{
             TaskHandle *task_obj;
             if(ctx->DM_WB.empty()){
                 //Insert NOP
-                task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, &clock);
+                task_obj = task::TasksTable[task::OP_NOP].Get(ctx, nullptr, U32_0, &clock);
             }else{
                 //Get from ID_EX stage register
                 task_obj = ctx->DM_WB.front();

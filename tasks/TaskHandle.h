@@ -29,6 +29,7 @@ public:
 
     Context* context;
     Instruction* instruction;
+    addr_t instruction_address; //PC value
     const ClockHandle* clock;
     std::string name;
     task_id_t task_id;
@@ -47,15 +48,20 @@ public:
 
     TaskHandle() :
             instruction(nullptr),
+            instruction_address(U32_0),
             context(nullptr),
             RtIndex(0), RsIndex(0), RdIndex(0),
             ModifyRegIndex(0),
             ForwardRs(false), ForwardRt(false){}
 
-    TaskHandle* Get(Context* ctx, Instruction* instr, const ClockHandle* clk){
+    TaskHandle* Get(Context* ctx,
+                    Instruction* instr,
+                    addr_t pc,
+                    const ClockHandle* clk){
         auto* task_handle = new TaskHandle();
         task_handle->context = ctx;
         task_handle->instruction = instr;
+        task_handle->instruction_address = pc;
         task_handle->clock = clk;
         task_handle->name = name;
         task_handle->task_id = task_id;

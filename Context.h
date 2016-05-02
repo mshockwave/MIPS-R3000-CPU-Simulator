@@ -28,7 +28,7 @@ class Context {
 #endif
 
 #define CHECK_MEMORY_BOUND(offset) \
-    if((offset) > mDataSize && (offset) < SP)
+    if((offset) > MEMORY_LENGTH)
 
 public:
     typedef unsigned long CounterType;
@@ -58,7 +58,7 @@ private:
 
 public:
 
-    addr_t getInstrEndAddr(){ return mInstrEndAddr; }
+    addr_t GetInstrEndAddr(){ return mInstrEndAddr; }
 
     //Global Registers
     reg_t Registers[REGISTER_COUNT];
@@ -217,7 +217,7 @@ public:
         if(pc % WORD_WIDTH != 0)
             e = e + Error::DATA_MISALIGNED;
 
-        if(pc > getInstrEndAddr())
+        if(pc > GetInstrEndAddr())
             e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if( !(e == Error::NONE) ) return e;

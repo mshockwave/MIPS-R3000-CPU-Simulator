@@ -43,11 +43,11 @@ namespace task{
         .IF(JInstr::EmptyIF)
         .ID(STAGE_TASK(){
             auto* ctx = self->context;
+            reg_t pc = self->instruction_address;
             
             RISING_EDGE_FENCE();
             
             uint32_t addr = JInstr::GetAddr(self->instruction->GetBitsInstruction());
-            reg_t pc = ctx->GetPC();
             pc += WORD_WIDTH;
             uint32_t partPC = extractInstrBits(pc, 31, 28);
             pc = (partPC << 28);
@@ -65,11 +65,11 @@ namespace task{
         .IF(JInstr::EmptyIF)
         .ID(STAGE_TASK(){
             auto* ctx = self->context;
+            reg_t pc = self->instruction_address;
             
             RISING_EDGE_FENCE();
             
             uint32_t addr = JInstr::GetAddr(self->instruction->GetBitsInstruction());
-            reg_t pc = ctx->GetPC();
             pc += WORD_WIDTH;
             //Store $ra value in self->Rd
             self->RdValue = pc;
