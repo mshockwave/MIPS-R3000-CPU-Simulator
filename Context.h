@@ -27,8 +27,8 @@ class Context {
     friend class TestTasksError;
 #endif
 
-#define CHECK_MEMORY_BOUND(offset) \
-    if((offset) > MEMORY_LENGTH)
+#define CHECK_MEMORY_BOUND(offset, size) \
+    if((offset) + (size) > MEMORY_LENGTH)
 
 public:
     typedef unsigned long CounterType;
@@ -240,7 +240,7 @@ public:
         //Check alignment
         if(offset % WORD_WIDTH != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        CHECK_MEMORY_BOUND(offset) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset, 4) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if(!(e == Error::NONE)) throw e;
 
@@ -252,7 +252,7 @@ public:
         //Check alignment
         if(offset % (WORD_WIDTH >> 1) != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        CHECK_MEMORY_BOUND(offset) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset, 2) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if(!(e == Error::NONE)) throw e;
 
@@ -260,7 +260,7 @@ public:
     }
     byte_t& GetMemoryByte(addr_t offset){
         //Check boundary
-        CHECK_MEMORY_BOUND(offset) throw Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset, 1) throw Error::MEMORY_ADDR_OVERFLOW;
 
         return *((byte_t*)(mMemory + offset));
     }
