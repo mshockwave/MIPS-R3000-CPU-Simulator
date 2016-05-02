@@ -266,7 +266,7 @@ namespace task{
             
             Error err = Error::NONE;
             try{
-                word_t v = ctx->GetMemoryWord(self->RsValue);
+                word_t v = reverse32ByteOrder(ctx->GetMemoryWord(self->RsValue));
                 self->RtValue = v;
             }catch(const Error& e){
                 err = e;
@@ -288,7 +288,7 @@ namespace task{
             
             Error err = Error::NONE;
             try{
-                half_w_t v = ctx->GetMemoryHalfWord(self->RsValue);
+                half_w_t v = reverse16ByteOrder(ctx->GetMemoryHalfWord(self->RsValue));
                 self->RtValue = signExtend16(v);
             }catch(const Error& e){
                 err = e;
@@ -310,7 +310,7 @@ namespace task{
             
             Error err = Error::NONE;
             try{
-                half_w_t v = ctx->GetMemoryHalfWord(self->RsValue);
+                half_w_t v = reverse16ByteOrder(ctx->GetMemoryHalfWord(self->RsValue));
                 self->RtValue = static_cast<reg_t>(v);
             }catch(const Error& e){
                 err = e;
@@ -375,7 +375,7 @@ namespace task{
             Error err = Error::NONE;
             try{
                 auto& v = ctx->GetMemoryWord(self->RsValue);
-                v = self->RtValue;
+                v = reverse32ByteOrder(self->RtValue);
             }catch(const Error& e){
                 err = e;
             }
@@ -397,7 +397,7 @@ namespace task{
             Error err = Error::NONE;
             try{
                 auto& v = ctx->GetMemoryHalfWord(self->RsValue);
-                v = static_cast<half_w_t>(self->RtValue & 0x0000FFFF);
+                v = reverse16ByteOrder(static_cast<half_w_t>(self->RtValue & 0x0000FFFF));
             }catch(const Error& e){
                 err = e;
             }
