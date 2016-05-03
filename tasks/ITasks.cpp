@@ -223,16 +223,20 @@ namespace task{
             // For result of this stage
             reg_reserves[self->RtIndex].EXAvailable = true;
             
-            auto rt_value = rs_value + static_cast<int32_t>(signExtend16(imm));
+            Error err = Error::NONE;
+            
+            auto rt_value = static_cast<int32_t>(rs_value) + static_cast<int32_t>(signExtend16(imm));
+            auto overflow = isSumOverflow(rs_value, signExtend16(imm), static_cast<reg_t>(rt_value));
+            if(overflow) err = err + Error::NUMBER_OVERFLOW;
             
             RISING_EDGE_FENCE();
             
             self->RtValue = rt_value;
             
-            reg_reserves[self->RtIndex].Value = rt_value;
+            reg_reserves[self->RtIndex].Value = static_cast<reg_t>(rt_value);
             reg_reserves[self->RtIndex].IDAvailable = true;
             
-            return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
+            return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
         })
         .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
@@ -481,10 +485,18 @@ namespace task{
         })
         .EX(STAGE_TASK(){
             auto* ctx = self->context;
+            auto& reg_reserves = ctx->RegReserves;
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
             
             RISING_EDGE_FENCE();
             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
             self->RtValue = static_cast<reg_t>(imm << 16);
+            
+            reg_reserves[self->RtIndex].Value = self->RtValue;
+            reg_reserves[self->RtIndex].IDAvailable = true;
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
@@ -498,9 +510,23 @@ namespace task{
         .EX(STAGE_TASK(){
             auto* ctx = self->context;
             
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
+            
             RISING_EDGE_FENCE();
             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
-            self->RtValue = (self->RsValue & static_cast<reg_t>(imm));
+            self->RtValue = (rs_value & static_cast<reg_t>(imm));
+            
+            reg_reserves[self->RtIndex].Value = self->RtValue;
+            reg_reserves[self->RtIndex].IDAvailable = true;
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
@@ -544,9 +570,23 @@ namespace task{
         .EX(STAGE_TASK(){
             auto* ctx = self->context;
             
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
+            
             RISING_EDGE_FENCE();
             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
-            self->RtValue = ~(self->RsValue | static_cast<reg_t>(imm));
+            self->RtValue = ~(rs_value | static_cast<reg_t>(imm));
+            
+            reg_reserves[self->RtIndex].Value = self->RtValue;
+            reg_reserves[self->RtIndex].IDAvailable = true;
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
@@ -558,13 +598,28 @@ namespace task{
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){
+            
             auto* ctx = self->context;
+            
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
             
             RISING_EDGE_FENCE();
             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
-            int32_t s_rs = static_cast<int32_t>(self->RsValue);
+            int32_t s_rs = static_cast<int32_t>(rs_value);
             int32_t s_imm = static_cast<int32_t>(signExtend16(imm));
             self->RtValue = (s_rs < s_imm)? U32_1 : U32_0;
+            
+            reg_reserves[self->RtIndex].Value = self->RtValue;
+            reg_reserves[self->RtIndex].IDAvailable = true;
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
