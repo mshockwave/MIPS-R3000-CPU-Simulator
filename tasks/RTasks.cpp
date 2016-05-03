@@ -53,7 +53,8 @@ namespace task{
 
                 //Can EX Forward
                 reg_reserves[rt_index].EXForward = true;
-
+                //Prevent second one from accessing
+                reg_reserves[rt_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -67,7 +68,8 @@ namespace task{
 
                 //Can EX Forward
                 reg_reserves[rs_index].EXForward = true;
-
+                //Prevent second one from accessing
+                reg_reserves[rs_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -506,7 +508,8 @@ namespace task{
                 
                 //Can EX Forward
                 reg_reserves[rt_index].EXForward = true;
-                
+                //Prevent second one from accessing
+                reg_reserves[rt_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -593,7 +596,8 @@ namespace task{
                 
                 //Can EX Forward
                 reg_reserves[rt_index].EXForward = true;
-                
+                //Prevent second one from accessing
+                reg_reserves[rt_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -680,7 +684,8 @@ namespace task{
                 
                 //Can EX Forward
                 reg_reserves[rt_index].EXForward = true;
-                
+                //Prevent second one from accessing
+                reg_reserves[rt_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -747,6 +752,8 @@ namespace task{
                 rs_value = reg_reserves[rs_index].Value;
                 rs_load = true;
                 reg_reserves[rs_index].IDForward = true;
+                //Prevent second one from accessing
+                reg_reserves[rs_index].IDAvailable = false;
             }
             
             RISING_EDGE_FENCE();

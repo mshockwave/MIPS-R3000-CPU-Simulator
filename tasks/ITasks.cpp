@@ -51,7 +51,8 @@ namespace task{
                 
                 //Can EX Forward
                 reg_reserves[rs_index].EXForward = true;
-                
+                //Prevent second one from accessing
+                reg_reserves[rs_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -99,7 +100,8 @@ namespace task{
                 
                 //Can EX Forward
                 reg_reserves[rt_index].EXForward = true;
-                
+                //Prevent second one from accessing
+                reg_reserves[rt_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -113,7 +115,8 @@ namespace task{
                 
                 //Can EX Forward
                 reg_reserves[rs_index].EXForward = true;
-                
+                //Prevent second one from accessing
+                reg_reserves[rs_index].EXAvailable = false;
             }else{
                 need_wait = true;
             }
@@ -507,9 +510,23 @@ namespace task{
         .EX(STAGE_TASK(){
             auto* ctx = self->context;
             
+            auto& reg_reserves = ctx->RegReserves;
+            
+            auto rs_value = self->RsValue;
+            if(reg_reserves[self->RsIndex].EXForward){
+                rs_value = reg_reserves[self->RsIndex].Value;
+            }
+            
+            // Prepare forwarding info
+            // For result of this stage
+            reg_reserves[self->RtIndex].EXAvailable = true;
+            
             RISING_EDGE_FENCE();
             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
-            self->RtValue = (self->RsValue | static_cast<reg_t>(imm));
+            self->RtValue = (rs_value | static_cast<reg_t>(imm));
+            
+            reg_reserves[self->RtIndex].Value = self->RtValue;
+            reg_reserves[self->RtIndex].IDAvailable = true;
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
@@ -569,12 +586,16 @@ namespace task{
                         rs_value = reg_reserves[rs_index].Value;
                         rs_load = true;
                         reg_reserves[rs_index].IDForward = true;
+                        //Prevent second one from accessing
+                        reg_reserves[rs_index].IDAvailable = false;
                     }
                     if(reg_reserves[rt_index].Holder != nullptr &&
                        reg_reserves[rt_index].IDAvailable){
                         rt_value = reg_reserves[rt_index].Value;
                         rt_load = true;
                         reg_reserves[rt_index].IDForward = true;
+                        //Prevent second one from accessing
+                        reg_reserves[rt_index].IDAvailable = false;
                     }
 
                     RISING_EDGE_FENCE();
@@ -647,12 +668,16 @@ namespace task{
                         rs_value = reg_reserves[rs_index].Value;
                         rs_load = true;
                         reg_reserves[rs_index].IDForward = true;
+                        //Prevent second one from accessing
+                        reg_reserves[rs_index].IDAvailable = false;
                     }
                     if(reg_reserves[rt_index].Holder != nullptr &&
                        reg_reserves[rt_index].IDAvailable){
                         rt_value = reg_reserves[rt_index].Value;
                         rt_load = true;
                         reg_reserves[rt_index].IDForward = true;
+                        //Prevent second one from accessing
+                        reg_reserves[rt_index].IDAvailable = false;
                     }
 
                     RISING_EDGE_FENCE();
@@ -737,6 +762,8 @@ namespace task{
                         rs_value = reg_reserves[rs_index].Value;
                         rs_load = true;
                         reg_reserves[rs_index].IDForward = true;
+                        //Prevent second one from accessing
+                        reg_reserves[rs_index].IDAvailable = false;
                     }
 
                     RISING_EDGE_FENCE();
