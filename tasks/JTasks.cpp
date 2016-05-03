@@ -20,10 +20,14 @@ namespace task{
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         };
         
-        TaskHandle::stage_task_t EmptyDM = STAGE_TASK(){
+        TaskHandle::stage_task_t DefaultDM = STAGE_TASK(){
             auto* ctx = self->context;
             
             RISING_EDGE_FENCE();
+            //Clear forwarding register ID available flag
+            if(self->ExportReg != TaskHandle::RegKind::kNone){
+                ctx->RegReserves[self->ExportRegIndex].IDAvailable = false;
+            }
             
             return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPELINE_STALL;
         };
@@ -58,11 +62,19 @@ namespace task{
             return (ctx->pushTask(ctx->ID_EX, self))? e : Error::PIPELINE_STALL;
         })
         .EX(JInstr::EmptyEX)
-        .DM(JInstr::EmptyDM)
+        .DM(JInstr::DefaultDM)
         .WB(JInstr::EmptyWB);
         
         TasksTable[OP_JAL].Name("JAL", OP_JAL)
-        .IF(JInstr::EmptyIF)
+        .ExportRegister(TaskHandle::RegKind::kRd)
+        .IF(STAGE_TASK(){
+            auto* ctx = self->context;
+            
+            RISING_EDGE_FENCE();
+            self->ExportRegIndex = 31; //$ra
+            
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
         .ID(STAGE_TASK(){
             auto* ctx = self->context;
             reg_t pc = self->instruction_address;
@@ -100,7 +112,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(JInstr::EmptyDM)
+        .DM(JInstr::DefaultDM)
         .WB(STAGE_TASK(){
             auto* ctx = self->context;
             

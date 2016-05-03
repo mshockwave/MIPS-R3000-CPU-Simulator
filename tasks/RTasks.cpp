@@ -90,10 +90,14 @@ namespace task{
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
         };
 
-        TaskHandle::stage_task_t EmptyDM = STAGE_TASK(){
+        TaskHandle::stage_task_t DefaultDM = STAGE_TASK(){
             auto* ctx = self->context;
 
             RISING_EDGE_FENCE();
+            //Clear forwarding register ID available flag
+            if(self->ExportReg != TaskHandle::RegKind::kNone){
+                ctx->RegReserves[self->ExportRegIndex].IDAvailable = false;
+            }
 
             return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPELINE_STALL;
         };
@@ -166,7 +170,7 @@ namespace task{
 
                     return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
                 })
-                .DM(RInstr::EmptyDM)
+                .DM(RInstr::DefaultDM)
                 .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_ADDU].Name("ADDU", OP_ADDU)
@@ -203,7 +207,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
 
         TasksTable[OP_SUB].Name("SUB", OP_SUB)
@@ -243,7 +247,7 @@ namespace task{
 
                     return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
                 })
-                .DM(RInstr::EmptyDM)
+                .DM(RInstr::DefaultDM)
                 .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_AND].Name("AND", OP_AND)
@@ -280,7 +284,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_OR].Name("OR", OP_OR)
@@ -317,7 +321,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_XOR].Name("XOR", OP_XOR)
@@ -354,7 +358,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_NOR].Name("NOR", OP_NOR)
@@ -391,7 +395,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_NAND].Name("NAND", OP_NAND)
@@ -428,7 +432,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SLT].Name("SLT", OP_SLT)
@@ -467,7 +471,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SLL].Name("SLL", OP_SLL)
@@ -555,7 +559,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SRL].Name("SRL", OP_SRL)
@@ -643,7 +647,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SRA].Name("SRA", OP_SRA)
@@ -731,7 +735,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_JR].Name("JR", OP_JR)
@@ -784,7 +788,7 @@ namespace task{
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(RInstr::EmptyDM)
+        .DM(RInstr::DefaultDM)
         .WB(STAGE_TASK(){
             
             RISING_EDGE_FENCE();

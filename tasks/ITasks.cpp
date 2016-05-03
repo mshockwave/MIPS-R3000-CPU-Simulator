@@ -130,10 +130,14 @@ namespace task{
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
         };
         
-        TaskHandle::stage_task_t EmptyDM = STAGE_TASK(){
+        TaskHandle::stage_task_t DefaultDM = STAGE_TASK(){
             auto* ctx = self->context;
             
             RISING_EDGE_FENCE();
+            //Clear forwarding register ID available flag
+            if(self->ExportReg != TaskHandle::RegKind::kNone){
+                ctx->RegReserves[self->ExportRegIndex].IDAvailable = false;
+            }
             
             return (ctx->pushTask(ctx->DM_WB, self))? Error::NONE : Error::PIPELINE_STALL;
         };
@@ -230,7 +234,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_ADDIU].Name("ADDIU", OP_ADDIU)
@@ -264,7 +268,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_LW].Name("LW", OP_LW)
@@ -484,7 +488,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_ANDI].Name("ANDI", OP_ANDI)
@@ -500,7 +504,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_ORI].Name("ORI", OP_ORI)
@@ -530,7 +534,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_NORI].Name("NORI", OP_NORI)
@@ -546,7 +550,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_SLTI].Name("SLTI", OP_SLTI)
@@ -564,7 +568,7 @@ namespace task{
             
             return (ctx->pushTask(ctx->EX_DM, self))? Error::NONE : Error::PIPELINE_STALL;
         })
-        .DM(IInstr::EmptyDM)
+        .DM(IInstr::DefaultDM)
         .WB(IInstr::WriteRegsWB);
 
         TasksTable[OP_BEQ].Name("BEQ", OP_BEQ)
@@ -572,6 +576,7 @@ namespace task{
                 .ID(STAGE_TASK(){
                     auto* ctx = self->context;
                     auto& reg_reserves = ctx->RegReserves;
+                    reg_t pc = self->instruction_address;
 
                     auto rt_index = self->RtIndex;
                     auto rs_index = self->RsIndex;
@@ -622,7 +627,7 @@ namespace task{
                             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
                             reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                             //TODO: Error handling
-                            ctx->SetPC(ctx->GetPC() + offset);
+                            ctx->SetPC(pc + offset);
                         }
 
                         //Push next task
@@ -654,6 +659,7 @@ namespace task{
                 .ID(STAGE_TASK(){
                     auto* ctx = self->context;
                     auto& reg_reserves = ctx->RegReserves;
+                    reg_t pc = self->instruction_address;
 
                     auto rt_index = self->RtIndex;
                     auto rs_index = self->RsIndex;
@@ -704,7 +710,7 @@ namespace task{
                             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
                             reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                             //TODO: Error handling
-                            ctx->SetPC(ctx->GetPC() + offset);
+                            ctx->SetPC(pc + offset);
                         }
 
                         //Push next task
@@ -749,6 +755,7 @@ namespace task{
                 .ID(STAGE_TASK(){
                     auto* ctx = self->context;
                     auto& reg_reserves = ctx->RegReserves;
+                    reg_t pc = self->instruction_address;
 
                     auto rs_index = self->RsIndex;
 
@@ -784,7 +791,7 @@ namespace task{
                             auto imm = IInstr::GetImm(self->instruction->GetBitsInstruction());
                             reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                             //TODO: Error handling
-                            ctx->SetPC(ctx->GetPC() + offset);
+                            ctx->SetPC(pc + offset);
                         }
 
                         //Push next task

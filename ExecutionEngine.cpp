@@ -178,6 +178,11 @@ namespace engines{
             }catch(boost::thread_interrupted&){
                 ready_to_abort = true;
             }
+            
+            //Clear forwarding register EX available flag
+            if(task_obj->ExportReg != TaskHandle::RegKind::kNone){
+                ctx->RegReserves[task_obj->ExportRegIndex].EXAvailable = false;
+            }
 
             std::stringstream ss;
             ss << task_obj->name;
