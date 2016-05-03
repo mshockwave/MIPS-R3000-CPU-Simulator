@@ -26,6 +26,13 @@ public:
                 rising_edge(re),
                 falling_edge(fe){}
     };
+    
+    enum RegKind {
+        kNone,
+        kRt,
+        kRs,
+        kRd
+    };
 
     Context* context;
     Instruction* instruction;
@@ -40,6 +47,8 @@ public:
     reg_t RtValue, RsValue, RdValue;
 
     uint8_t ModifyRegIndex;
+    RegKind ExportReg;
+    uint8_t ExportRegIndex;
 
     //Information for dumping
     bool ForwardRt, ForwardRs;
@@ -52,6 +61,8 @@ public:
             context(nullptr),
             RtIndex(0), RsIndex(0), RdIndex(0),
             ModifyRegIndex(0),
+            ExportReg(RegKind::kNone),
+            ExportRegIndex(32),
             ForwardRs(false), ForwardRt(false){}
 
     TaskHandle* Get(Context* ctx,
@@ -65,6 +76,7 @@ public:
         task_handle->clock = clk;
         task_handle->name = name;
         task_handle->task_id = task_id;
+        task_handle->ExportReg = ExportReg;
 
         task_handle->stage_if = stage_if;
         task_handle->stage_id = stage_id;
@@ -78,6 +90,11 @@ public:
     TaskHandle& Name(std::string name_, task_id_t id){
         name = name_;
         task_id = id;
+        return *this;
+    }
+    
+    TaskHandle& ExportRegister(RegKind r){
+        ExportReg = r;
         return *this;
     }
 

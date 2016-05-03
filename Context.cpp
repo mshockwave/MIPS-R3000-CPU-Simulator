@@ -179,9 +179,10 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
             boost::mutex::scoped_lock lk(Log::Mux::D);
 #endif
             if(wb_msg != Context::MSG_END){
-                mSnapShotStream << "WB: " << wb_msg << std::endl << std::endl;
+                mSnapShotStream << "WB: " << wb_msg << std::endl;
             }
         }
+        mSnapShotStream  << std::endl  << std::endl;
 
         if(regs_diff.Abort || (if_dead && id_dead &&
                                ex_dead && dm_dead && wb_dead)) break;

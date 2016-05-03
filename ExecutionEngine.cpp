@@ -54,7 +54,8 @@ namespace engines{
             if(ctx->RegReserves[task_obj->RsIndex].IDForward){
                 rs_forward_reg_id = task_obj->RsIndex;
             }
-            if(ctx->RegReserves[task_obj->RtIndex].IDForward){
+            if(ctx->RegReserves[task_obj->RtIndex].IDForward &&
+               task_obj->ExportReg != TaskHandle::RegKind::kRt){
                 rt_forward_reg_id = task_obj->RtIndex;
             }
 
@@ -147,7 +148,8 @@ namespace engines{
             if(ctx->RegReserves[task_obj->RsIndex].EXForward){
                 rs_forward_reg_id =  task_obj->RsIndex;
             }
-            if(ctx->RegReserves[task_obj->RtIndex].EXForward){
+            if(ctx->RegReserves[task_obj->RtIndex].EXForward &&
+               task_obj->ExportReg != TaskHandle::RegKind::kRt){
                 rt_forward_reg_id =  task_obj->RtIndex;
             }
 

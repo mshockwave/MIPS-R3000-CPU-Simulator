@@ -16,6 +16,9 @@ namespace task{
             auto instr_bits = self->instruction->GetBitsInstruction();
             self->RtIndex = IInstr::GetRt(instr_bits);
             self->RsIndex = IInstr::GetRs(instr_bits);
+            if(self->ExportReg == TaskHandle::RegKind::kRt){
+                self->ExportRegIndex = self->RtIndex;
+            }
             
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
@@ -59,7 +62,12 @@ namespace task{
                 stall = !ctx->pushTask(ctx->ID_EX, self);
                 
                 //Reserve destination registers
-                ctx->RegReserves[rt_index].Reset(self);
+                if(rt_index == rs_index){
+                    // Write register == read register
+                    ctx->RegReserves[rt_index].Delegate(self);
+                }else{
+                    ctx->RegReserves[rt_index].Reset(self);
+                }
             }
             
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
@@ -189,6 +197,7 @@ namespace task{
     void InitITasks(){
         
         TasksTable[OP_ADDI].Name("ADDI", OP_ADDI)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){
@@ -222,6 +231,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_ADDIU].Name("ADDIU", OP_ADDIU)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){
@@ -255,6 +265,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_LW].Name("LW", OP_LW)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(IInstr::CaculateMemOffsetEX)
@@ -277,6 +288,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_LH].Name("LH", OP_LH)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(IInstr::CaculateMemOffsetEX)
@@ -299,6 +311,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_LHU].Name("LHU", OP_LHU)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(IInstr::CaculateMemOffsetEX)
@@ -321,6 +334,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_LB].Name("LB", OP_LB)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(IInstr::CaculateMemOffsetEX)
@@ -343,6 +357,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_LBU].Name("LBU", OP_LBU)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(IInstr::CaculateMemOffsetEX)
@@ -431,6 +446,7 @@ namespace task{
         .WB(IInstr::EmptyWB);
         
         TasksTable[OP_LUI].Name("LUI", OP_LUI)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(STAGE_TASK(){
             /*
              * This IF lambda is always executed in last half cycle
@@ -441,6 +457,7 @@ namespace task{
             //Decode registers index
             auto instr_bits = self->instruction->GetBitsInstruction();
             self->RtIndex = IInstr::GetRt(instr_bits);
+            self->ExportRegIndex = self->RtIndex;
             
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
@@ -468,6 +485,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_ANDI].Name("ANDI", OP_ANDI)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){
@@ -483,6 +501,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_ORI].Name("ORI", OP_ORI)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){
@@ -498,6 +517,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_NORI].Name("NORI", OP_NORI)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){
@@ -513,6 +533,7 @@ namespace task{
         .WB(IInstr::WriteRegsWB);
         
         TasksTable[OP_SLTI].Name("SLTI", OP_SLTI)
+        .ExportRegister(TaskHandle::RegKind::kRt)
         .IF(IInstr::ResolveRegsIF)
         .ID(IInstr::LoadRsRegID)
         .EX(STAGE_TASK(){

@@ -47,7 +47,7 @@ private:
         TaskHandle::ClockHandle::Barrier falling_barrier(1);
         TaskHandle::ClockHandle clock_handle(rising_barrier, falling_barrier);
         auto* add_task = task::TasksTable[task::OP_ADD]
-                .Get(&ctx, &add_instr, &clock_handle);
+                .Get(&ctx, &add_instr, U32_0, &clock_handle);
 
         AssertEqual(add_task->name, std::string("ADD"), "Test task");
 

@@ -87,6 +87,12 @@ public:
             IDAvailable = EXAvailable = false;
             EXForward = IDForward = false;
         }
+        void Delegate(TaskHandle* h){
+            // If read register == write register
+            // Only need to delegate holder
+            // Instead of reseting all the information
+            if(!ForbitReservation) Holder = h;
+        }
     };
     
     RegReserve RegReserves[REGISTER_COUNT];

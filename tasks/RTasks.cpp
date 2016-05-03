@@ -19,6 +19,9 @@ namespace task{
             self->RdIndex = RInstr::GetRd(instr_bits);
             self->RtIndex = RInstr::GetRt(instr_bits);
             self->RsIndex = RInstr::GetRs(instr_bits);
+            if(self->ExportReg == TaskHandle::RegKind::kRd){
+                self->ExportRegIndex = self->RdIndex;
+            }
 
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
@@ -75,8 +78,11 @@ namespace task{
                 stall = !ctx->pushTask(ctx->ID_EX, self);
 
                 //Reserve destination registers
-                //ctx->RegReserves[self->RdIndex] = self;
-                ctx->RegReserves[self->RdIndex].Reset(self);
+                if(rt_index == self->RdIndex || rs_index == self->RdIndex){
+                    ctx->RegReserves[self->RdIndex].Delegate(self);
+                }else{
+                    ctx->RegReserves[self->RdIndex].Reset(self);
+                }
             }
 
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
@@ -121,6 +127,7 @@ namespace task{
     void InitRTasks(){
 
         TasksTable[OP_ADD].Name("ADD", OP_ADD)
+                .ExportRegister(TaskHandle::RegKind::kRd)
                 .IF(RInstr::ResolveRegsIF)
                 .ID(RInstr::LoadRegsID)
                 .EX(STAGE_TASK(){
@@ -161,6 +168,7 @@ namespace task{
                 .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_ADDU].Name("ADDU", OP_ADDU)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -197,6 +205,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
 
         TasksTable[OP_SUB].Name("SUB", OP_SUB)
+                .ExportRegister(TaskHandle::RegKind::kRd)
                 .IF(RInstr::ResolveRegsIF)
                 .ID(RInstr::LoadRegsID)
                 .EX(STAGE_TASK(){
@@ -236,6 +245,7 @@ namespace task{
                 .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_AND].Name("AND", OP_AND)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -272,6 +282,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_OR].Name("OR", OP_OR)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -308,6 +319,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_XOR].Name("XOR", OP_XOR)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -344,6 +356,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_NOR].Name("NOR", OP_NOR)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -380,6 +393,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_NAND].Name("NAND", OP_NAND)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -416,6 +430,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SLT].Name("SLT", OP_SLT)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(RInstr::ResolveRegsIF)
         .ID(RInstr::LoadRegsID)
         .EX(STAGE_TASK(){
@@ -454,6 +469,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SLL].Name("SLL", OP_SLL)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(STAGE_TASK(){
             /*
              * This IF lambda is always executed in last half cycle
@@ -465,6 +481,7 @@ namespace task{
             auto instr_bits = self->instruction->GetBitsInstruction();
             self->RdIndex = RInstr::GetRd(instr_bits);
             self->RtIndex = RInstr::GetRt(instr_bits);
+            self->ExportRegIndex = self->RdIndex;
             
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
@@ -500,8 +517,11 @@ namespace task{
                 stall = !ctx->pushTask(ctx->ID_EX, self);
                 
                 //Reserve destination registers
-                //ctx->RegReserves[self->RdIndex] = self;
-                ctx->RegReserves[self->RdIndex].Reset(self);
+                if(rt_index == self->RdIndex){
+                    ctx->RegReserves[self->RdIndex].Delegate(self);
+                }else{
+                    ctx->RegReserves[self->RdIndex].Reset(self);
+                }
             }
             
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
@@ -536,6 +556,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SRL].Name("SRL", OP_SRL)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(STAGE_TASK(){
             /*
              * This IF lambda is always executed in last half cycle
@@ -547,6 +568,7 @@ namespace task{
             auto instr_bits = self->instruction->GetBitsInstruction();
             self->RdIndex = RInstr::GetRd(instr_bits);
             self->RtIndex = RInstr::GetRt(instr_bits);
+            self->ExportRegIndex = self->RdIndex;
             
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
@@ -582,8 +604,11 @@ namespace task{
                 stall = !ctx->pushTask(ctx->ID_EX, self);
                 
                 //Reserve destination registers
-                //ctx->RegReserves[self->RdIndex] = self;
-                ctx->RegReserves[self->RdIndex].Reset(self);
+                if(rt_index == self->RdIndex){
+                    ctx->RegReserves[self->RdIndex].Delegate(self);
+                }else{
+                    ctx->RegReserves[self->RdIndex].Reset(self);
+                }
             }
             
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
@@ -618,6 +643,7 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_SRA].Name("SRA", OP_SRA)
+        .ExportRegister(TaskHandle::RegKind::kRd)
         .IF(STAGE_TASK(){
             /*
              * This IF lambda is always executed in last half cycle
@@ -629,6 +655,7 @@ namespace task{
             auto instr_bits = self->instruction->GetBitsInstruction();
             self->RdIndex = RInstr::GetRd(instr_bits);
             self->RtIndex = RInstr::GetRt(instr_bits);
+            self->ExportRegIndex = self->RdIndex;
             
             auto* ctx = self->context;
             return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
@@ -664,8 +691,11 @@ namespace task{
                 stall = !ctx->pushTask(ctx->ID_EX, self);
                 
                 //Reserve destination registers
-                //ctx->RegReserves[self->RdIndex] = self;
-                ctx->RegReserves[self->RdIndex].Reset(self);
+                if(rt_index == self->RdIndex){
+                    ctx->RegReserves[self->RdIndex].Delegate(self);
+                }else{
+                    ctx->RegReserves[self->RdIndex].Reset(self);
+                }
             }
             
             return (stall)? Error::PIPELINE_STALL : Error::NONE;
