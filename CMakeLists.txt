@@ -51,7 +51,8 @@ else()
     set(LINK_BOOST_LIBS
             ${LINK_BOOST_LIBS}
             libboost_thread.a
-            libboost_atomic.a)
+            libboost_atomic.a
+            pthread)
 endif ()
 
 if(NOT DEFINED OUT_EXE_NAME)
