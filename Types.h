@@ -51,6 +51,9 @@ protected:
             Error(id, LEVEL_CONTINUE, description){}
 
 public:
+    
+    Error(){/*Trivial constructor*/}
+    
     static const uint8_t LEVEL_CONTINUE;
     static const uint8_t LEVEL_HALT;
 

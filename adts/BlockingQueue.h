@@ -2,9 +2,8 @@
 #ifndef ARCHIHW1_BLOCKINGQUEUE_H
 #define ARCHIHW1_BLOCKINGQUEUE_H
 
-#include <queue>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 template <typename T>
 class BlockingQueue {
@@ -12,67 +11,30 @@ class BlockingQueue {
 public:
 
     BlockingQueue<T>() :
-            queue(),
-            mx(),
-            cv(){}
+            queue(5000) {}
 
     void Push(T v) {
-        boost::mutex::scoped_lock lk(mx);
         queue.push(v);
-        cv.notify_one();
     }
 
     T Pop(){
-        boost::mutex::scoped_lock lk(mx);
-        while(queue.empty()){
+        
+        T v = T();
+        
+        while(!queue.pop(v)){
             //Block
-            cv.wait(lk);
+            boost::this_thread::sleep_for(boost::chrono::nanoseconds(1));
         }
-
-        T v = queue.front();
-        queue.pop();
+        
         return v;
-    }
-    T PopAndCheck(const T& cmpr, bool* result){
-        boost::mutex::scoped_lock lk(mx);
-        while(queue.empty()){
-            //Block
-            cv.wait(lk);
-        }
-
-        T v = queue.front();
-        queue.pop();
-        if(!queue.empty()){
-            *result = (cmpr == queue.front());
-        }else{
-            *result = false;
-        }
-        return v;
-    }
-
-    T Peek(){
-        boost::mutex::scoped_lock lk(mx);
-        while(queue.empty()){
-            //Block
-            cv.wait(lk);
-        }
-        return queue.front();
     }
 
     bool IsEmpty(){
-        boost::mutex::scoped_lock lk(mx);
         return queue.empty();
     }
 
-    size_t Size(){
-        boost::mutex::scoped_lock lk(mx);
-        return queue.size();
-    }
-
 private:
-    std::queue<T> queue;
-    boost::mutex mx;
-    boost::condition cv;
+    boost::lockfree::spsc_queue<T> queue;
 };
 
 #endif //ARCHIHW1_BLOCKINGQUEUE_H
