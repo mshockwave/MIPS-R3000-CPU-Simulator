@@ -385,18 +385,20 @@ namespace engines{
             delete task_obj;
 
             if(ready_to_abort){
-                ctx->WBMessageQueue.Push(Context::MSG_END);
                 regs_diff.Abort = true;
                 ctx->RegsQueue.Push(regs_diff);
+                ctx->WBMessageQueue.Push(Context::MSG_END);
                 return;
             }
 
-            ctx->RegsQueue.Push(regs_diff);
-
             if(ready_to_dead){
+                regs_diff.Terminated = true;
+                ctx->RegsQueue.Push(regs_diff);
                 ctx->WBMessageQueue.Push(Context::MSG_END);
                 break;
             }
+            
+            ctx->RegsQueue.Push(regs_diff);
 
             cycle++;
         }

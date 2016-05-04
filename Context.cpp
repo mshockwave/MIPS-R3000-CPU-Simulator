@@ -109,8 +109,9 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
         mSnapShotStream << "PC: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << pc_ << std::endl;
 
         if(!if_dead){
-            if_msg = IFMessageQueue.PopAndCheck(Context::MSG_END, &if_dead);
-            if_dead |= (if_msg == Context::MSG_END);
+            auto tmp_msg = IFMessageQueue.Pop();
+            if_dead |= (tmp_msg == Context::MSG_END);
+            if(!if_dead) if_msg = tmp_msg;
         }else{
             trimOutput(if_msg);
         }
@@ -124,8 +125,9 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
         }
 
         if(!id_dead){
-            id_msg = IDMessageQueue.PopAndCheck(Context::MSG_END, &id_dead);
-            id_dead |= (id_msg == Context::MSG_END);
+            auto tmp_msg = IDMessageQueue.Pop();
+            id_dead |= (tmp_msg == Context::MSG_END);
+            if(!id_dead) id_msg = tmp_msg;
         }else{
             trimOutput(id_msg);
         }
@@ -139,8 +141,9 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
         }
 
         if(!ex_dead){
-            ex_msg = EXMessageQueue.PopAndCheck(Context::MSG_END, &ex_dead);
-            ex_dead |= (ex_msg == Context::MSG_END);
+            auto tmp_msg = EXMessageQueue.Pop();
+            ex_dead |= (tmp_msg == Context::MSG_END);
+            if(!ex_dead) ex_msg = tmp_msg;
         }else{
             trimOutput(ex_msg);
         }
@@ -154,8 +157,9 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
         }
 
         if(!dm_dead){
-            dm_msg = DMMessageQueue.PopAndCheck(Context::MSG_END, &dm_dead);
-            dm_dead |= (dm_msg == Context::MSG_END);
+            auto tmp_msg = DMMessageQueue.Pop();
+            dm_dead |= (tmp_msg == Context::MSG_END);
+            if(!dm_dead) dm_msg = tmp_msg;
         }else{
             trimOutput(dm_msg);
         }
@@ -169,8 +173,9 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
         }
 
         if(!wb_dead){
-            wb_msg = WBMessageQueue.PopAndCheck(Context::MSG_END, &wb_dead);
-            wb_dead |= (wb_msg == Context::MSG_END);
+            auto tmp_msg = WBMessageQueue.Pop();
+            wb_dead |= (tmp_msg == Context::MSG_END);
+            if(!wb_dead) wb_msg = tmp_msg;
         }else{
             trimOutput(wb_msg);
         }
@@ -184,8 +189,8 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
         }
         mSnapShotStream  << std::endl  << std::endl;
 
-        if(regs_diff.Abort || (if_dead && id_dead &&
-                               ex_dead && dm_dead && wb_dead)) break;
+        if(regs_diff.Abort || regs_diff.Terminated || (if_dead && id_dead &&
+                                                       ex_dead && dm_dead && wb_dead)) break;
         
         IncCycleCounter();
         

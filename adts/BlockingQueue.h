@@ -19,6 +19,7 @@ public:
     void Push(T v) {
         boost::mutex::scoped_lock lk(mx);
         queue.push(v);
+        lk.unlock();
         cv.notify_one();
     }
 

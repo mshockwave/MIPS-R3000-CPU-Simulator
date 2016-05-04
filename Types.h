@@ -112,12 +112,12 @@ struct RegsDiff {
     uint8_t RegIndex;
     reg_t RegValue;
 
-    bool Abort;
+    bool Abort, Terminated;
 
     RegsDiff() :
             RegIndex(0),
             RegValue(0),
-            Abort(false) { }
+            Abort(false), Terminated(false) { }
 };
 
 #endif //ARCHIHW1_TYPES_H
