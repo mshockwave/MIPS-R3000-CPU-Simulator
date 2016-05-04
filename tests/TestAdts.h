@@ -7,6 +7,9 @@
 
 #include "TestCase.h"
 #include "../adts/BlockingQueue.h"
+#ifndef NDEBUG
+#include "../Types.h"
+#endif
 #include <string>
 
 class TestAdts : public TestCase {
@@ -20,6 +23,30 @@ private:
     bool testBlockingQueue(){
 
         BlockingQueue<std::string> msg_queue;
+        
+#ifndef NDEBUG
+        if(msg_queue.queue.is_lock_free()){
+            Log::V(mName) << "BlockingQueue<string> is lock free" << std::endl;
+        }else{
+            Log::W(mName) << "BlockingQueue<string> is not lock free" << std::endl;
+        }
+        
+        BlockingQueue<Error> error_queue;
+        if(error_queue.queue.is_lock_free()){
+            Log::V(mName) << "BlockingQueue<Error> is lock free" << std::endl;
+        }else{
+            Log::W(mName) << "BlockingQueue<Error> is not lock free" << std::endl;
+        }
+        BlockingQueue<RegsDiff> regs_queue;
+        if(regs_queue.queue.is_lock_free()){
+            Log::V(mName) << "BlockingQueue<RegsDiff> is lock free" << std::endl;
+        }else{
+            Log::W(mName) << "BlockingQueue<RegsDiff> is not lock free" << std::endl;
+        }
+        
+#else
+        Log::W(mName) << "Suggest using Debug build config" << std::endl;
+#endif
 
         boost::thread t1([&]()->void{
             boost::this_thread::sleep_for(boost::chrono::seconds(3));

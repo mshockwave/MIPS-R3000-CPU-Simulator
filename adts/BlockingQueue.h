@@ -9,6 +9,10 @@ template <typename T, size_t N = 50000>
 class BlockingQueue {
 
 public:
+    
+#ifndef NDEBUG
+    friend class TestAdts;
+#endif
 
     BlockingQueue<T>() :
             queue(N) {}
