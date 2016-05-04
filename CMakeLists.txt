@@ -14,6 +14,7 @@ set(TASKS_SOURCE_FILES
 set(TEST_SOURCE_HEADERS
         tests/TestCase.h
         tests/TestUtils.h
+        tests/TestTypes.h
         tests/TestInstruction.h
         tests/TestAdts.h
         tests/TestTasks.h tests/TestTasksError.h)

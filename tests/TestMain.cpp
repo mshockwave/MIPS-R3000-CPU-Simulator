@@ -1,6 +1,7 @@
 
 #include "TestInstruction.h"
 #include "TestUtils.h"
+#include "TestTypes.h"
 #include "TestAdts.h"
 #include "TestTasks.h"
 #include "TestTasksError.h"
@@ -10,6 +11,7 @@ int main(){
     //Add test cases
     std::vector<TestCase*> testCases;
     testCases.push_back(new TestUtils());
+    testCases.push_back(new TestTypes());
     testCases.push_back(new TestAdts());
     testCases.push_back(new TestInstructionTransform());
     testCases.push_back(new TestInstructionList());

@@ -64,12 +64,28 @@ public:
     static Error MEMORY_ADDR_OVERFLOW;
     static Error DATA_MISALIGNED;
 
+    inline uint8_t GetId(){ return mErrorId; }
     inline uint8_t GetErrorLevel() { return mErrorLevel; }
+    inline std::string GetDescription() const { return mDescription; }
     inline int GetCycle(){ return cycle; }
     inline void SetCycle(int cycle_){ cycle = cycle_; }
 
     inline bool contains(const Error& e){
         return (mErrorId & e.mErrorId) != 0;
+    }
+    
+    //Copy operator
+    Error& operator=(const Error& rhs){
+        mErrorId = rhs.mErrorId;
+        mDescription = rhs.mDescription;
+        mErrorLevel = rhs.mErrorLevel;
+        cycle = rhs.cycle;
+        
+        return *this;
+    }
+    Error(const Error& that){
+        //Copy constructor
+        operator=(that);
     }
 
     bool operator==(const Error& rhs) const{
@@ -121,6 +137,19 @@ struct RegsDiff {
             RegIndex(0),
             RegValue(0),
             Abort(false), Terminated(false) { }
+    
+    RegsDiff& operator=(const RegsDiff& rhs){
+        RegIndex = rhs.RegIndex;
+        RegValue = rhs.RegValue;
+        Abort = rhs.Abort;
+        Terminated = rhs.Terminated;
+        
+        return *this;
+    }
+    RegsDiff(const RegsDiff& that){
+        //Copy constructor
+        operator=(that);
+    }
 };
 
 #endif //ARCHIHW1_TYPES_H
