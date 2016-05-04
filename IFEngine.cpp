@@ -101,7 +101,8 @@ void IFEngine::Start(){
         }
         
         bool ready_to_dead = (task_obj->task_id == task::OP_HALT) &&
-                                ( ((mContext->IFStall)? halt_counter : ++halt_counter) >= 4 );
+                                ( ((mContext->IFStall ||
+                                    mContext->PcFlush.load() > 0)? halt_counter : ++halt_counter) >= 4 );
         if(ready_to_dead){
             ScopedReadWriteLock::WriteLock lk(mContext->DeadThreadMux);
             mContext->DeadThreadNum++;
