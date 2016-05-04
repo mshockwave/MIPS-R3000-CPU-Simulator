@@ -14,7 +14,7 @@ public:
     friend class TestAdts;
 #endif
 
-    BlockingQueue<T>() :
+    BlockingQueue<T,N>() :
             queue(N) {}
 
     void Push(T v) {
