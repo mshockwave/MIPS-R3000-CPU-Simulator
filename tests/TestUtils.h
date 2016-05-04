@@ -7,6 +7,8 @@
 #include "TestCase.h"
 #include "../Utils.h"
 
+#include <boost/thread/thread.hpp>
+
 class TestUtils : public TestCase {
 
 public:
@@ -65,6 +67,15 @@ bool TestUtils::doTest() {
         Assert(u32Val == 0x78563412, ss.str());
         ss << "Expect 0x78563412, " << "get 0x" << std::hex << u16Val << std::endl;
         Assert(u16Val == 0x3412, ss.str());
+    }
+    
+    //Test threads hardware concurrency
+    {
+        Log::V(mName) << "Testing thread hardware concurrency..." << std::endl;
+        Log::V(mName) << "Thread hardware concurrency: "
+                        << boost::thread::hardware_concurrency() << std::endl;
+        Log::V(mName) << "Thread physical concurrency: "
+                        << boost::thread::physical_concurrency() << std::endl;
     }
 
     return true;
