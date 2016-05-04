@@ -5,13 +5,13 @@
 #include <boost/thread/thread.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
-template <typename T>
+template <typename T, size_t N = 50000>
 class BlockingQueue {
 
 public:
 
     BlockingQueue<T>() :
-            queue(5000) {}
+            queue(N) {}
 
     void Push(T v) {
         queue.push(v);
