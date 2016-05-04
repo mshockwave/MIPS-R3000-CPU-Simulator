@@ -24,44 +24,90 @@ void Context::loadMemory(RawBinary& rawBinary) {
     }
 }
 
-bool Context::PrintError() {
-
-    //Check errors
-    bool empty = true;
-    Error error = Error::NONE;
-    if(!EXErrorQueue.IsEmpty()){
-        error = (error + EXErrorQueue.Pop());
-        empty = false;
+void Context::doPrintError(Error& error){
+    if(error.GetCycle() >= 0){
+        if(error.contains(Error::WRITE_REG_ZERO)){
+            mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
+            mErrorStream << Error::WRITE_REG_ZERO << std::endl;
+        }
+        
+        if(error.contains(Error::MEMORY_ADDR_OVERFLOW)){
+            mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
+            mErrorStream << Error::MEMORY_ADDR_OVERFLOW << std::endl;
+        }
+        
+        if(error.contains(Error::DATA_MISALIGNED)){
+            mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
+            mErrorStream << Error::DATA_MISALIGNED << std::endl;
+        }
+        
+        if(error.contains(Error::NUMBER_OVERFLOW)){
+            mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
+            mErrorStream << Error::NUMBER_OVERFLOW << std::endl;
+        }
     }
-    if(!DMErrorQueue.IsEmpty()){
-        error = (error + DMErrorQueue.Pop());
-        empty = false;
-    }
-    if(!WBErrorQueue.IsEmpty()){
-        error = (error + WBErrorQueue.Pop());
-        empty = false;
-    }
+}
 
-    if(empty) return true;
+bool Context::PrintError(bool flush) {
 
-    if(error.contains(Error::WRITE_REG_ZERO)){
-        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
-        mErrorStream << Error::WRITE_REG_ZERO << std::endl;
-    }
-
-    if(error.contains(Error::MEMORY_ADDR_OVERFLOW)){
-        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
-        mErrorStream << Error::MEMORY_ADDR_OVERFLOW << std::endl;
-    }
-
-    if(error.contains(Error::DATA_MISALIGNED)){
-        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
-        mErrorStream << Error::DATA_MISALIGNED << std::endl;
-    }
-
-    if(error.contains(Error::NUMBER_OVERFLOW)){
-        mErrorStream << "In cycle " << std::dec << error.GetCycle() << ": ";
-        mErrorStream << Error::NUMBER_OVERFLOW << std::endl;
+    if(flush){
+        doPrintError(last_error);
+        last_error = Error::NONE;
+        
+        //Check and dump immediate
+        bool empty = true;
+        Error error = Error::NONE;
+        if(!EXErrorQueue.IsEmpty()){
+            error = (error + EXErrorQueue.Pop());
+            empty = false;
+        }
+        if(!DMErrorQueue.IsEmpty()){
+            error = (error + DMErrorQueue.Pop());
+            empty = false;
+        }
+        if(!WBErrorQueue.IsEmpty()){
+            error = (error + WBErrorQueue.Pop());
+            empty = false;
+        }
+        
+        if(empty) return true;
+        
+        doPrintError(error);
+    }else{
+        //Store and differ until cycle is different
+        
+        if(!EXErrorQueue.IsEmpty()){
+            Error error = EXErrorQueue.Pop();
+            if(error.GetCycle() != last_error.GetCycle()){
+                //Dump previous
+                doPrintError(last_error);
+                last_error = error;
+            }else{
+                last_error = (last_error + error);
+            }
+        }
+        
+        if(!DMErrorQueue.IsEmpty()){
+            Error error = DMErrorQueue.Pop();
+            if(error.GetCycle() != last_error.GetCycle()){
+                //Dump previous
+                doPrintError(last_error);
+                last_error = error;
+            }else{
+                last_error = (last_error + error);
+            }
+        }
+        
+        if(!WBErrorQueue.IsEmpty()){
+            Error error = WBErrorQueue.Pop();
+            if(error.GetCycle() != last_error.GetCycle()){
+                //Dump previous
+                doPrintError(last_error);
+                last_error = error;
+            }else{
+                last_error = (last_error + error);
+            }
+        }
     }
 
     return false;
@@ -97,7 +143,7 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
     while(true){
 
         //Print errors
-        PrintError();
+        PrintError(false);
 
         auto regs_diff = RegsQueue.Pop();
 
@@ -204,7 +250,7 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
     }
 
     //Clean rest of the errors
-    while(!PrintError());
+    while(!PrintError(true));
 
     /*
      * Remember to join before exit!!

@@ -6,8 +6,7 @@
 
 #include <queue>
 #include <vector>
-#include <thread>
-#include <mutex>
+#include <map>
 
 #include <boost/atomic/atomic.hpp>
 #include <boost/thread/thread.hpp>
@@ -53,6 +52,10 @@ private:
 
     //Output streams
     OutputStream &mSnapShotStream, &mErrorStream;
+    
+    //Error printing
+    Error last_error;
+    void doPrintError(Error&);
 
     void loadMemory(RawBinary& rawBinary);
 
@@ -136,7 +139,8 @@ public:
             mCycleCounter(0),
             /*Streams*/
             mSnapShotStream(snapshotStream), mErrorStream(errorStream),
-            mInstrCount(0), mInstrEndAddr(0){
+            mInstrCount(0), mInstrEndAddr(0),
+            last_error(){
 
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
@@ -176,7 +180,9 @@ public:
             mCycleCounter(0),
             /*Streams*/
             mSnapShotStream(snapshotStream), mErrorStream(errorStream),
-            mInstrCount(0), mInstrEndAddr(0){
+            mInstrCount(0), mInstrEndAddr(0),
+            last_error(){
+                
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
             Registers[i] = (byte_t)0;
@@ -299,9 +305,9 @@ public:
     void StartPrinterLoop(boost::thread_group*);
 
     /*
-     * Append error
+     * Error printing
      * */
-    bool PrintError();
+    bool PrintError(bool);
 
 };
 

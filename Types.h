@@ -52,8 +52,6 @@ protected:
 
 public:
     
-    Error(){/*Trivial constructor*/}
-    
     static const uint8_t LEVEL_CONTINUE;
     static const uint8_t LEVEL_HALT;
 
@@ -86,6 +84,10 @@ public:
     Error(const Error& that){
         //Copy constructor
         operator=(that);
+    }
+    Error(){
+        //Default constructor
+        *this = NONE;
     }
 
     bool operator==(const Error& rhs) const{
