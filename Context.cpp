@@ -48,69 +48,34 @@ void Context::doPrintError(Error& error){
     }
 }
 
-bool Context::PrintError(bool flush) {
-
-    if(flush){
-        doPrintError(last_error);
-        last_error = Error::NONE;
-        
-        //Check and dump immediate
-        bool empty = true;
-        Error error = Error::NONE;
-        if(!EXErrorQueue.IsEmpty()){
-            error = (error + EXErrorQueue.Pop());
-            empty = false;
-        }
-        if(!DMErrorQueue.IsEmpty()){
-            error = (error + DMErrorQueue.Pop());
-            empty = false;
-        }
-        if(!WBErrorQueue.IsEmpty()){
-            error = (error + WBErrorQueue.Pop());
-            empty = false;
-        }
-        
-        if(empty) return true;
-        
-        doPrintError(error);
-    }else{
-        //Store and differ until cycle is different
-        
-        if(!EXErrorQueue.IsEmpty()){
-            Error error = EXErrorQueue.Pop();
-            if(error.GetCycle() != last_error.GetCycle()){
-                //Dump previous
-                doPrintError(last_error);
-                last_error = error;
-            }else{
-                last_error = (last_error + error);
-            }
-        }
-        
-        if(!DMErrorQueue.IsEmpty()){
-            Error error = DMErrorQueue.Pop();
-            if(error.GetCycle() != last_error.GetCycle()){
-                //Dump previous
-                doPrintError(last_error);
-                last_error = error;
-            }else{
-                last_error = (last_error + error);
-            }
-        }
-        
-        if(!WBErrorQueue.IsEmpty()){
-            Error error = WBErrorQueue.Pop();
-            if(error.GetCycle() != last_error.GetCycle()){
-                //Dump previous
-                doPrintError(last_error);
-                last_error = error;
-            }else{
-                last_error = (last_error + error);
-            }
-        }
+void Context::consumeError(){
+    if(!EXErrorQueue.IsEmpty()){
+        Error error = EXErrorQueue.Pop();
+        Error& err_origin = errors_map[error.GetCycle()];
+        errors_map[error.GetCycle()] = (err_origin + error);
     }
+    
+    if(!DMErrorQueue.IsEmpty()){
+        Error error = DMErrorQueue.Pop();
+        Error& err_origin = errors_map[error.GetCycle()];
+        errors_map[error.GetCycle()] = (err_origin + error);
+    }
+    
+    if(!WBErrorQueue.IsEmpty()){
+        Error error = WBErrorQueue.Pop();
+        Error& err_origin = errors_map[error.GetCycle()];
+        errors_map[error.GetCycle()] = (err_origin + error);
+    }
+}
 
-    return false;
+bool Context::PrintError(bool) {
+
+    auto it_error = errors_map.begin();
+    for(; it_error != errors_map.end(); ++it_error){
+        doPrintError(it_error->second);
+    }
+    
+    return true;
 }
 
 static void trimOutput(std::string& str){
@@ -141,9 +106,8 @@ void Context::StartPrinterLoop(boost::thread_group* threads) {
     reg_t pc_;
 
     while(true){
-
-        //Print errors
-        PrintError(false);
+        
+        consumeError();
 
         auto regs_diff = RegsQueue.Pop();
 

@@ -53,9 +53,12 @@ private:
     //Output streams
     OutputStream &mSnapShotStream, &mErrorStream;
     
-    //Error printing
+    /*Error handling*/
+    //Map cycle number to Error mixin
+    std::map<int,Error> errors_map;
     Error last_error;
     void doPrintError(Error&);
+    void consumeError();
 
     void loadMemory(RawBinary& rawBinary);
 
