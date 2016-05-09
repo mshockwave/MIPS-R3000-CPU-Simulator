@@ -1,0 +1,46 @@
+PC = 0x00000268
+24
+         
+lw $t0, 0($0)     # $t0 = ARRAY_NUM
+       
+addi $t1, $t0, -1   # $t1 = i = ARRAY_NUM-1
+
+for_i:  slt $t3, $0, $t1
+        
+beq $0, $t3, end_i
+       
+addi $t4, $0, 4     # $t4, base of array[j]
+         
+or $t2, $0, $0    # $t2 = j = 0
+
+for_j:  slt $t3, $t2, $t1
+        
+beq $t3, $0, end_j
+         
+lw $t5, 0($t4)    # $t5 = array[j]
+         
+lw $t6, 4($t4)    # $t6 = array[j+1]
+        
+slt $t3, $t6, $t5
+        
+beq $0, $t3, inc_j
+         
+sw $t5, 4($t4)    # array[j+1] = $t5
+         
+sw $t6, 0($t4)    # array[j] = $t6
+
+inc_j: addi $t2, $t2, 1    # ++j
+       
+addi $t4, $t4, 4
+          
+j for_j
+
+end_j: addi $t1, $t1, -1   # --i
+          
+j for_i
+e
+nd_i: halt
+       halt
+       halt
+       halt
+       halt

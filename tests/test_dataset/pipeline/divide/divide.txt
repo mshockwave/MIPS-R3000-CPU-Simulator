@@ -1,0 +1,49 @@
+﻿		  lh $a0, 0($0) 		# $a0 = dividend
+    		  lh $a1, 2($0) 		# $a1 = divisor
+		 beq $a1, $0, error 		# if divisor == 0 jump to error
+		 srl $t0, $a0, 31 		# $t0 = $a0 >> 31 = sign-bit of dividend
+		 beq $t0, $0, check_divisor 	# if dividend > 0, go to check_divisor
+		 sub $a0, $0, $a0 		# if dividend < 0, $a0 = 0 - $a0
+check_divisor: 	 srl $t1, $a1, 31 		# $t1 = $a1 >> 31 = sign-bit of divisor
+		 beq $t1, $0, set 		# if divisor > 0, go to set
+		 sub $a1, $0, $a1 		# if divisor < 0, $a1 = 0 - $a1
+set: 		 and $v0, $0, $0 		# $v0 = hi = 0
+		 and $v1, $a0, $a0 		# $v1 = lo = abs(dividend) = $a0
+		addi $t2, $0, 32 		# $t2 = 32 = counter
+		 srl $v0, $v1, 31 		# $v0 = $v1 >> 31 ( hi = lo >> 31 )
+		 sll $v1, $v1, 1 		# $v1 = $v1 << 1 ( lo = lo << 1 )
+loop: 		 slt $t3, $0, $t2 		# $t3 = if( 0 < $t3 ) = if( 0 < counter )
+		 beq $0, $t3, adj 		# if( counter <= 0 ), go to end
+		 sub $v0, $v0, $a1 		# hi -= abs(divisor)
+		 slt $t4, $v0, $0 		# $t4 = if( hi < 0 )
+		 beq $0, $t4, else		# if( hi >= 0 ), go to else
+		 add $v0, $v0, $a1 		# hi += abs(divisor)
+		 sll $v0, $v0, 1 		# hi <<= 1
+		 srl $t5, $v1, 31 		# $t5 = lo >> 31
+  		  or $v0, $v0, $t5 		# hi |= ( lo >> 31 )
+		 sll $v1, $v1, 1 		# lo <<= 1
+   		   j dec_counter
+else: 		 sll $v0, $v0, 1 		# hi <<= 1
+		 srl $t5, $v1, 31 		# $t5 = lo >> 31
+  		  or $v0, $v0, $t5 		# hi |= ( lo >> 31 )
+		 sll $v1, $v1, 1 		# lo <<= 1
+		 ori $v1, $v1, 1 		# lo |= 1
+dec_counter: 	addi $t2, $t2, -1
+   		   j loop
+adj:   		 sra $v0, $v0, 1 		# hi >>= 1
+		 beq $0, $t0, adj_quo 		# sign-bit of divendend==0(!divendend«0), go to adj_quo
+		 sub $v0, $0, $v0 		# change sign of hi(remainder)
+adj_quo: 	 beq $t0, $t1, end
+		 sub $v1, $0, $v1 		# change sign of lo(quotient)
+		   j end
+error:		 add $v0, $0, $0		# hi = 0
+		 add $v1, $0, $0		# lo = 0
+end:   	  	  sw $v0, 4($0)
+  		  sw $v1, 8($0)
+		  lw $t6, 4($0)
+		  lw $t7, 8($0)
+		halt
+		halt
+		halt
+		halt
+		halt

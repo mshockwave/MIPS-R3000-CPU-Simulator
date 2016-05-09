@@ -1,0 +1,38 @@
+        addi $sp, $sp, -4
+        sw   $ra, 0($sp)    # push $ra
+        lw   $a0, 0x10($0)  # $a0 = desired
+        jal  fibo
+        sw   $v0, 0x14($0)  # store answer
+        lw   $ra, 0($sp)    # pop $sp
+        addi $sp, $sp, 4
+        lw   $1, 0x14($0)
+        halt
+        halt
+        halt
+        halt
+        halt
+  fibo: slti $t0, $a0, 2    #i:0x3B8
+        beq  $0, $t0, fib_1
+        or   $v0, $a0, $0
+        jr   $ra
+ fib_1: addi $sp, $sp, -8
+        sw   $ra, 4($sp)    # push $ra
+        sw   $a0, 0($sp)    # push $a0
+        addi $a0, $a0, -1
+        jal  fibo
+        lw   $a0, 0($sp)    # pop $a0
+        lw   $ra, 4($sp)    # pop $ra
+        addi $sp, $sp, 8
+        or   $t0, $v0, $0   # save fib_1
+ fib_2: addi $sp, $sp, -12
+        sw   $ra, 8($sp)    # push $ra
+        sw   $t0, 4($sp)    # push $t0
+        sw   $a0, 0($sp)    # push $a0
+        addi $a0, $a0, -2
+        jal  fibo
+        lw   $a0, 0($sp)    # pop $a0
+        lw   $t0, 4($sp)    # pop $t0
+        lw   $ra, 8($sp)    # pop $ra
+        addi $sp, $sp, 12
+        add  $v0, $v0, $t0
+        jr   $ra

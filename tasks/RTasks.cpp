@@ -243,6 +243,7 @@ namespace task{
 
                     self->RdValue = rd_value;
 
+                    reg_reserves[self->RdIndex].Value = rd_value;
                     reg_reserves[self->RdIndex].IDAvailable = true;
 
                     return (ctx->pushTask(ctx->EX_DM, self))? err : Error::PIPELINE_STALL;
