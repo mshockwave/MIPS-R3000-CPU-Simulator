@@ -642,21 +642,23 @@ namespace task{
                     // Load ID forwarding stuff here
                     // To avoiding race condition on falling edge
                     if(reg_reserves[rs_index].Holder != nullptr &&
-                            reg_reserves[rs_index].IDAvailable){
+                       reg_reserves[rs_index].IDAvailable &&
+                       !reg_reserves[rs_index].EXForward){
                         rs_value = reg_reserves[rs_index].Value;
                         rs_load = true;
                         reg_reserves[rs_index].IDForward = true;
-                        //Prevent second one from accessing
-                        reg_reserves[rs_index].IDAvailable = false;
                     }
+                    //Prevent second one from accessing
+                    reg_reserves[rs_index].IDAvailable = false;
                     if(reg_reserves[rt_index].Holder != nullptr &&
-                       reg_reserves[rt_index].IDAvailable){
+                       reg_reserves[rt_index].IDAvailable &&
+                       !reg_reserves[rt_index].EXForward){
                         rt_value = reg_reserves[rt_index].Value;
                         rt_load = true;
                         reg_reserves[rt_index].IDForward = true;
-                        //Prevent second one from accessing
-                        reg_reserves[rt_index].IDAvailable = false;
                     }
+                    //Prevent second one from accessing
+                    reg_reserves[rt_index].IDAvailable = false;
 
                     RISING_EDGE_FENCE();
 
@@ -725,21 +727,23 @@ namespace task{
                     // Load ID forwarding stuff here
                     // To avoiding race condition on falling edge
                     if(reg_reserves[rs_index].Holder != nullptr &&
-                       reg_reserves[rs_index].IDAvailable){
+                       reg_reserves[rs_index].IDAvailable &&
+                       !reg_reserves[rs_index].EXForward){
                         rs_value = reg_reserves[rs_index].Value;
                         rs_load = true;
                         reg_reserves[rs_index].IDForward = true;
-                        //Prevent second one from accessing
-                        reg_reserves[rs_index].IDAvailable = false;
                     }
+                    //Prevent second one from accessing
+                    reg_reserves[rs_index].IDAvailable = false;
                     if(reg_reserves[rt_index].Holder != nullptr &&
-                       reg_reserves[rt_index].IDAvailable){
+                       reg_reserves[rt_index].IDAvailable &&
+                       !reg_reserves[rt_index].EXForward){
                         rt_value = reg_reserves[rt_index].Value;
                         rt_load = true;
                         reg_reserves[rt_index].IDForward = true;
-                        //Prevent second one from accessing
-                        reg_reserves[rt_index].IDAvailable = false;
                     }
+                    //Prevent second one from accessing
+                    reg_reserves[rt_index].IDAvailable = false;
 
                     RISING_EDGE_FENCE();
 
@@ -820,13 +824,14 @@ namespace task{
                     // Load ID forwarding stuff here
                     // To avoiding race condition on falling edge
                     if(reg_reserves[rs_index].Holder != nullptr &&
-                       reg_reserves[rs_index].IDAvailable){
+                       reg_reserves[rs_index].IDAvailable &&
+                       !reg_reserves[rs_index].EXForward){
                         rs_value = reg_reserves[rs_index].Value;
                         rs_load = true;
                         reg_reserves[rs_index].IDForward = true;
-                        //Prevent second one from accessing
-                        reg_reserves[rs_index].IDAvailable = false;
                     }
+                    //Prevent second one from accessing
+                    reg_reserves[rs_index].IDAvailable = false;
 
                     RISING_EDGE_FENCE();
 
