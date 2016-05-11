@@ -740,7 +740,20 @@ namespace task{
         .WB(RInstr::WriteRegsWB);
         
         TasksTable[OP_JR].Name("JR", OP_JR)
-        .IF(RInstr::ResolveRegsIF)
+        .IF(STAGE_TASK(){
+            /*
+             * This IF lambda is always executed in last half cycle
+             * Since first half cycle is reserved for instruction loading
+             * */
+            RISING_EDGE_FENCE();
+            
+            //Decode registers index
+            auto instr_bits = self->instruction->GetBitsInstruction();
+            self->RsIndex = RInstr::GetRs(instr_bits);
+            
+            auto* ctx = self->context;
+            return (ctx->pushTask(ctx->IF_ID, self))? Error::NONE : Error::PIPELINE_STALL;
+        })
         .ID(STAGE_TASK(){
             auto* ctx = self->context;
             auto& reg_reserves = ctx->RegReserves;
