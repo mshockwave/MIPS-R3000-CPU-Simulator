@@ -38,15 +38,3 @@ Usage
 
 The result output files, `snapshot.rpt` and `error_dump.rpt`, would put in current path.
 
-Design
--------------
-The work would pretty resemble to building an interpreter.
-
-I use global dispatch table to implement op code handling. Each op code handlers is a lambda function object, they're stored in a map indexed by its corresponding op code
-(Actually raw op codes would map to a task id first, then map to the real handlers).
-I use C++11 STL's `unordered_map` to do the mapping job, which is said to have `O(1)` query performance in average cases and `O(n)` in worst cases.
-
-This kind of dispatch table based interpreter implementation is used in many large projects nowadays.
-For example, Interpreters in [V8 Javascript Engine(Ignition)](http://mshockwave.blogspot.tw/2016/03/ignition-interpreter-in-v8-javascript.html) and [Android ART](http://mshockwave.blogspot.tw/2016/03/interpreter-in-android-art.html) to name a few.
-This approach can overcome some of the deadliest performance degrading(e.g. Pipeline stalling) in traditional interpreter designs
-  which mostly use `switch` or `goto` to implement task dispatching.
