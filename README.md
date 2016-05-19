@@ -16,23 +16,20 @@ The main programming language is C++11.
   `cmake -DCMAKE_BUILD_TYPE=<Debug/Release> ..`<br/>
   `Release` build type use `-Os` compiler optimization flag since `-O3` is proved to break the programs execution logic.
 
-* Install test data folders:<br/>
-  `make install-test-data`<br/>
-  **Note: `make clean` would also clean these test data folders**
 
 * Build main program:<br/>
-  `make ArchiHW1`
+  `make pipeline`
 
 * Build unit tests main program:<br/>
-  `make ArchiHW1Tests`
+  `make pipelineTests`
 
 * Or just build all stuff:<br/>
   `make`
 
 Usage
 -----
-* `./ArchiHW1 <Path of folder contains test binaries>`<br/>
-  E.g. `./ArchiHW1 test_dataset/func` Where test_dataset/func contains the desired binary files: `iimage.bin` and `dimage.bin`
+* `./pipeline <Path of folder contains test binaries>`<br/>
+  E.g. `./pipeline test_dataset/func` Where test_dataset/func contains the desired binary files: `iimage.bin` and `dimage.bin`
 
 * `./ArchiHW1` would find those two binary files in current path.
 
