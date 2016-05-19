@@ -26,7 +26,7 @@ private:
 
         ExecutionEngine engine(context, instructions);
 
-        engine.start();
+        engine.Start();
 
         return true;
     }

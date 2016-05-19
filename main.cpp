@@ -15,21 +15,12 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-    char testCasePath[100] = { '\0' };
-
-    if(argc < 2){
-        //Log::E("") << "Usage: " << argv[0] << " <test case folder name>" << std::endl;
-        testCasePath[0] = '.';
-    }else{
-        strncpy(testCasePath, argv[1], sizeof(char) * 100);
-    }
-
     try{
         std::stringstream ssInstrImage;
-        ssInstrImage << testCasePath << FILE_PATH_SEP << "iimage.bin";
+        ssInstrImage << "iimage.bin";
 
         std::stringstream ssDataImg;
-        ssDataImg << testCasePath << FILE_PATH_SEP << "dimage.bin";
+        ssDataImg << "dimage.bin";
         //Log::D("Main") << "Instruction Image Path: " << instrImagePath << std::endl;
         //Log::D("Main") << "Data Image Path: " << dataImagePath << std::endl;
         RawBinary inputBinary(ssInstrImage.str(), ssDataImg.str());
