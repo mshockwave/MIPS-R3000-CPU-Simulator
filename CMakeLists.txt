@@ -15,7 +15,8 @@ set(SOURCE_FILES
         Utils.cpp
         Task.cpp
         Types.h
-        Types.cpp)
+        Types.cpp
+        MemCache.hpp MemCache.cpp)
 include_directories(./include)
 
 if(NOT DEFINED OUT_EXE_NAME)
