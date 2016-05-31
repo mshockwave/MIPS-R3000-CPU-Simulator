@@ -4,6 +4,8 @@
 #define ARCHIHW1_TESTINSTRUCTION_H
 
 #include <cstdio>
+#include <initializer_list>
+
 #include "../Types.h"
 #include "../Instruction.h"
 #include "../RawBinary.h"
@@ -47,7 +49,8 @@ private:
 
         RawBinary data("test_dataset/func/iimage.bin", "test_dataset/func/dimage.bin");
 
-        Instructions instructions(data);
+        /*{block size, page size, mem size, cache size, set associate}*/
+        Instructions instructions(data, {4, 4, 16, 16, 1});
 
         Log::D(mName) << "Instructions length: " << instructions.length() << std::endl;
 

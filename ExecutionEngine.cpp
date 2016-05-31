@@ -43,7 +43,7 @@ void ExecutionEngine::Start() {
         uint32_t index = offset / WORD_WIDTH;
 
         Instructions::iterator itInstr = mInstructions.begin();
-        Instruction& instruction = *(itInstr + index);
+        Instruction instruction = *(itInstr + index);
 
         //Extract op code
         uint32_t op = extractInstrBits(instruction.GetBitsInstruction(), 31, 26);

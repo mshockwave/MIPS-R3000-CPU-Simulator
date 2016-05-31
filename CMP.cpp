@@ -13,7 +13,11 @@ namespace cmp {
     PageSize(4),
     MemSize(16),
     CacheSize(16),
-    SetAssoc(1){
+    SetAssoc(1),
+    /*Profiling*/
+    tlb_hit_count(0), tlb_miss_count(0),
+    cache_hit_count(0), cache_miss_count(0),
+    page_hit_count(0), page_fault_count(0){
         
         std::vector<size_t> config_vec(config);
         auto config_size = config_vec.size();
@@ -55,6 +59,8 @@ namespace cmp {
             }
         }
         
+        if(found) tlb_hit_count++;
+        
         return std::make_tuple(phy_addr,found);
     }
     
@@ -63,61 +69,90 @@ namespace cmp {
      */
     bool CMP::tlb_miss(addr_t vir_addr){
         
+        tlb_miss_count++;
+        
         auto vm_tag = pt_tag(vir_addr);
-        const auto& pt_entry = PageTable[vm_tag];
+        auto& pt_entry = PageTable[vm_tag];
         if(!pt_entry.Valid) return false;
+        
+        page_hit_count++;
+        pt_entry.Use = true;
         
         // TLB insert
         ssize_t index = -1;
-        bool full = true;
         for(size_t i = 0; i < TLB.size(); i++){
             const auto& tlb_entry = TLB[i];
-            if(!tlb_entry.Use &&
-               index < 0){
+            if(!tlb_entry.Valid){
                 index = i;
-            }else if(!tlb_entry.Use){
-                full = false;
+                break;
             }
         }
         
-        if(full){
-            for(auto& tlb_entry : TLB){
-                tlb_entry.Use = false;
+        if(index < 0){ // Use LRU to pick next
+            bool full = true;
+            for(size_t i = 0; i < TLB.size(); i++){
+                const auto& tlb_entry = TLB[i];
+                if(!tlb_entry.Use &&
+                   index < 0){
+                    index = i;
+                }else if(!tlb_entry.Use){
+                    full = false;
+                }
+            }
+            
+            if(full){
+                for(auto& tlb_entry : TLB){
+                    tlb_entry.Use = false;
+                }
             }
         }
         
         if(index < 0) index = 0;
         TLB[index] = pt_entry;
         TLB[index].Use = true;
+        TLB[index].Valid = true;
         
         return true;
     }
     
     void CMP::page_fault(addr_t vir_addr){
         
+        page_fault_count++;
+        
         PhyPage phy_page;
         phy_page.Ref = true;
         phy_page.Use = true;
+        phy_page.Valid = true;
         phy_page.ReferVirAddr = vir_addr;
         phy_page.DataOffset = vir_addr - disk_data_start_addr;
         
         
         // Find next phy mem entry
         ssize_t index = -1;
-        bool full = true;
         for(size_t i = 0; i < PhyPages.size(); i++){
             const auto& phy_entry = PhyPages[i];
-            if(!phy_entry.Use &&
-               index < 0){
+            if(!phy_entry.Valid){
                 index = i;
-            }else if(!phy_entry.Use){
-                full = false;
+                break;
             }
         }
         
-        if(full){
-            for(auto& phy_entry : PhyPages){
-                phy_entry.Use = false;
+        if(index < 0){ // Use LRU to pick next page
+            bool full = true;
+            for(size_t i = 0; i < PhyPages.size(); i++){
+                const auto& phy_entry = PhyPages[i];
+                if(!phy_entry.Use &&
+                   index < 0){
+                    index = i;
+                }else if(!phy_entry.Use){
+                    full = false;
+                }
+            }
+            
+            if(full){
+                for(auto& phy_entry : PhyPages){
+                    phy_entry.Use = false;
+                }
             }
         }
         
@@ -158,6 +193,7 @@ namespace cmp {
         }
         
         PhyPages[index] = phy_page;
+        PhyPages[index].Use = true;
     }
     
     /*
@@ -173,6 +209,9 @@ namespace cmp {
             if(cache_set.Tag == cache_tag_ &&
                cache_set.Valid){
                 cache_set.Use = true;
+                
+                cache_hit_count++;
+                
                 return std::make_tuple(cache_set.DataOffset, true);
             }
         }
@@ -182,26 +221,38 @@ namespace cmp {
     
     void CMP::cache_miss(addr_t phy_addr){
         
+        cache_miss_count++;
+        
         auto cache_index_ = cache_index(phy_addr);
         auto cache_tag_ = cache_tag(phy_addr);
         
         auto& cache_sets = Cache[cache_index_];
         // Find set to insert
         ssize_t index = -1;
-        bool full = true;
         for(size_t i = 0; i < cache_sets.size(); i++){
             const auto& set = cache_sets[i];
-            if(!set.Use &&
-               index < 0){
+            if(!set.Valid){
                 index = i;
-            }else if(!set.Use){
-                full = false;
+                break;
             }
         }
         
-        if(full){
-            for(auto& set : cache_sets){
-                set.Use = false;
+        if(index < 0){
+            bool full = true;
+            for(size_t i = 0; i < cache_sets.size(); i++){
+                const auto& set = cache_sets[i];
+                if(!set.Use &&
+                   index < 0){
+                    index = i;
+                }else if(!set.Use){
+                    full = false;
+                }
+            }
+            
+            if(full){
+                for(auto& set : cache_sets){
+                    set.Use = false;
+                }
             }
         }
         

@@ -14,6 +14,7 @@ namespace cmp {
         
         size_t DataOffset;
         bool Use;
+        bool Valid;
         
         bool Ref;
         addr_t ReferVirAddr;
@@ -21,7 +22,7 @@ namespace cmp {
         PhyPage() :
         DataOffset(0),
         Ref(false), ReferVirAddr(0),
-        Use(false){}
+        Use(false),Valid(false){}
     };
     
     struct PageEntry{
@@ -60,6 +61,10 @@ namespace cmp {
          {block size, page size, mem size, cache size, set associate}
          */
         typedef std::initializer_list<size_t> cmp_config_t;
+        
+        typedef unsigned long profile_count_t;
+        /*(hit,miss)*/
+        typedef std::tuple<profile_count_t, profile_count_t> profile_result_t;
         
         CMP(cmp_config_t config,
             addr_t start_address,
@@ -100,6 +105,18 @@ namespace cmp {
             
         }
         
+        inline addr_t GetStartAddr() const { return disk_data_start_addr; }
+        
+        inline profile_result_t GetCacheProfileData() const{
+            return std::make_tuple(cache_hit_count,cache_miss_count);
+        }
+        inline profile_result_t GetTLBProfileData() const{
+            return std::make_tuple(tlb_hit_count, tlb_miss_count);
+        }
+        inline profile_result_t GetPageProfileData() const{
+            return std::make_tuple(page_hit_count, page_fault_count);
+        }
+        
     private:
         size_t BlockSize;
         size_t PageSize;
@@ -115,6 +132,11 @@ namespace cmp {
         std::map<addr_t, PageEntry> PageTable;
         std::vector<PhyPage> PhyPages;
         std::map<addr_t, std::vector<CacheEntry> > Cache;
+        
+        // Profiling
+        profile_count_t tlb_miss_count, tlb_hit_count;
+        profile_count_t cache_miss_count, cache_hit_count;
+        profile_count_t page_hit_count, page_fault_count;
         
         inline size_t pt_length(){ return disk_data_size / PageSize; }
         inline size_t tlb_length(){ return (pt_length() >> 2); }
