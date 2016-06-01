@@ -31,6 +31,7 @@ private:
     //Memory
     addr_t mDataSize;
     byte_t mMemory[MEMORY_LENGTH];
+    //std::shared_ptr<cmp::CMP> MemoryCMP;
     std::unique_ptr<cmp::CMP> MemoryCMP;
 
     CounterType mCycleCounter;
@@ -82,11 +83,18 @@ public:
         loadMemory(rawBinary);
                 
         // Init CMP
+        /*
+        MemoryCMP = std::make_shared<cmp::CMP>(mem_cmp_config,
+                                               0,
+                                               mMemory,
+                                               MEMORY_LENGTH);
+         */
         std::unique_ptr<cmp::CMP> mem_cmp(new cmp::CMP(mem_cmp_config,
                                                        0,
                                                        mMemory,
                                                        MEMORY_LENGTH));
         MemoryCMP = std::move(mem_cmp);
+        
     }
 
     addr_t GetInstrStartAddress() const{ return mInstrStartAddr; }

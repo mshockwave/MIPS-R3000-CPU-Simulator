@@ -123,8 +123,9 @@ namespace cmp {
         phy_page.Ref = true;
         phy_page.Use = true;
         phy_page.Valid = true;
-        phy_page.ReferVirAddr = vir_addr;
-        phy_page.DataOffset = vir_addr - disk_data_start_addr;
+        phy_page.ReferVirAddr = vir_addr - (vir_addr % PageSize);
+        size_t vir_addr_offset = vir_addr - disk_data_start_addr;
+        phy_page.DataOffset = vir_addr_offset - (vir_addr_offset % PageSize);
         
         
         // Find next phy mem entry
