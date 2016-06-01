@@ -131,6 +131,16 @@ public:
         return it_new;
     }
     
+    inline cmp::CMP::profile_result_t GetCacheProfileData() const{
+        return cmp_module->GetCacheProfileData();
+    }
+    inline cmp::CMP::profile_result_t GetTLBProfileData() const{
+        return cmp_module->GetTLBProfileData();
+    }
+    inline cmp::CMP::profile_result_t GetPageProfileData() const{
+        return cmp_module->GetPageProfileData();
+    }
+    
 private:
     uint32_t instr_length;
     

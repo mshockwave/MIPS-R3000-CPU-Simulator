@@ -15,6 +15,7 @@ using namespace std;
 
 #define SNAPSHOT_FILE   "snapshot.rpt"
 #define ERROR_DUMP_FILE "error_dump.rpt"
+#define CMP_DUMP_FILE   "report.rpt"
 
 /*
  {block size, page size, mem size, cache size, set associate}
@@ -65,7 +66,9 @@ int main(int argc, char **argv) {
         std::ofstream snapShotOut(SNAPSHOT_FILE);
         std::ofstream errorOut(ERROR_DUMP_FILE);
 
-        Context context(inputBinary, snapShotOut, errorOut);
+        Context context(inputBinary,
+                        data_cmp_config,
+                        snapShotOut, errorOut);
 
         ExecutionEngine engine(context, instructions);
 
@@ -73,6 +76,55 @@ int main(int argc, char **argv) {
 
         snapShotOut.close();
         errorOut.close();
+        
+        /*Write CMP report*/
+        {
+            std::ofstream os(CMP_DUMP_FILE);
+            
+            // Instruction Cache
+            os << "ICache :" <<std::endl;
+            auto instr_cache_profile = instructions.GetCacheProfileData();
+            os << "# hits: " << std::get<0>(instr_cache_profile) << std::endl;
+            os << "# misses: " << std::get<1>(instr_cache_profile) << std::endl;
+            os << std::endl;
+            
+            // Data Cache
+            os << "DCache :" <<std::endl;
+            auto data_cache_profile = context.GetCacheProfileData();
+            os << "# hits: " << std::get<0>(data_cache_profile) << std::endl;
+            os << "# misses: " << std::get<1>(data_cache_profile) << std::endl;
+            os << std::endl;
+            
+            // Instruction TLB
+            os << "ITLB :" <<std::endl;
+            auto instr_tlb_profile = instructions.GetTLBProfileData();
+            os << "# hits: " << std::get<0>(instr_tlb_profile) << std::endl;
+            os << "# misses: " << std::get<1>(instr_tlb_profile) << std::endl;
+            os << std::endl;
+            
+            // Data TLB
+            os << "DTLB :" <<std::endl;
+            auto data_tlb_profile = context.GetTLBProfileData();
+            os << "# hits: " << std::get<0>(data_tlb_profile) << std::endl;
+            os << "# misses: " << std::get<1>(data_tlb_profile) << std::endl;
+            os << std::endl;
+            
+            // Instruction PageTable
+            os << "IPageTable :" <<std::endl;
+            auto instr_pt_profile = instructions.GetPageProfileData();
+            os << "# hits: " << std::get<0>(instr_pt_profile) << std::endl;
+            os << "# misses: " << std::get<1>(instr_pt_profile) << std::endl;
+            os << std::endl;
+            
+            // Data PageTable
+            os << "DPageTable :" <<std::endl;
+            auto data_pt_profile = context.GetPageProfileData();
+            os << "# hits: " << std::get<0>(data_pt_profile) << std::endl;
+            os << "# misses: " << std::get<1>(data_pt_profile) << std::endl;
+            os << std::endl;
+            
+            os.close();
+        }
 
         return 0;
     }catch(const char *e){
