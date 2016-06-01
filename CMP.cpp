@@ -59,7 +59,7 @@ namespace cmp {
             }
         }
         
-        if(found) tlb_hit_count++;
+        //if(found) tlb_hit_count++;
         
         return std::make_tuple(phy_addr,found);
     }
@@ -69,13 +69,13 @@ namespace cmp {
      */
     bool CMP::tlb_miss(addr_t vir_addr){
         
-        tlb_miss_count++;
+        //tlb_miss_count++;
         
         auto vm_tag = pt_tag(vir_addr);
         auto& pt_entry = PageTable[vm_tag];
         if(!pt_entry.Valid) return false;
         
-        page_hit_count++;
+        //page_hit_count++;
         pt_entry.Use = true;
         
         // TLB insert
@@ -117,7 +117,7 @@ namespace cmp {
     
     void CMP::page_fault(addr_t vir_addr){
         
-        page_fault_count++;
+        //page_fault_count++;
         
         PhyPage phy_page;
         phy_page.Ref = true;
@@ -217,7 +217,7 @@ namespace cmp {
                cache_set.Valid){
                 cache_set.Use = true;
                 
-                cache_hit_count++;
+                //cache_hit_count++;
                 
                 return std::make_tuple(cache_set.DataOffset, true);
             }
@@ -228,7 +228,7 @@ namespace cmp {
     
     void CMP::cache_miss(addr_t phy_addr){
         
-        cache_miss_count++;
+        //cache_miss_count++;
         
         auto cache_index_ = cache_index(phy_addr);
         auto cache_tag_ = cache_tag(phy_addr);
@@ -270,11 +270,11 @@ namespace cmp {
         size_t phy_addr_offset = phy_addr % PageSize;
         
         CacheEntry new_cache_entry;
-        new_cache_entry.DataOffset = phy_page_data_offset * PageSize + phy_addr_offset;
+        new_cache_entry.DataOffset = phy_page_data_offset + phy_addr_offset;
         new_cache_entry.Tag = cache_tag_;
         new_cache_entry.Index = cache_index_;
         new_cache_entry.Valid = true;
-        new_cache_entry.Use = true;
+        //new_cache_entry.Use = true;
         cache_sets[index] = new_cache_entry;
     }
     
@@ -282,11 +282,21 @@ namespace cmp {
      @return: data offset of phy page
      */
     size_t CMP::phy_access(addr_t phy_addr){
-        size_t phy_page_index = phy_addr / PageSize;
-        auto& phy_page = PhyPages[phy_page_index];
-        size_t phy_page_offset = phy_page.DataOffset;
-        phy_page.Use = true;
-        return phy_page_offset;
+        
+        auto result = cache_access(phy_addr);
+        if(std::get<1>(result)){
+            // Cache Hit
+            cache_hit_count++;
+            auto data_offset_block = std::get<0>(result);
+            return data_offset_block + cache_block_offset(phy_addr);
+        }
+        
+        // Cache Miss
+        cache_miss_count++;
+        cache_miss(phy_addr);
+        result = cache_access(phy_addr);
+        auto data_offset_block = std::get<0>(result);
+        return data_offset_block + cache_block_offset(phy_addr);
     }
     
 } //namespace cmp

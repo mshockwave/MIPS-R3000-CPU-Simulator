@@ -50,7 +50,7 @@ private:
         RawBinary data("test_dataset/func/iimage.bin", "test_dataset/func/dimage.bin");
 
         /*{block size, page size, mem size, cache size, set associate}*/
-        Instructions instructions(data, {4, 8, 64, 16, 4});
+        Instructions instructions(data, {4, 8, 64, 16, 2});
 
         Log::D(mName) << "Instructions length: " << std::dec << instructions.length() << std::endl;
         
@@ -59,7 +59,9 @@ private:
             auto instr = *(it_instr);
             Log::D(mName) << "Instruction: " << std::hex << instr.GetBitsInstruction() << std::endl;
         }
-
+        
+        Log::D(mName) << "Finish reading instructions" << std::endl;
+        
         return true;
     }
 };
