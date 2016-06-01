@@ -194,6 +194,13 @@ namespace cmp {
         
         PhyPages[index] = phy_page;
         PhyPages[index].Use = true;
+        
+        // Put result back to page table
+        PageEntry pt_entry;
+        pt_entry.PhyAddr = (index * PageSize);
+        pt_entry.Tag = pt_tag(vir_addr);
+        pt_entry.Valid = true;
+        PageTable[pt_entry.Tag] = pt_entry;
     }
     
     /*

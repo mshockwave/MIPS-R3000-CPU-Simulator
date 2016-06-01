@@ -79,7 +79,7 @@ namespace cmp {
                 // TLB Hit
                 addr_t phy_addr = std::get<0>(tlb_result);
                 size_t data_offset = phy_access(phy_addr);
-                data_offset = data_offset * PageSize + vir_addr_offset;
+                data_offset += vir_addr_offset;
                 return disk_data + data_offset;
             }
             
@@ -88,18 +88,19 @@ namespace cmp {
                 // Do not count as TLB hit
                 addr_t phy_addr = std::get<0>(tlb_result);
                 size_t data_offset = phy_access(phy_addr);
-                data_offset = data_offset * PageSize + vir_addr_offset;
+                data_offset += vir_addr_offset;
                 return disk_data + data_offset;
             }
             
             // Page fault
             page_fault(vir_addr);
             tlb_miss(vir_addr);
+            tlb_result = tlb_access(vir_addr);
             {
                 // Do not count as TLB miss
                 addr_t phy_addr = std::get<0>(tlb_result);
                 size_t data_offset = phy_access(phy_addr);
-                data_offset = data_offset * PageSize + vir_addr_offset;
+                data_offset += vir_addr_offset;
                 return disk_data + data_offset;
             }
             
