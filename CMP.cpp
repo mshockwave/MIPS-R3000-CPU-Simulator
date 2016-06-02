@@ -88,8 +88,8 @@ namespace cmp {
             }
         }
         
+        bool full = true;
         if(index < 0){ // Use LRU to pick next
-            bool full = true;
             for(size_t i = 0; i < TLB.size(); i++){
                 const auto& tlb_entry = TLB[i];
                 if(!tlb_entry.Use &&
@@ -100,10 +100,20 @@ namespace cmp {
                 }
             }
             
-            if(full){
-                for(auto& tlb_entry : TLB){
-                    tlb_entry.Use = false;
+        }else{
+            for(size_t i = 0; i < TLB.size(); i++){
+                if(i == index) continue;
+                
+                if(!TLB[i].Use){
+                    full = false;
+                    break;
                 }
+            }
+        }
+        
+        if(full){
+            for(auto& tlb_entry : TLB){
+                tlb_entry.Use = false;
             }
         }
         
@@ -138,8 +148,8 @@ namespace cmp {
             }
         }
         
+        bool full = true;
         if(index < 0){ // Use LRU to pick next page
-            bool full = true;
             for(size_t i = 0; i < PhyPages.size(); i++){
                 const auto& phy_entry = PhyPages[i];
                 if(!phy_entry.Use &&
@@ -150,10 +160,20 @@ namespace cmp {
                 }
             }
             
-            if(full){
-                for(auto& phy_entry : PhyPages){
-                    phy_entry.Use = false;
+        }else{
+            for(size_t i = 0; i < PhyPages.size(); i++){
+                if(i == index) continue;
+                
+                if(!PhyPages[i].Use){
+                    full = false;
+                    break;
                 }
+            }
+        }
+        
+        if(full){
+            for(auto& phy_entry : PhyPages){
+                phy_entry.Use = false;
             }
         }
         
@@ -256,8 +276,8 @@ namespace cmp {
             }
         }
         
+        bool full = true;
         if(index < 0){
-            bool full = true;
             for(size_t i = 0; i < cache_sets.size(); i++){
                 const auto& set = cache_sets[i];
                 if(!set.Use &&
@@ -268,10 +288,21 @@ namespace cmp {
                 }
             }
             
-            if(full){
-                for(auto& set : cache_sets){
-                    set.Use = false;
+            
+        }else{
+            for(size_t i = 0; i < cache_sets.size(); i++){
+                if(i == index) continue;
+                
+                if(!cache_sets[i].Use){
+                    full = false;
+                    break;
                 }
+            }
+        }
+        
+        if(full){
+            for(auto& set : cache_sets){
+                set.Use = false;
             }
         }
         

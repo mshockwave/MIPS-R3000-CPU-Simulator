@@ -47,7 +47,7 @@ Instructions::Instructions(RawBinary &binary,
     cmp_module = std::make_shared<cmp::CMP>(instr_cmp_config,
                                             start_addr,
                                             bytesArray + 8, // Skip first eight bytes of metadata
-                                            instr_length * INSTRUCTION_BYTE_WIDTH);
+                                            1024/*Fix size, 1K*/);
 
     /*The first eight bytes are PC address and instruction size, skip*/
     /*
