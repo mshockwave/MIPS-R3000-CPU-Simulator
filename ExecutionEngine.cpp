@@ -41,6 +41,15 @@ void ExecutionEngine::Start() {
 
         addr_t offset = pc - (mContext->GetInstrStartAddress());
         uint32_t index = offset / WORD_WIDTH;
+        
+        DEBUG_BLOCK {
+            Log::D("Execution Engine") << "=========================" << std::endl;;
+            Log::D("Execution Engine") << "Ready to execute PC: 0x"
+                                        << std::hex << static_cast<unsigned int>(pc) << std::endl;
+            Log::D("Execution Engine") << "Index: "
+                                        << std::dec << static_cast<unsigned int>(index) << std::endl;
+            Log::D("Execution Engine") << "=========================" << std::endl;
+        }
 
         Instructions::iterator itInstr = mInstructions.begin();
         Instruction instruction = *(itInstr + index);

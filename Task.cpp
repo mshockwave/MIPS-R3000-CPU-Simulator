@@ -583,7 +583,10 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("beq")
             }
 
-            if(rs == rt){
+            int32_t s_rs = static_cast<int32_t>(rs);
+            int32_t s_rt = static_cast<int32_t>(rt);
+            
+            if(s_rs == s_rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error e = context->setPC(context->GetPC() + offset);
                 if(e == Error::NONE){
@@ -604,8 +607,11 @@ namespace task{
             DEBUG_BLOCK {
                 PRINT_I_INSTR_DEBUG("bne")
             }
+            
+            int32_t s_rs = static_cast<int32_t>(rs);
+            int32_t s_rt = static_cast<int32_t>(rt);
 
-            if(rs != rt){
+            if(s_rs != s_rt){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error e = context->setPC(context->GetPC() + offset);
                 if(e == Error::NONE){
@@ -627,7 +633,7 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("bgtz")
             }
 
-            if(static_cast<uint32_t>(rs) > 0){
+            if(static_cast<int32_t>(rs) > 0){
                 reg_t offset = static_cast<reg_t>(WORD_WIDTH + (signExtend16(imm) << 2));
                 Error e = context->setPC(context->GetPC() + offset);
                 if(e == Error::NONE){

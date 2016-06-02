@@ -98,6 +98,9 @@ namespace task {
 #define PRINT_R_INSTR_DEBUG(op_name) \
     Log::D("Task R Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
     Log::D("Task R Type") << "Cycle: " << context->GetCycleCounter() << std::endl; \
+    Log::D("Task R Type") << "PC: 0x" \
+                          << OSTREAM_HEX_OUTPUT_FMT(8) \
+                          << static_cast<unsigned int>(context->GetPC()) << std::endl;\
     Log::D("Task R Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task R Type") << "Rs: " << \
                             static_cast<unsigned int>(RInstr::GetRs(instruction->GetBitsInstruction())) << \
@@ -118,6 +121,9 @@ namespace task {
 #define PRINT_I_INSTR_DEBUG(op_name) \
     Log::D("Task I Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
     Log::D("Task I Type") << "Cycle: " << context->GetCycleCounter() << std::endl; \
+    Log::D("Task R Type") << "PC: 0x" \
+                            << OSTREAM_HEX_OUTPUT_FMT(8) \
+                            << static_cast<unsigned int>(context->GetPC()) << std::endl;\
     Log::D("Task I Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task I Type") << "Rs: " << \
                             static_cast<unsigned int>(RInstr::GetRs(instruction->GetBitsInstruction())) << \
@@ -135,6 +141,9 @@ namespace task {
 #define PRINT_J_INSTR_DEBUG(op_name) \
     Log::D("Task J Type") << "TimeStamp: " << getCurrentTimeMs() << std::endl; \
     Log::D("Task J Type") << "Cycle: " << context->GetCycleCounter() << std::endl; \
+    Log::D("Task R Type") << "PC: 0x" \
+                            << OSTREAM_HEX_OUTPUT_FMT(8) \
+                            << static_cast<unsigned int>(context->GetPC()) << std::endl;\
     Log::D("Task J Type") << "Op Name: " << (op_name) << std::endl; \
     Log::D("Task J Type") << "Addr: 0x" << OSTREAM_HEX_OUTPUT_FMT(8) << \
                             static_cast<unsigned int>(JInstr::GetAddr(instruction->GetBitsInstruction())) << std::endl; \
