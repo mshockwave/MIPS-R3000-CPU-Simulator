@@ -90,6 +90,7 @@ namespace cmp {
             if(tlb_miss(vir_addr)){
                 page_hit_count++;
                 
+                tlb_result = tlb_access(vir_addr);
                 addr_t phy_page_addr = std::get<0>(tlb_result);
                 addr_t phy_addr = phy_page_addr + vir_addr_offset;
                 size_t data_offset = phy_access(phy_addr);

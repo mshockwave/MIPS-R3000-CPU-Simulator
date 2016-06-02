@@ -123,7 +123,7 @@ namespace cmp {
         phy_page.Ref = true;
         phy_page.Use = true;
         phy_page.Valid = true;
-        phy_page.ReferVirAddr = vir_addr - (vir_addr % PageSize);
+        phy_page.ReferVirAddr = vir_addr ;
         size_t vir_addr_offset = vir_addr - disk_data_start_addr;
         phy_page.DataOffset = vir_addr_offset - (vir_addr_offset % PageSize);
         
@@ -169,6 +169,17 @@ namespace cmp {
                     // Purge
                     tlb_entry.Valid = false;
                     tlb_entry.Use = false;
+                }
+            }
+            
+            // Purge original page entry
+            for(auto& pt_entry : PageTable){
+                if(pt_entry.first == vm_tag &&
+                   pt_entry.second.Valid){
+                    // Purge
+                    pt_entry.second.Valid = false;
+                    pt_entry.second.Use = false;
+                    break;
                 }
             }
             
