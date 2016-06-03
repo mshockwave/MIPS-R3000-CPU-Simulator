@@ -7,11 +7,10 @@
 #include "Types.h"
 #include "RawBinary.h"
 #include "Utils.h"
-#include "MemCache.hpp"
+#include "CMP.hpp"
 
 #include <vector>
-#include <unordered_map>
-#include <set>
+#include <memory>
 
 class Instruction {
 private:
@@ -32,185 +31,119 @@ public:
 
 struct Instructions{
     
-    friend class instruction_iterator;
+    friend class _instructions_iterator_;
     
+private:
+    std::vector<Instruction> mInstructions;
+    typedef std::shared_ptr<cmp::CMP> cmp_ptr_t;
+    cmp_ptr_t cmp_module;
+
 public:
-    Instructions(RawBinary& binary);
+    Instructions(RawBinary& binary,
+                 cmp::CMP::cmp_config_t instr_cmp_config);
     
-    class instruction_iterator{
-        
-        friend struct Instructions;
-        
-        uint32_t it_index;
-        Instructions* instrs_ptr;
-        uint32_t addr_boundary;
-        
-        bool isAccessible(){
-            return !(it_index < addr_boundary &&
-                     instrs_ptr != nullptr);
-        }
+    class _instructions_iterator_ {
         
     public:
-        instruction_iterator() :
-            it_index(0), addr_boundary(1),
-            instrs_ptr(nullptr){}
         
-        //Copy constructors
-        instruction_iterator(const instruction_iterator &that){
-            it_index = that.it_index;
-            addr_boundary = that.addr_boundary;
-            instrs_ptr = that.instrs_ptr;
-        }
-        instruction_iterator(instruction_iterator &that){
-            it_index = that.it_index;
-            addr_boundary = that.addr_boundary;
-            instrs_ptr = that.instrs_ptr;
+        _instructions_iterator_(cmp_ptr_t cmp_mod) :
+            cmp_module(cmp_mod),
+            vir_addr_offset(0){}
+        
+        _instructions_iterator_() :
+            vir_addr_offset(0){/*Default constructor*/}
+        
+        _instructions_iterator_(const _instructions_iterator_& that){
+            /*Copy constructor*/
+            cmp_module = that.cmp_module;
+            vir_addr_offset = that.vir_addr_offset;
         }
         
-        instruction_iterator operator+(size_t n){
-            instruction_iterator it_new(*this);
-            it_new.it_index = it_index + n;
+        _instructions_iterator_ operator+(size_t n){
+            _instructions_iterator_ it_new(*this);
+            it_new.vir_addr_offset += (n * INSTRUCTION_BYTE_WIDTH);
             return it_new;
         }
-        
-        instruction_iterator& operator+=(int step){
-            it_index += step;
+        _instructions_iterator_& operator+=(size_t n){
+            this->vir_addr_offset += (n * INSTRUCTION_BYTE_WIDTH);
             return *this;
         }
         
-        instruction_iterator& operator++(){
-            //suffix
-            it_index++;
+        _instructions_iterator_ operator-(size_t n){
+            _instructions_iterator_ it_new(*this);
+            it_new.vir_addr_offset -= (n * INSTRUCTION_BYTE_WIDTH);
+            return it_new;
+        }
+        _instructions_iterator_& operator-=(size_t n){
+            this->vir_addr_offset -= (n * INSTRUCTION_BYTE_WIDTH);
             return *this;
         }
-        instruction_iterator operator++(int){
-            //prefix
-            instruction_iterator tmp(*this);
-            it_index++;
+        
+        _instructions_iterator_& operator++(){
+            //++x
+            this->operator+=(1);
+            return *this;
+        }
+        _instructions_iterator_ operator++(int){
+            //x++
+            _instructions_iterator_ tmp(*this);
+            this->operator+=(1);
             return tmp;
         }
         
-        instruction_iterator& operator--(){
-            //suffix
-            it_index--;
+        _instructions_iterator_& operator--(){
+            //--x
+            this->operator-=(1);
             return *this;
         }
-        instruction_iterator operator--(int){
-            //prefix
-            instruction_iterator tmp(*this);
-            it_index--;
+        _instructions_iterator_ operator--(int){
+            //x--
+            _instructions_iterator_ tmp(*this);
+            this->operator-=(1);
             return tmp;
         }
         
         Instruction operator*();
         
-        bool operator==(const instruction_iterator &rhs){ return (it_index == rhs.it_index); }
-        bool operator!=(const instruction_iterator &rhs){ return !(*this == rhs); }
-        bool operator>=(const instruction_iterator &rhs){ return (it_index >= rhs.it_index); }
-        bool operator<=(const instruction_iterator &rhs){ return (it_index <= rhs.it_index); }
-        bool operator<(const instruction_iterator &rhs){ return !(*this >= rhs); }
-        bool operator>(const instruction_iterator &rhs){ return !(*this <= rhs); }
+        bool operator==(const _instructions_iterator_ &rhs){ return (vir_addr_offset == rhs.vir_addr_offset); }
+        bool operator!=(const _instructions_iterator_ &rhs){ return !(*this == rhs); }
+        bool operator>=(const _instructions_iterator_ &rhs){ return (vir_addr_offset >= rhs.vir_addr_offset); }
+        bool operator<=(const _instructions_iterator_ &rhs){ return (vir_addr_offset <= rhs.vir_addr_offset); }
+        bool operator<(const _instructions_iterator_ &rhs){ return !(*this >= rhs); }
+        bool operator>(const _instructions_iterator_ &rhs){ return !(*this <= rhs); }
         
     private:
+        cmp_ptr_t cmp_module;
+        addr_t vir_addr_offset;
         
+        //inline bool is_cmp_valid(){ return cmp_module.get() != nullptr; }
     };
-    
+
     //typedef std::vector<Instruction>::iterator iterator;
-    typedef instruction_iterator iterator;
+    typedef _instructions_iterator_ iterator;
 
-    unsigned long length(){ return instruction_length; }
+    unsigned long length(){ return instr_length; }
 
-    iterator begin(){
-        iterator it;
-        it.addr_boundary =  instruction_length;
-        return it;
-    }
+    iterator begin(){ return _instructions_iterator_(cmp_module); }
     iterator end(){
-        iterator it;
-        it.it_index = instruction_length;
-        it.addr_boundary =  instruction_length;
-        return it;
+        _instructions_iterator_ it_new(cmp_module);
+        it_new += instr_length; // Pass the tail
+        return it_new;
+    }
+    
+    inline cmp::CMP::profile_result_t GetCacheProfileData() const{
+        return cmp_module->GetCacheProfileData();
+    }
+    inline cmp::CMP::profile_result_t GetTLBProfileData() const{
+        return cmp_module->GetTLBProfileData();
+    }
+    inline cmp::CMP::profile_result_t GetPageProfileData() const{
+        return cmp_module->GetPageProfileData();
     }
     
 private:
-    //std::vector<Instruction> mInstructions;
-    addr_t instruction_length;
-    addr_t instruction_start_addr;
-    size_t instr_index_width,
-            instr_tag_width,
-            instr_offset_width;
-    RawBinary& raw_binary;
+    uint32_t instr_length;
     
-    /*Caceh and page table of Instruction part*/
-    std::vector<memcache::TLBEntry> TLB;
-    std::unordered_map<addr_t, memcache::PageTableEntry> VirPageTable;
-    std::vector<memcache::PhyPageEntry> PhyPages;
-    typedef memcache::CacheEntry<> cache_entry_type;
-    std::unordered_map<addr_t, std::vector< cache_entry_type > > Cache;
-    
-    uint32_t tlb_length(){
-        return static_cast<uint32_t>(instruction_length >> 2); // 1/4
-    }
-    
-    void tlb_insert(const memcache::TLBEntry& entry){
-        // Find empty slot
-        // And reset according to LRU if needed
-        int32_t aval_index = -1;
-        uint32_t i;
-        bool all_used = true;
-        for(i = 0; i < TLB.size(); i++){
-            const auto& element = TLB[i];
-            if(aval_index < 0 && !element.Use){
-                aval_index = i;
-            }else if(!element.Use){
-                all_used = false;
-            }
-        }
-        
-        if(all_used){
-            for(i = 0; i < TLB.size(); i++){
-                TLB[i].Use = false;
-            }
-        }
-        
-        if(aval_index >= 0){
-            TLB[aval_index] = entry;
-            TLB[aval_index].Use = true;
-        }
-    }
-    
-    addr_t phy_page_insert(const memcache::PhyPageEntry& entry){
-        // Find empty slot
-        // And reset according to LRU if needed
-        int32_t aval_index = -1;
-        uint32_t i;
-        bool all_used = true;
-        for(i = 0; i < PhyPages.size(); i++){
-            const auto& element = PhyPages[i];
-            if(aval_index < 0 && !element.Use){
-                aval_index = i;
-            }else if(!element.Use){
-                all_used = false;
-            }
-        }
-        
-        if(all_used){
-            for(i = 0; i < PhyPages.size(); i++){
-                PhyPages[i].Use = false;
-            }
-        }
-        
-        if(aval_index >= 0){
-            // TODO: Invalid cache and page table
-            
-            PhyPages[aval_index] = entry;
-            PhyPages[aval_index].Use = true;
-            
-            return static_cast<addr_t>(aval_index) * memcache::instr::PageSize;
-        }
-        
-        return 0;
-    }
 };
 
 #endif //ARCHIHW1_INSTRUCTION_H

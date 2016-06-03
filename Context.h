@@ -3,15 +3,17 @@
 #define ARCHIHW1_CONTEXT_H
 
 #include <iomanip>
+#include <memory>
 
 #include "Types.h"
 #include "RawBinary.h"
 #include "Utils.h"
+#include "CMP.hpp"
 
 class Context {
 
-#define CHECK_MEMORY_BOUND(offset) \
-    if((offset) > mDataSize && (offset) < SP)
+#define CHECK_MEMORY_BOUND(offset, size) \
+    if((offset) + (size) > MEMORY_LENGTH)
 
 public:
     typedef unsigned long CounterType;
@@ -29,6 +31,8 @@ private:
     //Memory
     addr_t mDataSize;
     byte_t mMemory[MEMORY_LENGTH];
+    //std::shared_ptr<cmp::CMP> MemoryCMP;
+    std::unique_ptr<cmp::CMP> MemoryCMP;
 
     CounterType mCycleCounter;
 
@@ -47,21 +51,22 @@ public:
     reg_t &ZERO, &AT, &SP, &FP, &RA;
 
     Context(RawBinary& rawBinary,
+            cmp::CMP::cmp_config_t mem_cmp_config,
             OutputStream& snapshotStream, OutputStream& errorStream) :
-            /*Registers*/
-            PC(0),
-            ZERO(Registers[0]),
-            AT(Registers[1]),
-            SP(Registers[29]),
-            FP(Registers[30]),
-            RA(Registers[31]),
-            /*Memory*/
-            mDataSize(0),
-            /*Cycle counter*/
-            mCycleCounter(0),
-            /*Streams*/
-            mSnapShotStream(snapshotStream), mErrorStream(errorStream),
-            mInstrCount(0), mInstrEndAddr(0){
+    /*Registers*/
+    PC(0),
+    ZERO(Registers[0]),
+    AT(Registers[1]),
+    SP(Registers[29]),
+    FP(Registers[30]),
+    RA(Registers[31]),
+    /*Memory*/
+    mDataSize(0),
+    /*Cycle counter*/
+    mCycleCounter(0),
+    /*Streams*/
+    mSnapShotStream(snapshotStream), mErrorStream(errorStream),
+    mInstrCount(0), mInstrEndAddr(0){
         //Zero registers
         for(int i = 0; i < REGISTER_COUNT; i++){
             Registers[i] = (byte_t)0;
@@ -76,6 +81,20 @@ public:
             mMemory[i] = (byte_t)0;
         }
         loadMemory(rawBinary);
+                
+        // Init CMP
+        /*
+        MemoryCMP = std::make_shared<cmp::CMP>(mem_cmp_config,
+                                               0,
+                                               mMemory,
+                                               MEMORY_LENGTH);
+         */
+        std::unique_ptr<cmp::CMP> mem_cmp(new cmp::CMP(mem_cmp_config,
+                                                       0,
+                                                       mMemory,
+                                                       MEMORY_LENGTH));
+        MemoryCMP = std::move(mem_cmp);
+        
     }
 
     addr_t GetInstrStartAddress() const{ return mInstrStartAddr; }
@@ -117,11 +136,13 @@ public:
         //Check alignment
         if(offset % WORD_WIDTH != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        CHECK_MEMORY_BOUND(offset) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset, 4) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if(!(e == Error::NONE)) throw e;
 
-        return *((word_t*)(mMemory + offset));
+        byte_t* mem_ptr = MemoryCMP->Access(offset);
+        
+        return *((word_t*)mem_ptr);
     }
     half_w_t& getMemoryHalfWord(addr_t offset){
         Error e = Error::NONE;
@@ -129,17 +150,21 @@ public:
         //Check alignment
         if(offset % (WORD_WIDTH >> 1) != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        CHECK_MEMORY_BOUND(offset) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset, 2) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
         if(!(e == Error::NONE)) throw e;
+        
+        byte_t* mem_ptr = MemoryCMP->Access(offset);
 
-        return *((half_w_t*)(mMemory + offset));
+        return *((half_w_t*)mem_ptr);
     }
     byte_t& getMemoryByte(addr_t offset){
         //Check boundary
-        CHECK_MEMORY_BOUND(offset) throw Error::MEMORY_ADDR_OVERFLOW;
+        CHECK_MEMORY_BOUND(offset, 1) throw Error::MEMORY_ADDR_OVERFLOW;
+        
+        byte_t* mem_ptr = MemoryCMP->Access(offset);
 
-        return *((byte_t*)(mMemory + offset));
+        return *((byte_t*)mem_ptr);
     }
 
     CounterType IncCycleCounter(){ return ++mCycleCounter; }
@@ -154,6 +179,16 @@ public:
      * Append error
      * */
     void putError(Error& error);
+    
+    inline cmp::CMP::profile_result_t GetCacheProfileData() const{
+        return MemoryCMP->GetCacheProfileData();
+    }
+    inline cmp::CMP::profile_result_t GetTLBProfileData() const{
+        return MemoryCMP->GetTLBProfileData();
+    }
+    inline cmp::CMP::profile_result_t GetPageProfileData() const{
+        return MemoryCMP->GetPageProfileData();
+    }
 
 };
 
