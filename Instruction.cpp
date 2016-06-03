@@ -1,9 +1,6 @@
-
 #include "Instruction.h"
 
 #include <cstring>
-#include <cmath>
-#include <memory>
 
 extern "C"{
 #include <sys/time.h>
@@ -14,7 +11,7 @@ inline void Instruction::convert() {
     for(int i = 0; i < INSTRUCTION_BYTE_WIDTH; i++){
         this->mInstruction[i] = this->mRawInstruction[INSTRUCTION_BYTE_WIDTH - 1 - i];
     }
-
+    
     //Convert to 32-bits uint for bits operations
     for(int i = 0; i < INSTRUCTION_BYTE_WIDTH; i++){
         uint32_t b = static_cast<uint32_t>(this->mRawInstruction[i]);
@@ -23,7 +20,7 @@ inline void Instruction::convert() {
 }
 
 Instruction::Instruction(const byte_t *rawInstruction) :
-        mBitsInstruction(0){
+mBitsInstruction(0){
     memcpy(this->mRawInstruction, rawInstruction, sizeof(byte_t) * INSTRUCTION_BYTE_WIDTH);
     convert();
 }
@@ -31,36 +28,18 @@ Instruction::Instruction(const byte_t *rawInstruction) :
 /*struct Instructions*/
 Instructions::Instructions(RawBinary &binary,
                            cmp::CMP::cmp_config_t instr_cmp_config) : instr_length(U32_0) {
-
-        //Hint: Do not use auto here
-        // For the sake of preventing unexpected memory release
-        RawBinary::raw_container_t& instr_bytes = binary.getInstructions();
-        
-        //TODO: assert binary.size() % 4 == 0
-        //Load instruction length
-        load2Register<4>(instr_bytes, instruction_length);
-        // Load start address
-        load2Register(instr_bytes, instruction_start_addr);
-        
-        // Init TLB
-        TLB.resize(tlb_length(), memcache::TLBEntry());
-        // Init physical memory
-        PhyPages.resize(memcache::instr::MemSize / memcache::instr::PageSize,
-                        memcache::PhyPageEntry());
-        // Init virtual address properties
-        instr_offset_width = static_cast<size_t>(::log2l(memcache::instr::BlockSize));
-        size_t block_amount = static_cast<size_t>(memcache::instr::CacheSize / memcache::instr::BlockSize);
-        size_t cache_depth = static_cast<size_t>(block_amount / memcache::instr::SetAssoc);
-        instr_index_width = static_cast<size_t>(::log2l(cache_depth));
-        instr_tag_width = (INSTRUCTION_BYTE_WIDTH << 3) - (instr_offset_width + instr_index_width);
-
+    
+    //Hint: Do not use auto here
+    // For the sake of preventing unexpected memory release
+    RawBinary::raw_container_t& instr_bytes = binary.getInstructions();
+    
     //TODO: assert binary.size() % 4 == 0
     //Load instruction length
     load2Register<4>(instr_bytes, instr_length);
     
     addr_t start_addr = U32_0;
     load2Register(instr_bytes, start_addr);
-
+    
     auto* bytesArray = instr_bytes.content();
     
     /*Init CMP module*/
@@ -68,16 +47,16 @@ Instructions::Instructions(RawBinary &binary,
                                             start_addr,
                                             bytesArray + 8, // Skip first eight bytes of metadata
                                             1024/*Fix size, 1K*/);
-
+    
     /*The first eight bytes are PC address and instruction size, skip*/
     /*
-    uint32_t i, j;
-    for(i = 0, j = 8; i < instructionLength; i++, j += INSTRUCTION_BYTE_WIDTH){
-        Instruction instruction(bytesArray + j);
-        mInstructions.push_back(instruction);
-    }
+     uint32_t i, j;
+     for(i = 0, j = 8; i < instructionLength; i++, j += INSTRUCTION_BYTE_WIDTH){
+     Instruction instruction(bytesArray + j);
+     mInstructions.push_back(instruction);
+     }
      */
-
+    
     DEBUG_BLOCK {
         Log::D("Instructions Read") << "End Time(ms): " << getCurrentTimeMs() << std::endl;
     };
