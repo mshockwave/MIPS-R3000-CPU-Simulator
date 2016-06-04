@@ -264,8 +264,8 @@ namespace task{
 
             uint8_t shamt = RInstr::GetShAmt(instruction->GetBitsInstruction());
             rd = rt >> shamt;
-            uint32_t mask = createBitMask( ((uint8_t)32) - shamt );
-            rd &= mask;
+            //uint32_t mask = createBitMask( ((uint8_t)32) - shamt );
+            //rd &= mask;
 
             context->AdvancePC();
 
