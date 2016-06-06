@@ -72,7 +72,7 @@ namespace cmp {
         
         byte_t* Access(addr_t vir_addr){
             
-            size_t vir_addr_offset = vir_addr % PageSize;
+            size_t vir_addr_offset = (vir_addr - disk_data_start_addr) % PageSize;
             
             auto tlb_result = tlb_access(vir_addr);
             if(std::get<1>(tlb_result)){
@@ -153,7 +153,7 @@ namespace cmp {
         }
         
         inline addr_t pt_tag(addr_t vir_addr){
-            return vir_addr / PageSize;
+            return (vir_addr - disk_data_start_addr) / PageSize;
         }
         
         inline addr_t cache_block_offset(addr_t phy_addr){
