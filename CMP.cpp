@@ -244,18 +244,30 @@ namespace cmp {
         auto cache_tag_ = cache_tag(phy_addr);
         
         auto& cache_sets = Cache[cache_index_];
-        for(auto& cache_set : cache_sets){
+        ssize_t index = -1;
+        bool full = true;
+        for(size_t i = 0; i < cache_sets.size(); i++){
+            auto& cache_set = cache_sets[i];
             if(cache_set.Tag == cache_tag_ &&
                cache_set.Valid){
-                cache_set.Use = true;
                 
-                //cache_hit_count++;
+                index = i;
                 
-                return std::make_tuple(cache_set.DataOffset, true);
+            }else if(!cache_set.Use){
+                full = false;
+            }
+        }
+        if(index < 0) return std::make_tuple(0, false);
+        
+        if(full){
+            for(auto& set : cache_sets){
+                set.Use = false;
             }
         }
         
-        return std::make_tuple(0, false);
+        auto& hit_set = cache_sets[index];
+        hit_set.Use = true;
+        return std::make_tuple(hit_set.DataOffset, true);
     }
     
     void CMP::cache_miss(addr_t phy_addr){
