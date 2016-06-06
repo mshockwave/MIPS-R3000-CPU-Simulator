@@ -300,7 +300,10 @@ namespace task{
 
             reg_t pend_rs = rs;
 
-            rt = rs + signExtend16(imm);
+            //rt = rs + signExtend16(imm);
+            int32_t s_rs = static_cast<int32_t>(rs);
+            int16_t s_imm = static_cast<int16_t>(imm);
+            rt = static_cast<reg_t>(s_rs + s_imm);
             if(isSumOverflow(pend_rs, signExtend16(imm), rt)){
                 context->putError(Error::NUMBER_OVERFLOW);
             }
@@ -336,7 +339,9 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                word_t v = reverse32ByteOrder(context->getMemoryWord(rs + imm));
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                word_t v = reverse32ByteOrder(context->getMemoryWord(s_rs + s_imm));
                 rt = static_cast<reg_t>(v);
 
                 context->AdvancePC();
@@ -358,7 +363,9 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(rs + imm));
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(s_rs + s_imm));
                 rt = static_cast<reg_t>(signExtend16(v));
 
                 context->AdvancePC();
@@ -380,7 +387,9 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(rs + imm));
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(s_rs + s_imm));
                 rt = static_cast<reg_t>(v);
 
                 context->AdvancePC();
@@ -402,7 +411,9 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                byte_t v = context->getMemoryByte(rs + imm);
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                byte_t v = context->getMemoryByte(s_rs + s_imm);
                 rt = static_cast<reg_t>(signExtend8(v));
 
                 context->AdvancePC();
@@ -424,7 +435,9 @@ namespace task{
             ASSERT_DEST_REG_NOT_ZERO(rt)
 
             try{
-                byte_t v = context->getMemoryByte(rs + imm);
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                byte_t v = context->getMemoryByte(s_rs + s_imm);
                 rt = static_cast<reg_t>(v);
 
                 context->AdvancePC();
@@ -444,7 +457,9 @@ namespace task{
             }
 
             try{
-                word_t& var = context->getMemoryWord(rs + imm);
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                word_t& var = context->getMemoryWord(s_rs + s_imm);
                 var = reverse32ByteOrder(rt);
 
                 context->AdvancePC();
@@ -464,7 +479,9 @@ namespace task{
             }
 
             try{
-                half_w_t& var = context->getMemoryHalfWord(rs + imm);
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                half_w_t& var = context->getMemoryHalfWord(s_rs + s_imm);
                 var = reverse16ByteOrder(static_cast<half_w_t>(rt & 0x0000FFFF));
 
                 context->AdvancePC();
@@ -484,7 +501,9 @@ namespace task{
             }
 
             try{
-                byte_t& var = context->getMemoryByte(rs + imm);
+                int16_t s_imm = static_cast<int16_t>(imm);
+                int32_t s_rs = static_cast<int32_t>(rs);
+                byte_t& var = context->getMemoryByte(s_rs + s_imm);
                 var = static_cast<byte_t>(rt & 0x000000FF);
 
                 context->AdvancePC();

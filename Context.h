@@ -131,28 +131,28 @@ public:
     //mMemory operations
     //const byte_t* getMemoryR() { return const_cast<const byte_t*>(mMemory); }
     word_t& getMemoryWord(addr_t offset){
-        Error e = Error::NONE;
+        //Error e = Error::NONE;
 
         //Check alignment
-        if(offset % WORD_WIDTH != 0) e = e + Error::DATA_MISALIGNED;
+        //if(offset % WORD_WIDTH != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        CHECK_MEMORY_BOUND(offset, 4) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        //CHECK_MEMORY_BOUND(offset, 4) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
-        if(!(e == Error::NONE)) throw e;
+        //if(!(e == Error::NONE)) throw e;
 
         byte_t* mem_ptr = MemoryCMP->Access(offset);
         
         return *((word_t*)mem_ptr);
     }
     half_w_t& getMemoryHalfWord(addr_t offset){
-        Error e = Error::NONE;
+        //Error e = Error::NONE;
 
         //Check alignment
-        if(offset % (WORD_WIDTH >> 1) != 0) e = e + Error::DATA_MISALIGNED;
+        //if(offset % (WORD_WIDTH >> 1) != 0) e = e + Error::DATA_MISALIGNED;
         //Check boundary
-        CHECK_MEMORY_BOUND(offset, 2) e = e + Error::MEMORY_ADDR_OVERFLOW;
+        //CHECK_MEMORY_BOUND(offset, 2) e = e + Error::MEMORY_ADDR_OVERFLOW;
 
-        if(!(e == Error::NONE)) throw e;
+        //if(!(e == Error::NONE)) throw e;
         
         byte_t* mem_ptr = MemoryCMP->Access(offset);
 
@@ -160,7 +160,7 @@ public:
     }
     byte_t& getMemoryByte(addr_t offset){
         //Check boundary
-        CHECK_MEMORY_BOUND(offset, 1) throw Error::MEMORY_ADDR_OVERFLOW;
+        //CHECK_MEMORY_BOUND(offset, 1) throw Error::MEMORY_ADDR_OVERFLOW;
         
         byte_t* mem_ptr = MemoryCMP->Access(offset);
 
