@@ -62,6 +62,10 @@ Instructions::Instructions(RawBinary &binary,
     };
 }
 
+void Instructions::HandleNOP(){
+    cmp_module->IncreaseAllProfiles();
+}
+
 /*Instructions iterator*/
 Instruction Instructions::_instructions_iterator_::operator*(){
     // TODO: Verify whether offset valid

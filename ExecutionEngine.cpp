@@ -33,9 +33,12 @@ void ExecutionEngine::Start() {
 
         if(pc < mContext->GetInstrStartAddress()){
             //Execute NOP until
+            mContext->AdvancePC();
             mContext->DumpSnapshot();
             mContext->IncCycleCounter();
-            mContext->AdvancePC();
+            
+            mInstructions.HandleNOP();
+            
             continue;
         }
 

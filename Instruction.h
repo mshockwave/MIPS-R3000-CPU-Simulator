@@ -131,6 +131,8 @@ public:
         return it_new;
     }
     
+    void HandleNOP();
+    
     inline cmp::CMP::profile_result_t GetCacheProfileData() const{
         return cmp_module->GetCacheProfileData();
     }

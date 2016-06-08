@@ -123,6 +123,12 @@ namespace cmp {
             return std::make_tuple(page_hit_count, page_fault_count);
         }
         
+        inline void IncreaseAllProfiles(){
+            cache_miss_count++;
+            tlb_miss_count++;
+            page_fault_count++;
+        }
+        
     private:
         size_t BlockSize;
         size_t PageSize;
