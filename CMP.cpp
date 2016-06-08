@@ -338,10 +338,11 @@ namespace cmp {
         
         size_t phy_page_index = phy_addr / PageSize;
         size_t phy_page_data_offset = PhyPages[phy_page_index].DataOffset;
-        size_t phy_addr_offset = phy_addr % PageSize;
+        size_t phy_addr_offset = phy_addr % PageSize; // Offset within a page
+        size_t cache_block_index = phy_addr_offset / BlockSize;
         
         CacheEntry new_cache_entry;
-        new_cache_entry.DataOffset = phy_page_data_offset + phy_addr_offset;
+        new_cache_entry.DataOffset = phy_page_data_offset + (cache_block_index * BlockSize);
         new_cache_entry.Tag = cache_tag_;
         new_cache_entry.Index = cache_index_;
         new_cache_entry.Valid = true;

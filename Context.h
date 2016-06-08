@@ -2,6 +2,10 @@
 #ifndef ARCHIHW1_CONTEXT_H
 #define ARCHIHW1_CONTEXT_H
 
+extern "C"{
+#include <unistd.h>
+}
+
 #include <iomanip>
 #include <memory>
 
@@ -167,7 +171,14 @@ public:
         return *((byte_t*)mem_ptr);
     }
 
-    CounterType IncCycleCounter(){ return ++mCycleCounter; }
+    CounterType IncCycleCounter(){
+        if((mCycleCounter++) >= 500000){
+            Log::E("Context") << "Over 500000 cycle, abort" << std::endl;
+            ::exit(1);
+        }
+        
+        return mCycleCounter;
+    }
     CounterType GetCycleCounter(){ return mCycleCounter; }
 
     /*
