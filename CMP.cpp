@@ -47,21 +47,34 @@ namespace cmp {
     std::tuple<addr_t,bool> CMP::tlb_access(addr_t vir_addr){
         
         auto vm_tag = pt_tag(vir_addr);
-        bool found = false;
         addr_t phy_addr = 0;
-        for(auto& tlb_entry : TLB){
+        ssize_t index = -1;
+        bool full = true;
+        for(size_t i = 0; i < TLB.size(); i++){
+            const auto& tlb_entry = TLB[i];
             if(tlb_entry.Tag == vm_tag &&
                tlb_entry.Valid){
-                found = true;
-                tlb_entry.Use = true;
-                phy_addr = tlb_entry.PhyAddr;
-                break;
+                index = i;
+            }else if(!tlb_entry.Use){
+                full = false;
             }
         }
         
-        //if(found) tlb_hit_count++;
+        if(full){
+            for(auto& tlb_entry : TLB){
+                tlb_entry.Use = false;
+            }
+        }
         
-        return std::make_tuple(phy_addr,found);
+        if(index < 0) return std::make_tuple(phy_addr, false);
+        
+        auto& tlb_entry = TLB[index];
+        phy_addr = tlb_entry.PhyAddr;
+        tlb_entry.Use = true;
+        
+        //flip_phy_pages_mru(phy_addr);
+        
+        return std::make_tuple(phy_addr,true);
     }
     
     /*
@@ -76,7 +89,8 @@ namespace cmp {
         if(!pt_entry.Valid) return false;
         
         //page_hit_count++;
-        pt_entry.Use = true;
+        //pt_entry.Use = true;
+        flip_phy_pages_mru(pt_entry.PhyAddr);
         
         // TLB insert
         ssize_t index = -1;
@@ -319,6 +333,8 @@ namespace cmp {
         }
         
         if(index < 0) index = 0;
+        
+        //flip_phy_pages_mru(phy_addr);
         
         size_t phy_page_index = phy_addr / PageSize;
         size_t phy_page_data_offset = PhyPages[phy_page_index].DataOffset;

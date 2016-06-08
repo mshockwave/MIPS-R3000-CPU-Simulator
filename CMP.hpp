@@ -168,6 +168,25 @@ namespace cmp {
             return tag_and_index / cache_length();
         }
         
+        inline void flip_phy_pages_mru(addr_t phy_addr){
+            
+            size_t phy_page_index = (phy_addr / PageSize);
+            bool full = true;
+            for(size_t i = 0; i < PhyPages.size(); i++){
+                const auto& phy_page = PhyPages[i];
+                if(i != phy_page_index &&
+                   !phy_page.Use){
+                    full = false;
+                }
+            }
+            if(full){
+                for(auto& phy_page : PhyPages){
+                    phy_page.Use = false;
+                }
+            }
+            PhyPages[phy_page_index].Use = true;
+        }
+        
         std::tuple<addr_t,bool> tlb_access(addr_t vir_addr);
         bool tlb_miss(addr_t vir_addr);
         
