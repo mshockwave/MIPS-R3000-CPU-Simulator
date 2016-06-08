@@ -336,12 +336,13 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("lw")
             }
 
-            ASSERT_DEST_REG_NOT_ZERO(rt)
-
             try{
                 int16_t s_imm = static_cast<int16_t>(imm);
                 int32_t s_rs = static_cast<int32_t>(rs);
                 word_t v = reverse32ByteOrder(context->getMemoryWord(s_rs + s_imm));
+                
+                ASSERT_DEST_REG_NOT_ZERO(rt)
+                
                 rt = static_cast<reg_t>(v);
 
                 context->AdvancePC();
@@ -360,12 +361,13 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("lh")
             }
 
-            ASSERT_DEST_REG_NOT_ZERO(rt)
-
             try{
                 int16_t s_imm = static_cast<int16_t>(imm);
                 int32_t s_rs = static_cast<int32_t>(rs);
                 half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(s_rs + s_imm));
+                
+                ASSERT_DEST_REG_NOT_ZERO(rt)
+                
                 rt = static_cast<reg_t>(signExtend16(v));
 
                 context->AdvancePC();
@@ -384,12 +386,13 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("lhu")
             }
 
-            ASSERT_DEST_REG_NOT_ZERO(rt)
-
             try{
                 int16_t s_imm = static_cast<int16_t>(imm);
                 int32_t s_rs = static_cast<int32_t>(rs);
                 half_w_t v = reverse16ByteOrder(context->getMemoryHalfWord(s_rs + s_imm));
+                
+                ASSERT_DEST_REG_NOT_ZERO(rt)
+                
                 rt = static_cast<reg_t>(v);
 
                 context->AdvancePC();
@@ -408,12 +411,13 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("lb")
             }
 
-            ASSERT_DEST_REG_NOT_ZERO(rt)
-
             try{
                 int16_t s_imm = static_cast<int16_t>(imm);
                 int32_t s_rs = static_cast<int32_t>(rs);
                 byte_t v = context->getMemoryByte(s_rs + s_imm);
+                
+                ASSERT_DEST_REG_NOT_ZERO(rt)
+                
                 rt = static_cast<reg_t>(signExtend8(v));
 
                 context->AdvancePC();
@@ -432,12 +436,13 @@ namespace task{
                 PRINT_I_INSTR_DEBUG("lbu")
             }
 
-            ASSERT_DEST_REG_NOT_ZERO(rt)
-
             try{
                 int16_t s_imm = static_cast<int16_t>(imm);
                 int32_t s_rs = static_cast<int32_t>(rs);
                 byte_t v = context->getMemoryByte(s_rs + s_imm);
+                
+                ASSERT_DEST_REG_NOT_ZERO(rt)
+                
                 rt = static_cast<reg_t>(v);
 
                 context->AdvancePC();
