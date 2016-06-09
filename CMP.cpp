@@ -14,6 +14,7 @@ namespace cmp {
     MemSize(16),
     CacheSize(16),
     SetAssoc(1),
+    LruSampleCounter(0),
     /*Profiling*/
     tlb_hit_count(0), tlb_miss_count(0),
     cache_hit_count(0), cache_miss_count(0),
@@ -48,33 +49,19 @@ namespace cmp {
         
         auto vm_tag = pt_tag(vir_addr);
         addr_t phy_addr = 0;
-        ssize_t index = -1;
-        bool full = true;
-        for(size_t i = 0; i < TLB.size(); i++){
-            const auto& tlb_entry = TLB[i];
+        
+        for(auto& tlb_entry : TLB){
             if(tlb_entry.Tag == vm_tag &&
                tlb_entry.Valid){
-                index = i;
-            }else if(!tlb_entry.Use){
-                full = false;
+                
+                tlb_entry.LruCounter = LruSampleCounter;
+                phy_addr = tlb_entry.PhyAddr;
+                
+                return std::make_tuple(phy_addr,true);
             }
         }
         
-        if(full){
-            for(auto& tlb_entry : TLB){
-                tlb_entry.Use = false;
-            }
-        }
-        
-        if(index < 0) return std::make_tuple(phy_addr, false);
-        
-        auto& tlb_entry = TLB[index];
-        phy_addr = tlb_entry.PhyAddr;
-        tlb_entry.Use = true;
-        
-        //flip_phy_pages_mru(phy_addr);
-        
-        return std::make_tuple(phy_addr,true);
+        return std::make_tuple(phy_addr, false);
     }
     
     /*
@@ -102,6 +89,19 @@ namespace cmp {
             }
         }
         
+        if(index < 0){
+            // Pick according to LRU
+            lru_counter_t min_lru_counter = LruSampleCounter + 1;
+            for(size_t i = 0; i < TLB.size(); i++){
+                const auto& tlb_entry = TLB[i];
+                if(tlb_entry.LruCounter < min_lru_counter){
+                    index = i;
+                    min_lru_counter = tlb_entry.LruCounter;
+                }
+            }
+        }
+        
+        /*
         bool full = true;
         if(index < 0){ // Use LRU to pick next
             for(size_t i = 0; i < TLB.size(); i++){
@@ -130,10 +130,12 @@ namespace cmp {
                 tlb_entry.Use = false;
             }
         }
+         */
         
         if(index < 0) index = 0;
         TLB[index] = pt_entry;
-        TLB[index].Use = true;
+        //TLB[index].Use = true;
+        TLB[index].LruCounter = LruSampleCounter;
         TLB[index].Valid = true;
         
         return true;
@@ -145,7 +147,8 @@ namespace cmp {
         
         PhyPage phy_page;
         phy_page.Ref = true;
-        phy_page.Use = true;
+        //phy_page.Use = true;
+        phy_page.LruCounter = LruSampleCounter;
         phy_page.Valid = true;
         phy_page.ReferVirAddr = vir_addr ;
         size_t vir_addr_offset = vir_addr - disk_data_start_addr;
@@ -162,6 +165,7 @@ namespace cmp {
             }
         }
         
+        /*
         bool full = true;
         if(index < 0){ // Use LRU to pick next page
             for(size_t i = 0; i < PhyPages.size(); i++){
@@ -190,6 +194,20 @@ namespace cmp {
                 phy_entry.Use = false;
             }
         }
+         */
+        
+        if(index < 0){
+            // Use LRU to pick next page
+            auto min_lru_counter = LruSampleCounter + 1;
+            for(size_t i = 0; i < PhyPages.size(); i++){
+                const auto& phy_entry = PhyPages[i];
+                if(phy_entry.LruCounter < min_lru_counter){
+                    index = i;
+                    min_lru_counter = phy_entry.LruCounter;
+                }
+            }
+            
+        }
         
         if(index < 0) index = 0;
         
@@ -202,7 +220,7 @@ namespace cmp {
                    tlb_entry.Valid){
                     // Purge
                     tlb_entry.Valid = false;
-                    tlb_entry.Use = false;
+                    //tlb_entry.Use = false;
                 }
             }
             
@@ -212,7 +230,7 @@ namespace cmp {
                    pt_entry.second.Valid){
                     // Purge
                     pt_entry.second.Valid = false;
-                    pt_entry.second.Use = false;
+                    //pt_entry.second.Use = false;
                     break;
                 }
             }
@@ -239,7 +257,8 @@ namespace cmp {
         }
         
         PhyPages[index] = phy_page;
-        PhyPages[index].Use = true;
+        //PhyPages[index].Use = true;
+        PhyPages[index].LruCounter = LruSampleCounter;
         
         // Put result back to page table
         PageEntry pt_entry;

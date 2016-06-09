@@ -10,10 +10,13 @@
 
 namespace cmp {
     
+    typedef unsigned long lru_counter_t;
+    
     struct PhyPage {
         
         size_t DataOffset;
-        bool Use;
+        //bool Use;
+        lru_counter_t LruCounter;
         bool Valid;
         
         bool Ref;
@@ -22,7 +25,7 @@ namespace cmp {
         PhyPage() :
         DataOffset(0),
         Ref(false), ReferVirAddr(0),
-        Use(false),Valid(false){}
+        /*Use(false),*/Valid(false), LruCounter(0){}
     };
     
     struct PageEntry{
@@ -30,10 +33,12 @@ namespace cmp {
         addr_t Tag;
         addr_t PhyAddr;
         bool Valid;
-        bool Use;
+        //bool Use;
+        lru_counter_t LruCounter;
         
         PageEntry() :
-        Valid(false), Use(false),
+        Valid(false), /*Use(false),*/
+        LruCounter(0),
         Tag(0), PhyAddr(0){}
     };
     
@@ -71,6 +76,8 @@ namespace cmp {
             byte_t* data, size_t data_size);
         
         byte_t* Access(addr_t vir_addr){
+            
+            LruSampleCounter++;
             
             size_t vir_addr_offset = (vir_addr - disk_data_start_addr) % PageSize;
             
@@ -145,6 +152,8 @@ namespace cmp {
         std::vector<PhyPage> PhyPages;
         std::map<addr_t, std::vector<CacheEntry> > Cache;
         
+        lru_counter_t LruSampleCounter;
+        
         // Profiling
         profile_count_t tlb_miss_count, tlb_hit_count;
         profile_count_t cache_miss_count, cache_hit_count;
@@ -177,6 +186,7 @@ namespace cmp {
         inline void flip_phy_pages_mru(addr_t phy_addr){
             
             size_t phy_page_index = (phy_addr / PageSize);
+            /*
             bool full = true;
             for(size_t i = 0; i < PhyPages.size(); i++){
                 const auto& phy_page = PhyPages[i];
@@ -190,7 +200,10 @@ namespace cmp {
                     phy_page.Use = false;
                 }
             }
-            PhyPages[phy_page_index].Use = true;
+             */
+            
+            //PhyPages[phy_page_index].Use = true;
+            PhyPages[phy_page_index].LruCounter = LruSampleCounter;
         }
         
         std::tuple<addr_t,bool> tlb_access(addr_t vir_addr);
