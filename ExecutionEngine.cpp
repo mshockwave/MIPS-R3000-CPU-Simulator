@@ -3,13 +3,22 @@
 
 task_id_t ExecutionEngine::dispatchTask(Instruction *instruction, task_id_t taskId){
     //Last catch
-    if(UNLIKELY(taskId == task::OP_HALT || taskId == task::TASK_BAIL)) return taskId;
+    if(UNLIKELY(taskId == task::TASK_BAIL)) return taskId;
+    
+    if(taskId == task::OP_HALT){
+        if((++halt_counter) >= 1){
+            // End Execution
+            return task::OP_HALT;
+        }else{
+            mContext->AdvancePC();
+            mContext->IncCycleCounter();
+            return task::TASK_END;
+        }
+    }
 
     task_id_t nextId = (task::TasksTable[taskId])(mContext, instruction);
 
     if(nextId == task::OP_HALT || nextId == task::TASK_BAIL){
-        //Do not dump snapshot for TASK_BAIL
-        if(nextId == task::OP_HALT) mContext->DumpSnapshot();
         return nextId;
     }
 

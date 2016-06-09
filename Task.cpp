@@ -718,8 +718,8 @@ namespace task{
         };
 
         TasksTable[OP_HALT] = TASK_HANDLER() {
-            //Unlikely to reach here
-            return OP_HALT;
+            
+            return TASK_END;
         };
     }
 

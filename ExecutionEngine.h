@@ -10,6 +10,8 @@ class ExecutionEngine {
 private:
     Context* mContext;
     Instructions& mInstructions;
+    
+    size_t halt_counter;
 
     void init(){
         task::InitInstructionMap();
@@ -27,7 +29,8 @@ public:
 
     ExecutionEngine(Context& ctx, Instructions& instructions) :
             mContext(&ctx),
-            mInstructions(instructions) {
+            mInstructions(instructions),
+            halt_counter(0){
         ctx.setInstructionCount(static_cast<uint32_t>(mInstructions.length()));
         init();
     }
