@@ -101,37 +101,6 @@ namespace cmp {
             }
         }
         
-        /*
-        bool full = true;
-        if(index < 0){ // Use LRU to pick next
-            for(size_t i = 0; i < TLB.size(); i++){
-                const auto& tlb_entry = TLB[i];
-                if(!tlb_entry.Use &&
-                   index < 0){
-                    index = i;
-                }else if(!tlb_entry.Use){
-                    full = false;
-                }
-            }
-            
-        }else{
-            for(size_t i = 0; i < TLB.size(); i++){
-                if(i == index) continue;
-                
-                if(!TLB[i].Use){
-                    full = false;
-                    break;
-                }
-            }
-        }
-        
-        if(full){
-            for(auto& tlb_entry : TLB){
-                tlb_entry.Use = false;
-            }
-        }
-         */
-        
         if(index < 0) index = 0;
         TLB[index] = pt_entry;
         //TLB[index].Use = true;
@@ -164,37 +133,6 @@ namespace cmp {
                 break;
             }
         }
-        
-        /*
-        bool full = true;
-        if(index < 0){ // Use LRU to pick next page
-            for(size_t i = 0; i < PhyPages.size(); i++){
-                const auto& phy_entry = PhyPages[i];
-                if(!phy_entry.Use &&
-                   index < 0){
-                    index = i;
-                }else if(!phy_entry.Use){
-                    full = false;
-                }
-            }
-            
-        }else{
-            for(size_t i = 0; i < PhyPages.size(); i++){
-                if(i == index) continue;
-                
-                if(!PhyPages[i].Use){
-                    full = false;
-                    break;
-                }
-            }
-        }
-        
-        if(full){
-            for(auto& phy_entry : PhyPages){
-                phy_entry.Use = false;
-            }
-        }
-         */
         
         if(index < 0){
             // Use LRU to pick next page
