@@ -101,7 +101,8 @@ public:
         
     }
 
-    addr_t GetInstrStartAddress() const{ return mInstrStartAddr; }
+    //addr_t GetInstrStartAddress() const{ return mInstrStartAddr; }
+    addr_t GetInstrStartAddress() const{ return 0; }
 
     void setInstructionCount(uint32_t num){
         mInstrCount = num;

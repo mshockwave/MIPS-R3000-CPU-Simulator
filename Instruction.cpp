@@ -27,7 +27,8 @@ mBitsInstruction(0){
 
 /*struct Instructions*/
 Instructions::Instructions(RawBinary &binary,
-                           cmp::CMP::cmp_config_t instr_cmp_config) : instr_length(U32_0) {
+                           cmp::CMP::cmp_config_t instr_cmp_config) :
+instr_length(U32_0), instr_disk(nullptr) {
     
     //Hint: Do not use auto here
     // For the sake of preventing unexpected memory release
@@ -41,11 +42,23 @@ Instructions::Instructions(RawBinary &binary,
     load2Register(instr_bytes, start_addr);
     
     auto* bytesArray = instr_bytes.content();
+    byte_t* raw_instr_array = bytesArray + 8;
+    instr_disk = new byte_t[1024];
+    
+    size_t instr_size = instr_length * INSTRUCTION_BYTE_WIDTH;
+    size_t j = 0;
+    for(size_t i = 0; i < 1024; i++){
+        if(i < start_addr || i >= (start_addr + instr_size)){
+            instr_disk[i] = (byte_t)0;
+        }else{
+            instr_disk[i] = raw_instr_array[j++];
+        }
+    }
     
     /*Init CMP module*/
     cmp_module = std::make_shared<cmp::CMP>(instr_cmp_config,
-                                            start_addr,
-                                            bytesArray + 8, // Skip first eight bytes of metadata
+                                            0,
+                                            instr_disk, // Skip first eight bytes of metadata
                                             1024/*Fix size, 1K*/);
     
     /*The first eight bytes are PC address and instruction size, skip*/
@@ -60,6 +73,11 @@ Instructions::Instructions(RawBinary &binary,
     DEBUG_BLOCK {
         Log::D("Instructions Read") << "End Time(ms): " << getCurrentTimeMs() << std::endl;
     };
+}
+Instructions::~Instructions(){
+    if(instr_disk != nullptr){
+        delete [] instr_disk;
+    }
 }
 
 void Instructions::HandleNOP(){

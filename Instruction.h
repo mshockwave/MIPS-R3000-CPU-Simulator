@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include <array>
 
 class Instruction {
 private:
@@ -37,10 +38,14 @@ private:
     std::vector<Instruction> mInstructions;
     typedef std::shared_ptr<cmp::CMP> cmp_ptr_t;
     cmp_ptr_t cmp_module;
+    
+    byte_t* instr_disk;
 
 public:
     Instructions(RawBinary& binary,
                  cmp::CMP::cmp_config_t instr_cmp_config);
+    
+    ~Instructions();
     
     class _instructions_iterator_ {
         

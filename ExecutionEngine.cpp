@@ -31,6 +31,7 @@ void ExecutionEngine::Start() {
     while(true){
         const reg_t& pc = mContext->GetPC();
 
+        /*
         if(pc < mContext->GetInstrStartAddress()){
             //Execute NOP until
             mContext->AdvancePC();
@@ -41,6 +42,7 @@ void ExecutionEngine::Start() {
             
             continue;
         }
+         */
 
         addr_t offset = pc - (mContext->GetInstrStartAddress());
         uint32_t index = offset / WORD_WIDTH;
