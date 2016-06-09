@@ -5,6 +5,7 @@
 #include <map>
 #include <initializer_list>
 #include <tuple>
+#include <memory>
 
 #include "Types.h"
 
@@ -12,11 +13,112 @@ namespace cmp {
     
     typedef unsigned long lru_counter_t;
     
+    
+    struct LruEntity {
+        
+        size_t Index;
+        lru_counter_t LruCounter;
+        
+        LruEntity* Prev;
+        LruEntity* Next;
+        
+        LruEntity() :
+        Prev(nullptr), Next(nullptr),
+        Index(0), LruCounter(0){}
+        
+        inline void Remove(){
+            if(Prev != nullptr){
+                Prev->Next = Next;
+            }
+            
+            if(Next != nullptr){
+                Next->Prev = Prev;
+            }
+            
+            Prev = Next = nullptr;
+        }
+        
+        inline void InsertAfter(LruEntity* element){
+            Prev = element;
+            
+            if(Prev != nullptr && Prev->Next != nullptr){
+                Prev->Next->Prev = this;
+            }
+            
+            if(Prev != nullptr){
+                Next = Prev->Next;
+                Prev->Next = this;
+            }
+        }
+    };
+    
+    struct LruListManager {
+        LruEntity* Head;
+        LruEntity* Tail;
+        
+        LruListManager() :
+        Head(nullptr), Tail(nullptr){}
+        
+        ~LruListManager(){
+            while(Head != Tail && Tail != nullptr){
+                auto* element = Tail;
+                Tail = Tail->Prev;
+                if(element != nullptr) delete element;
+            }
+            
+            if(Head != nullptr) delete Head;
+        }
+        
+        LruEntity* AddNew(size_t index){
+            auto* element = new LruEntity();
+            element->Index = index;
+            element->Next = nullptr;
+            
+            if(Head == nullptr || Tail == nullptr){
+                element->Prev = nullptr;
+                Head = element;
+                Tail = Head;
+            }else{
+                element->InsertAfter(Tail);
+                Tail = element;
+            }
+            
+            return element;
+        }
+    };
+    
+    template<typename list_mngr_ptr_t>
+    void UpdateLru(list_mngr_ptr_t list_manager, LruEntity* entity,
+                   lru_counter_t current_counter){
+        entity->LruCounter = current_counter;
+        
+        if(list_manager->Head == entity &&
+           list_manager->Head != list_manager->Tail){
+            list_manager->Head = entity->Next;
+        }
+        if(list_manager->Tail == entity &&
+           list_manager->Head != list_manager->Tail){
+            list_manager->Tail = entity->Prev;
+        }
+        entity->Remove();
+        
+        auto* tail = list_manager->Tail;
+        auto* ptr = tail;
+        while(ptr->LruCounter == entity->LruCounter &&
+              ptr->Index > entity->Index){
+            ptr = ptr->Prev;
+        }
+        entity->InsertAfter(ptr);
+        
+        if(entity->Next == nullptr) list_manager->Tail = entity;
+    }
+    
     struct PhyPage {
         
         size_t DataOffset;
         //bool Use;
-        lru_counter_t LruCounter;
+        //lru_counter_t LruCounter;
+        LruEntity* Lru;
         bool Valid;
         
         bool Ref;
@@ -25,7 +127,8 @@ namespace cmp {
         PhyPage() :
         DataOffset(0),
         Ref(false), ReferVirAddr(0),
-        /*Use(false),*/Valid(false), LruCounter(0){}
+        /*Use(false),*/Valid(false),
+        Lru(nullptr)/*, LruCounter(0)*/{}
     };
     
     struct PageEntry{
@@ -34,11 +137,12 @@ namespace cmp {
         addr_t PhyAddr;
         bool Valid;
         //bool Use;
-        lru_counter_t LruCounter;
+        //lru_counter_t LruCounter;
+        LruEntity* Lru;
         
         PageEntry() :
         Valid(false), /*Use(false),*/
-        LruCounter(0),
+        Lru(nullptr)/*, LruCounter(0)*/,
         Tag(0), PhyAddr(0){}
     };
     
@@ -148,8 +252,13 @@ namespace cmp {
         size_t disk_data_size;
         
         std::vector<PageEntry> TLB;
+        std::shared_ptr<LruListManager> LruTLB;
+        
         std::map<addr_t, PageEntry> PageTable;
+        
         std::vector<PhyPage> PhyPages;
+        std::shared_ptr<LruListManager> LruPhyPages;
+        
         std::map<addr_t, std::vector<CacheEntry> > Cache;
         
         lru_counter_t LruSampleCounter;
@@ -186,24 +295,9 @@ namespace cmp {
         inline void flip_phy_pages_mru(addr_t phy_addr){
             
             size_t phy_page_index = (phy_addr / PageSize);
-            /*
-            bool full = true;
-            for(size_t i = 0; i < PhyPages.size(); i++){
-                const auto& phy_page = PhyPages[i];
-                if(i != phy_page_index &&
-                   !phy_page.Use){
-                    full = false;
-                }
-            }
-            if(full){
-                for(auto& phy_page : PhyPages){
-                    phy_page.Use = false;
-                }
-            }
-             */
             
-            //PhyPages[phy_page_index].Use = true;
-            PhyPages[phy_page_index].LruCounter = LruSampleCounter;
+            //PhyPages[phy_page_index].LruCounter = LruSampleCounter;
+            UpdateLru(LruPhyPages, PhyPages[phy_page_index].Lru, LruSampleCounter);
         }
         
         std::tuple<addr_t,bool> tlb_access(addr_t vir_addr);

@@ -29,12 +29,25 @@ namespace cmp {
         if(config_size >= 5) SetAssoc = config_vec[4];
         
         // Init components
-        TLB.resize(tlb_length(), PageEntry());
+        TLB.resize(tlb_length()/*, PageEntry()*/);
+        LruTLB = std::make_shared<LruListManager>();
+        for(size_t i = 0; i < tlb_length(); i++){
+            TLB[i] = PageEntry();
+            TLB[i].Lru = LruTLB->AddNew(i);
+        }
+        
         for(addr_t offset = 0; offset < disk_data_size; offset += PageSize){
             auto addr = disk_data_start_addr + offset;
             PageTable[pt_tag(addr)] = PageEntry();
         }
-        PhyPages.resize(phy_pages_length(), PhyPage());
+        
+        PhyPages.resize(phy_pages_length()/*, PhyPage()*/);
+        LruPhyPages = std::make_shared<LruListManager>();
+        for(size_t i = 0; i < phy_pages_length(); i++){
+            PhyPages[i] = PhyPage();
+            PhyPages[i].Lru = LruPhyPages->AddNew(i);
+        }
+        
         for(addr_t addr = 0; addr < cache_length(); addr++){
             std::vector<CacheEntry> cache_sets;
             cache_sets.resize(SetAssoc, CacheEntry());
@@ -54,7 +67,8 @@ namespace cmp {
             if(tlb_entry.Tag == vm_tag &&
                tlb_entry.Valid){
                 
-                tlb_entry.LruCounter = LruSampleCounter;
+                //tlb_entry.LruCounter = LruSampleCounter;
+                UpdateLru(LruTLB, tlb_entry.Lru, LruSampleCounter);
                 phy_addr = tlb_entry.PhyAddr;
                 
                 return std::make_tuple(phy_addr,true);
@@ -91,6 +105,8 @@ namespace cmp {
         
         if(index < 0){
             // Pick according to LRU
+            
+            /*
             lru_counter_t min_lru_counter = LruSampleCounter + 1;
             for(size_t i = 0; i < TLB.size(); i++){
                 const auto& tlb_entry = TLB[i];
@@ -99,12 +115,17 @@ namespace cmp {
                     min_lru_counter = tlb_entry.LruCounter;
                 }
             }
+             */
+            
+            index = LruTLB->Head->Index;
         }
         
-        if(index < 0) index = 0;
+        //if(index < 0) index = 0;
+        pt_entry.Lru = TLB[index].Lru;
         TLB[index] = pt_entry;
         //TLB[index].Use = true;
-        TLB[index].LruCounter = LruSampleCounter;
+        UpdateLru(LruTLB, TLB[index].Lru, LruSampleCounter);
+        //TLB[index].LruCounter = LruSampleCounter;
         TLB[index].Valid = true;
         
         return true;
@@ -117,7 +138,7 @@ namespace cmp {
         PhyPage phy_page;
         phy_page.Ref = true;
         //phy_page.Use = true;
-        phy_page.LruCounter = LruSampleCounter;
+        //phy_page.LruCounter = LruSampleCounter;
         phy_page.Valid = true;
         phy_page.ReferVirAddr = vir_addr ;
         size_t vir_addr_offset = vir_addr - disk_data_start_addr;
@@ -136,6 +157,8 @@ namespace cmp {
         
         if(index < 0){
             // Use LRU to pick next page
+            
+            /*
             auto min_lru_counter = LruSampleCounter + 1;
             for(size_t i = 0; i < PhyPages.size(); i++){
                 const auto& phy_entry = PhyPages[i];
@@ -144,10 +167,11 @@ namespace cmp {
                     min_lru_counter = phy_entry.LruCounter;
                 }
             }
-            
+             */
+            index = LruPhyPages->Head->Index;
         }
         
-        if(index < 0) index = 0;
+        //if(index < 0) index = 0;
         
         const auto& phy_page_origin = PhyPages[index];
         if(phy_page_origin.Ref){
@@ -194,9 +218,11 @@ namespace cmp {
             }
         }
         
+        phy_page.Lru = phy_page_origin.Lru;
         PhyPages[index] = phy_page;
         //PhyPages[index].Use = true;
-        PhyPages[index].LruCounter = LruSampleCounter;
+        //PhyPages[index].LruCounter = LruSampleCounter;
+        UpdateLru(LruPhyPages, PhyPages[index].Lru, LruSampleCounter);
         
         // Put result back to page table
         PageEntry pt_entry;
